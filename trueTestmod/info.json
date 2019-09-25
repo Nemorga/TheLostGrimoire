@@ -1,0 +1,8 @@
+﻿{
+  "Id": "trueTestmod",
+  "DisplayName": "Test",
+  "Author": "Nemorga",
+  "Version": "0.0.9",
+  "ManagerVersion": "0.18.0",
+  "EntryMethod": "trueTestmod.Main.Load"
+}
