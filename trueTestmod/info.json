@@ -1,8 +1,8 @@
 ﻿{
-  "Id": "trueTestmod",
-  "DisplayName": "Test",
+  "Id": "TheLostGrimoire",
+  "DisplayName": "The Lost Grimoire",
   "Author": "Nemorga",
   "Version": "0.0.9",
   "ManagerVersion": "0.18.0",
-  "EntryMethod": "trueTestmod.Main.Load"
+  "EntryMethod": "thelostgrimoire.Main.Load"
 }

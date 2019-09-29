@@ -19,7 +19,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityModManagerNet;
 
-namespace trueTestmod
+namespace thelostgrimoire
 {
     static class SaveCompatibility
     {

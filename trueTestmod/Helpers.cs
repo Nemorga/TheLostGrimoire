@@ -62,7 +62,7 @@ using UnityEngine;
 using static Kingmaker.UnitLogic.ActivatableAbilities.ActivatableAbilityResourceLogic;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 
-namespace trueTestmod
+namespace thelostgrimoire
 {
     // A few notes discovered while debugging issues:
     //
@@ -1296,17 +1296,21 @@ namespace trueTestmod
                 DiceType = diceType
             };
         }
-
+        //@@modified by nemorga
         public static BlueprintBuff CreateBuff(String name, String displayName, String description, String guid, Sprite icon,
-            PrefabLink fxOnStart,
+            PrefabLink fxOnStart = null, PrefabLink FxOnRemove = null,
             params BlueprintComponent[] components)
         {
             var buff = Create<BlueprintBuff>();
             buff.name = name;
             buff.FxOnStart = fxOnStart ?? new PrefabLink();
-            buff.FxOnRemove = new PrefabLink();
+            buff.FxOnRemove = FxOnRemove ?? new PrefabLink();
             buff.SetComponents(components);
             buff.SetNameDescriptionIcon(displayName, description, icon);
+            
+            buff.ResourceAssetIds = new string[] {};
+            if (buff.FxOnStart.AssetId != null) { buff.ResourceAssetIds.AddToArray(buff.FxOnStart.AssetId);}
+            if (buff.FxOnRemove.AssetId != null) { buff.ResourceAssetIds.AddToArray(buff.FxOnRemove.AssetId); }
             Main.library.AddAsset(buff, guid);
             return buff;
         }

@@ -7,8 +7,8 @@
     <ProjectGuid>{D8C0ADC2-4C89-48DC-8CA8-CAD4D7B320E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>trueTestmod</RootNamespace>
-    <AssemblyName>trueTestmod</AssemblyName>
+    <RootNamespace>thelostgrimoire</RootNamespace>
+    <AssemblyName>thelostgrimoire</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Pathfinder Kingmaker\Mods\trueTestmod\</OutputPath>
+    <OutputPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Pathfinder Kingmaker\Mods\thelostgrimoire\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -97,9 +97,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fixandchange.cs" />
+    <Compile Include="Relatedfeat.cs" />
     <Compile Include="ConstructCompanion.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="MagicFeats.cs" />
+    <Compile Include="ArcanesDiscoveries.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveCompatibility.cs" />

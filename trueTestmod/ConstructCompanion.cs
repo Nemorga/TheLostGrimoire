@@ -47,9 +47,10 @@ using Kingmaker.UI.GenericSlot;
 using Kingmaker.UI.Group;
 using Kingmaker.Utility;
 using Kingmaker.Visual.Sound;
+using Kingmaker.Visual.Animation.Kingmaker;
 using UnityEngine;
 
-namespace trueTestmod
+namespace thelostgrimoire
 {
     class GolemDiscovery
     {
@@ -66,22 +67,22 @@ namespace trueTestmod
         {
             
             Main.ApplyPatch(typeof(GetPortraitFolderPathPatch), "Test");
-            Main.ApplyPatch(typeof(DisallowAddingFeatureToConstructPatch), "Please work");
-            Main.ApplyPatch(typeof(DisallowSharingFeaturewithConstructPatch), "Please work too");
-
+            Main.ApplyPatch(typeof(DisallowAddingFeatureToConstructPatch), "Do not add Animal companion feature to golem ");
+            Main.ApplyPatch(typeof(DisallowSharingFeaturewithConstructPatch), "Do not share animal companion feature with golem");
+            Main.ApplyPatch(typeof(DisableSteamDragonAnimationPatch), "Make the steam dragon not move while iddle"); 
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
-            BlueprintFeature animalDomainProgressionSecondary = Main.library.Get<BlueprintFeature>("f13eb6be93dd5234c8126e5384040009");
-            BlueprintFeature animalDomainProgression = Main.library.Get<BlueprintFeature>("23d2f87aa54c89f418e68e790dba11e0");
-            BlueprintFeature animaldomainprogressiondruid = Main.library.Get<BlueprintFeature>("a75ad4936e099c54881cf553e2110703");
-            BlueprintArchetype sacredHuntsmasterArchetype = Main.library.Get<BlueprintArchetype>("46eb929c8b6d7164188eb4d9bcd0a012");
-            BlueprintCharacterClass inquisitorClass = Main.library.Get<BlueprintCharacterClass>("f1a70d9e1b0b41e49874e1fa9052a1ce");
+            //BlueprintFeature animalDomainProgressionSecondary = Main.library.Get<BlueprintFeature>("f13eb6be93dd5234c8126e5384040009");
+            //BlueprintFeature animalDomainProgression = Main.library.Get<BlueprintFeature>("23d2f87aa54c89f418e68e790dba11e0");
+            //BlueprintFeature animaldomainprogressiondruid = Main.library.Get<BlueprintFeature>("a75ad4936e099c54881cf553e2110703");
+            //BlueprintArchetype sacredHuntsmasterArchetype = Main.library.Get<BlueprintArchetype>("46eb929c8b6d7164188eb4d9bcd0a012");
+            //BlueprintCharacterClass inquisitorClass = Main.library.Get<BlueprintCharacterClass>("f1a70d9e1b0b41e49874e1fa9052a1ce");
             BlueprintCharacterClass wizardclass = Main.library.Get<BlueprintCharacterClass>("ba34257984f4c41408ce1dc2004e342e");
 
             BlueprintFeature AnimalCompanionEmptyCompanion = Main.library.Get<BlueprintFeature>("472091361cf118049a2b4339c4ea836a");
-            BlueprintFeature AnimalCompanionFeatureBear = Main.library.Get<BlueprintFeature>("f6f1cdcc404f10c4493dc1e51208fd6f");
-            BlueprintFeature AnimalCompanionFeatureBoar = Main.library.Get<BlueprintFeature>("afb817d80b843cc4fa7b12289e6ebe3d");
-            BlueprintFeature AnimalCompanionFeatureCentipede = Main.library.Get<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46");
+            //BlueprintFeature AnimalCompanionFeatureBear = Main.library.Get<BlueprintFeature>("f6f1cdcc404f10c4493dc1e51208fd6f");
+            //BlueprintFeature AnimalCompanionFeatureBoar = Main.library.Get<BlueprintFeature>("afb817d80b843cc4fa7b12289e6ebe3d");
+            /*BlueprintFeature AnimalCompanionFeatureCentipede = Main.library.Get<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46");
             BlueprintFeature AnimalCompanionFeatureDog = Main.library.Get<BlueprintFeature>("f894e003d31461f48a02f5caec4e3359");
             BlueprintFeature AnimalCompanionFeatureEkun = Main.library.Get<BlueprintFeature>("e992949eba096644784592dc7f51a5c7");
             BlueprintFeature AnimalCompanionFeatureElk = Main.library.Get<BlueprintFeature>("aa92fea676be33d4dafd176d699d7996");
@@ -89,7 +90,7 @@ namespace trueTestmod
             BlueprintFeature AnimalCompanionFeatureMammoth = Main.library.Get<BlueprintFeature>("6adc3aab7cde56b40aa189a797254271");
             BlueprintFeature AnimalCompanionFeatureMonitor = Main.library.Get<BlueprintFeature>("ece6bde3dfc76ba4791376428e70621a");
             BlueprintFeature AnimalCompanionFeatureSmilodon = Main.library.Get<BlueprintFeature>("126712ef923ab204983d6f107629c895");
-            BlueprintFeature AnimalCompanionFeatureWolf = Main.library.Get<BlueprintFeature>("67a9dc42b15d0954ca4689b13e8dedea");
+            BlueprintFeature AnimalCompanionFeatureWolf = Main.library.Get<BlueprintFeature>("67a9dc42b15d0954ca4689b13e8dedea");*/
 
             
 
@@ -134,7 +135,7 @@ namespace trueTestmod
             BlueprintFeature MudGolemCompanion = AddMudGolemCompanion();
             BlueprintFeature GolemCompanion = AddGolemCompanion();
             BlueprintFeature ScarecrowCompanion = AddScarecrowCompanion();
-            BlueprintFeature TESTCompanion = AddTestCompanion();
+            
             BlueprintFeature IceGolem = AddIceGolemCompanion();
             BlueprintFeature SteamDragon = AddSteamDragonCompanion();
             BlueprintFeature[] CompanionList = new BlueprintFeature[]
@@ -142,25 +143,23 @@ namespace trueTestmod
                 GolemCompanion,
                 ScarecrowCompanion,
                 MudGolemCompanion,
-                TESTCompanion,
                 IceGolem,
                 SteamDragon
             };
 
 
 
-            //Creating an Ability to resurect Golem ? TODO later only if there is balance proble = pet construct wont resurect on rest and this ability must be used, and can be only 1 time per rest
+            //Creating an Ability to resurect Golem ? TODO later only if there is balance problem = pet construct wont resurect on rest and this ability must be used, and can be only 1 time per rest and cost diamond dust
 
 
-            /*/Create test ability to summon shit and verify that base game unit aren't modified
+            //Create test ability to summon shit and verify that base game unit aren't modified
             var Testsummon = Main.library.CopyAndAdd<BlueprintAbility>("4b76d32feb089ad4499c3a1ce8e1ac27", "testsummonfortests", Helpers.getGuid("testsummmonfortests"));
             var Testsummoncompo = Testsummon.ComponentsArray.OfType<AbilityEffectRunAction>().First();
             Testsummon.ReplaceComponent<AbilityEffectRunAction>(r =>
             {
-                r.Actions.Actions.OfType<ContextActionSpawnMonster>().First().Blueprint = Main.library.Get<BlueprintUnit>("dfd21dba15fe7dd4f95961ff27d91836");
+                r.Actions.Actions.OfType<ContextActionSpawnMonster>().First().Blueprint = Main.library.Get<BlueprintUnit>("64589573eba29d541b5240c7485e1aec");
             });
-            //Testsummon.ComponentsArray.OfType<AbilityEffectRunAction>().First().Actions.Actions.OfType<ContextActionSpawnMonster>().First().Blueprint = Main.library.Get<BlueprintUnit>("dfd21dba15fe7dd4f95961ff27d91836");
-         */
+         
 
 
             //Creating an Abilities to heal the golem 
@@ -193,7 +192,7 @@ namespace trueTestmod
             BlueprintFeatureSelection GolemConstructor = Helpers.CreateFeatureSelection(
                 "Golem Constructor",
                 "Arcane Discovery : Golem Constructor",
-                "You have learned the art and craft of creating a single type of golem (such as stone golems or iron golems) and after hours of work, one of the construct is now ready to travel with you." +
+                "You have learned the art and craft of creating a single type of golem (such as stone golems) and after hours of work, one of the construct is now ready to travel with you." +
                 "Golem are construct and are not living creature: they do not need to drink, sleep or eat and are immune to wide variety of effect.",
                 Helpers.getGuid("ArcaneDiscoveriesgolemconstructor"),
                 cannyobserver.Icon,
@@ -202,11 +201,11 @@ namespace trueTestmod
                 Helpers.Create<AddFeatureOnApply>(x => x.Feature = golemCompanionProgression),
                 Helpers.Create<AnimalAllyAdjustToLevelLogic>(),
                 PatchGolem.CreateAddFact(),
-                //Testsummon.CreateAddFact(),
+                Testsummon.CreateAddFact(),
                 Helpers.Create<PrerequisitePet>(p => p.NoCompanion = true)
 
             ) ; 
-            //GolemConstructor.AddComponents(nofeatures);
+            
             GolemConstructor.SetFeatures(CompanionList);
             GolemConstructor.Groups = GolemConstructor.Groups.AddToArray(FeatureGroup.Feat);
 
@@ -215,171 +214,35 @@ namespace trueTestmod
 
             //Disable Taking animal companion if you have the golem constructor feat
             var noconstructprereq = Helpers.PrerequisiteNoFeature(GolemConstructor);
-            
             AnimalCompanionEmptyCompanion.AddComponent(noconstructprereq);
-            //animalDomainProgression.AddComponent(noconstructprereq);
-            //animaldomainprogressiondruid.AddComponent(noconstructprereq);
-            //animalDomainProgressionSecondary.AddComponent(noconstructprereq);
-            
-            //NEW SPELL PERTAINING TO CONSTRUCT
-
-
-            //Construct Healing => as heal but for consruct
-            //construct programming, lesser : lvl 2
-            //Cpnstruct programming: lvl 5
-            //Construct programming greater : lvl 8
+          
 
 
 
         }
-        private static BlueprintFeature AddTestCompanion()
-        {
-
-            BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
-
-            //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodTest");
-            BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
-            portrait.Data = portraitData;
-            Main.library.AddAsset(portrait, Helpers.getGuid("MudGolemTest"));
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
-
-            
-            //getting the golem
-            BlueprintUnit TestGolem = Main.library.CopyAndAdd<BlueprintUnit>("64589573eba29d541b5240c7485e1aec", "TestGolemCompanion", Helpers.getGuid("TestGolemCompanion"));
-            TestGolem.Prefab.AssetId = "1d5a2ef7c2529be49879b1399b55a34a";
-            TestGolem.Visual.FootstepSoundSizeType = FootstepSoundSizeType.BootMetalMedium;
-            
-
-
-            // Setting the golem right with class, archetype and all
-            TestGolem.AddFacts = Array.Empty<BlueprintUnitFact>();
-
-
-            var ConstructType = Main.library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f");
-            List<LevelEntry> addtypeFeatures = new List<LevelEntry>();
-            addtypeFeatures.Add(Helpers.LevelEntry(1, ConstructType));
-
-            //Fixing bleed immunity in the ui
-            var bleedimmune = Main.library.Get<BlueprintBuff>("3f6038d75ccffaa40b338f4b13f9e4b6");
-            Helpers.SetLocalizedStringField(bleedimmune, "m_DisplayName", "Bleed Immunity");
-            Helpers.SetLocalizedStringField(bleedimmune, "m_Description", "This creature is immune to bleed damage and the bleeding condition");
-            var stoneskinspell = Main.library.Get<BlueprintAbility>("c66e86905f7606c4eaa5c774f0357b2b");
-            Helpers.SetField(bleedimmune, "m_Icon", stoneskinspell.Icon);
-
-            TestGolem.ComponentsArray = animalCompanionUnitCentipede.ComponentsArray;
-            TestGolem.ReplaceComponent<AddClassLevels>(l =>
-            {
-                l.Archetypes = Array.Empty<BlueprintArchetype>();
-
-                l.CharacterClass = Main.library.Get<BlueprintCharacterClass>("fd66bdea5c33e5f458e929022322e6bf");
-                l.Archetypes = l.Archetypes.AddToArray(thearchetypeforthisnicegolem);
-                l.CharacterClass.Archetypes = Array.Empty<BlueprintArchetype>();
-                l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
-
-                l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
-
-
-            });
-            // Brain and faction
-            TestGolem.Brain = animalCompanionUnitCentipede.Brain;
-            TestGolem.Faction = Main.library.Get<BlueprintFaction>("d8de50cc80eb4dc409a983991e0b77ad"); // Neutral faction
-
-            //SIZE
-            //Size: Not Large, baby, not yet
-            ChangeUnitSize unitSizeless = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -2);
-            FieldInfo typeFieldless = unitSizeless.GetType().GetField("m_Type", BindingFlags.NonPublic | BindingFlags.Instance);
-            object deltaless = unitSizeless.GetType().GetNestedType("ChangeType", BindingFlags.NonPublic).GetField("Delta").GetValue(unitSizeless);
-            typeFieldless.SetValue(unitSizeless, deltaless);
-
-            BlueprintFeature changesizedamnit = Helpers.CreateFeature("TestGolemsizechange",
-                "",
-                "",
-                Helpers.getGuid("TestGolemsizechange"),
-                cannyobserver.Icon,
-                FeatureGroup.None,
-                unitSizeless);
-            TestGolem.AddFacts = TestGolem.AddFacts.AddToArray(changesizedamnit);
-            
-
-            //Portrait
-            Helpers.SetField(TestGolem, "m_Portrait", portrait);
-
-            //Creating the Feature
-            BlueprintFeature ConstructCompanionTestGolemFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "TestGolemCompanionFeature", Helpers.getGuid("TestGolemCompanionFeature"));
-            ConstructCompanionTestGolemFeature.SetNameDescription("TESTGOLEM", "Size Small\nSpeed 40 ft.\nAC +6 natural armor\nAttacks 1 Slam 1d6 \nAbility Scores Str 16, Dex 11, Con --, Int --, Wis 11, Cha 1 and can Hast itself once a day.\n Gains DR/Adamantine with level  \nAt 11th level size becomes Large, Str +4, Dex -2,  +4 natural armor and gain the Slippery Mud ability.");
-            Helpers.SetField(ConstructCompanionTestGolemFeature, "m_Icon", cannyobserver.Icon);
-
-            //Adding the pet
-            AddPet addPetFact = ConstructCompanionTestGolemFeature.ComponentsArray.OfType<AddPet>().First();
-            ConstructCompanionTestGolemFeature.RemoveComponent(addPetFact);
-            addPetFact = UnityEngine.Object.Instantiate(addPetFact);
-            ConstructCompanionTestGolemFeature.AddComponent(addPetFact);
-            addPetFact.Pet = TestGolem;
-            addPetFact.LevelRank = Main.library.Get<BlueprintFeature>(Helpers.getGuid("ConstructCompanionRank"));
-            //Upgrade Feature
-            addPetFact.UpgradeFeature = Helpers.CreateFeature(
-                "TestCompanionUpgradeFeature",
-                "",
-                "",
-                Helpers.getGuid("TestGolemCompanionUpgradeFeature"),
-                cannyobserver.Icon,
-                FeatureGroup.None,
-
-                //createstonegolemslow().CreateAddFact(),
-                Helpers.Create<AddStatBonus>(x =>
-                {
-                    x.Stat = StatType.AC;
-                    x.Value = 4;
-                    x.Descriptor = ModifierDescriptor.NaturalArmor;
-                }),
-                Helpers.Create<AddStatBonus>(x =>
-                {
-                    x.Stat = StatType.Strength;
-                    x.Value = 4;
-                }),
-                Helpers.Create<AddStatBonus>(x =>
-                {
-                    x.Stat = StatType.Dexterity;
-                    x.Value = -2;
-                })
-
-            );
-            addPetFact.UpgradeLevel = 11;
-
-            return ConstructCompanionTestGolemFeature;
-        }
+      
         private static BlueprintFeature AddSteamDragonCompanion()
         {
 
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
             //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodSteamDragon");
+            PortraitData portraitData = new PortraitData("thelostgrimoireSteamDragon");
             BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
             portrait.Data = portraitData;
             Main.library.AddAsset(portrait, Helpers.getGuid("SteamDragonPortrait"));
 
-            //BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); //Deleted fo this golem, maybe usefull for another
-
-
-
-
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
+           
 
             //getting the golem
             BlueprintUnit SteamDragon = Main.library.CopyAndAdd<BlueprintUnit>("64589573eba29d541b5240c7485e1aec", "SteamDragonCompanion", Helpers.getGuid("SteamDragonCompanion"));
             SteamDragon.Prefab.AssetId = "1d5a2ef7c2529be49879b1399b55a34a";
             SteamDragon.Visual.FootstepSoundSizeType = FootstepSoundSizeType.BootMetalMedium;
-            SteamDragon.LocalizedName.String = Helpers.CreateString($"{SteamDragon.name}.{"String"}", "Steam Dragon");
+            
 
+            var Name = SteamDragon.LocalizedName.CreateCopy();
+            SteamDragon.LocalizedName = Name;
+            AccessTools.Field(SteamDragon.LocalizedName.GetType(), "String").SetValue(SteamDragon.LocalizedName, Helpers.CreateString($"{SteamDragon.name}.{"String"}", "Steam Dragon"));
 
             //Editing Golem for balance reason and shit
             //remove Magic Immunity, its too good 
@@ -429,7 +292,7 @@ namespace trueTestmod
             SteamDragon.Body.AdditionalSecondaryLimbs = new BlueprintItemWeapon[] { SteamDragonWing, SteamDragonWing, SteamDragonTail };
 
             //Size: Not Large, baby, not yet
-            ChangeUnitSize unitSizeless = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -2);
+            ChangeUnitSize unitSizeless = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -3);
             FieldInfo typeFieldless = unitSizeless.GetType().GetField("m_Type", BindingFlags.NonPublic | BindingFlags.Instance);
             object deltaless = unitSizeless.GetType().GetNestedType("ChangeType", BindingFlags.NonPublic).GetField("Delta").GetValue(unitSizeless);
             typeFieldless.SetValue(unitSizeless, deltaless);
@@ -450,7 +313,7 @@ namespace trueTestmod
                Helpers.getGuid("SteamDragonAdjustHp"),
                cannyobserver.Icon,
                FeatureGroup.None,
-               Helpers.CreateAddStatBonus(StatType.HitPoints, -20, ModifierDescriptor.UntypedStackable)
+               Helpers.CreateAddStatBonus(StatType.HitPoints, -30, ModifierDescriptor.UntypedStackable)
                );
             SteamDragon.AddFacts = SteamDragon.AddFacts.AddToArray(AdjustHP);
             // Setting the golem right with class, archetype and all
@@ -476,7 +339,7 @@ namespace trueTestmod
                 l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
 
                 l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
+               
 
 
             });
@@ -489,19 +352,10 @@ namespace trueTestmod
             //Portrait 
             Helpers.SetField(SteamDragon, "m_Portrait", portrait);
 
-            /* BlueprintUnitAsksList StoneGolemBarks = Main.library.CopyAndAdd<BlueprintUnitAsksList>("841546117acf7c549804346499002840", "StoneGolemCompanionBarks", Helpers.getGuid("StoneGolemCompanionBarks"));
-             UnitAsksComponent component = StoneGolemBarks.GetComponent<UnitAsksComponent>();
-             foreach (var componentAnimationBark in component.AnimationBarks)
-             {
-                 if (componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound1 || componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound2)
-                 {
-                     componentAnimationBark.Cooldown = 10f;
-                     componentAnimationBark.DelayMin = 5f;
-                 }
-             }*/
+         
 
             //for the size change at level 11
-            ChangeUnitSize unitSizeplus = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -1);
+            ChangeUnitSize unitSizeplus = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -2);
             FieldInfo typeField = unitSizeplus.GetType().GetField("m_Type", BindingFlags.NonPublic | BindingFlags.Instance);
             object delta = unitSizeplus.GetType().GetNestedType("ChangeType", BindingFlags.NonPublic).GetField("Delta").GetValue(unitSizeplus);
             typeField.SetValue(unitSizeplus, delta);
@@ -532,7 +386,7 @@ namespace trueTestmod
                 FeatureGroup.None,
                 
                 unitSizeplus,
-                //createstonegolemslow().CreateAddFact(),
+                
                 Helpers.Create<AddStatBonus>(x =>
                 {
                     x.Stat = StatType.AC;
@@ -569,20 +423,12 @@ namespace trueTestmod
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
             //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodIceGolem");
+            PortraitData portraitData = new PortraitData("thelostgrimoireIceGolem");
             BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
             portrait.Data = portraitData;
             Main.library.AddAsset(portrait, Helpers.getGuid("IceGolemPortrait"));
 
-            //BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); //Deleted fo this golem, maybe usefull for another
-
-
-
-
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
+           
 
             //getting the golem
             BlueprintUnit IceGolem = Main.library.CopyAndAdd<BlueprintUnit>("dfd21dba15fe7dd4f95961ff27d91836", "IceGolemCompanion", Helpers.getGuid("IceGolemCompanion"));
@@ -660,10 +506,7 @@ namespace trueTestmod
                );
             IceGolem.AddFacts = IceGolem.AddFacts.AddToArray(AdjustHP);
 
-            // Setting the golem right with class, archetype and all
-            /* var ConstructType = Main.library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f");
-             List<LevelEntry> addtypeFeatures = new List<LevelEntry>();
-             addtypeFeatures.Add(Helpers.LevelEntry(1, ConstructType));*/
+           
 
             //Fixing bleed immunity in the ui
             var bleedimmune = Main.library.Get<BlueprintBuff>("3f6038d75ccffaa40b338f4b13f9e4b6");
@@ -672,8 +515,8 @@ namespace trueTestmod
             var stoneskinspell = Main.library.Get<BlueprintAbility>("c66e86905f7606c4eaa5c774f0357b2b");
             Helpers.SetField(bleedimmune, "m_Icon", stoneskinspell.Icon);
 
+            //Level and shit
             IceGolem.ComponentsArray = animalCompanionUnitCentipede.ComponentsArray;
-
             IceGolem.ReplaceComponent<AddClassLevels>(l =>
             {
                 l.Archetypes = Array.Empty<BlueprintArchetype>();
@@ -684,22 +527,11 @@ namespace trueTestmod
                 l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
 
                 l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
+              
 
 
             });
-            /*var originclass = IceGolem.ComponentsArray.OfType<AddClassLevels>().First();
-            int index = IceGolem.ComponentsArray.IndexOf(originclass);
-            var modifyclass = originclass.CreateCopy<AddClassLevels>();
-            IceGolem.ComponentsArray[index] = modifyclass;
-
-            modifyclass.Archetypes = Array.Empty<BlueprintArchetype>();
-            modifyclass.Archetypes = modifyclass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
-            modifyclass.CharacterClass = Main.library.Get<BlueprintCharacterClass>("fd66bdea5c33e5f458e929022322e6bf");
-            modifyclass.CharacterClass.Archetypes = Array.Empty<BlueprintArchetype>();
-            modifyclass.CharacterClass.Archetypes = modifyclass.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
-            modifyclass.Selections = Array.Empty<SelectionEntry>();
-            modifyclass.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();*/
+           
 
              // Brain and faction
             IceGolem.Brain = animalCompanionUnitCentipede.Brain;
@@ -722,10 +554,10 @@ namespace trueTestmod
             traverse.Field("m_Feature").SetValue(AddMechanicsFeature.MechanicsFeatureType.IterativeNaturalAttacks);
 
             //Creating the Feature
-            BlueprintFeature camouflagefeature = Main.library.Get<BlueprintFeature>("ff1b5aa8dcc7d7d4d9aa85e1cb3f9e88");
+            BlueprintAbility icyprison = Main.library.Get<BlueprintAbility>("65e8d23aef5e7784dbeb27b1fca40931");
             BlueprintFeature ConstructCompanionIceGolemFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "IceGolemCompanionFeature", Helpers.getGuid("IceGolemCompanionFeature"));
             ConstructCompanionIceGolemFeature.SetNameDescription("Ice Golem", "Size Small\nSpeed 30 ft.\nAC +2 natural armor\nAttacks 1 Slam 1d6 +1d8 Cald \nAbility Scores Str 10, Dex 11, Con --, Int --, Wis 11, Cha 1\n Gains DR/Adamantine with level, has the cold touch and Death Throes ability. \nAt 11th level size becomes Large, Str +4,  +4 natural armor and gain the Icy Breath ability.");
-            Helpers.SetField(ConstructCompanionIceGolemFeature, "m_Icon", camouflagefeature.Icon);
+            Helpers.SetField(ConstructCompanionIceGolemFeature, "m_Icon", icyprison.Icon);
 
             //Adding the pet
             AddPet addPetFact = ConstructCompanionIceGolemFeature.ComponentsArray.OfType<AddPet>().First();
@@ -781,20 +613,11 @@ namespace trueTestmod
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
             //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodMudGolem");
+            PortraitData portraitData = new PortraitData("thelostgrimoireMudGolem");
             BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
             portrait.Data = portraitData;
             Main.library.AddAsset(portrait, Helpers.getGuid("MudGolemPortrait"));
 
-            //BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); //Deleted fo this golem, maybe usefull for another
-
-
-           
-
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
 
             //getting the golem
             BlueprintUnit MudGolem = Main.library.CopyAndAdd<BlueprintUnit>("1f9760775b988b749aa15355efca74d1", "MudGolemCompanion", Helpers.getGuid("MudGolemCompanion"));
@@ -881,11 +704,10 @@ namespace trueTestmod
                 l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
 
                 l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
+                
 
 
             });
-            //MudGolem.ComponentsArray.AddToArray(strangecomponent);
             // Brain and faction
             MudGolem.Brain = animalCompanionUnitCentipede.Brain;
             MudGolem.Faction = Main.library.Get<BlueprintFaction>("d8de50cc80eb4dc409a983991e0b77ad"); // Neutral faction
@@ -893,16 +715,6 @@ namespace trueTestmod
             //Portrait
             Helpers.SetField(MudGolem, "m_Portrait", portrait);
 
-           /* BlueprintUnitAsksList StoneGolemBarks = Main.library.CopyAndAdd<BlueprintUnitAsksList>("841546117acf7c549804346499002840", "StoneGolemCompanionBarks", Helpers.getGuid("StoneGolemCompanionBarks"));
-            UnitAsksComponent component = StoneGolemBarks.GetComponent<UnitAsksComponent>();
-            foreach (var componentAnimationBark in component.AnimationBarks)
-            {
-                if (componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound1 || componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound2)
-                {
-                    componentAnimationBark.Cooldown = 10f;
-                    componentAnimationBark.DelayMin = 5f;
-                }
-            }*/
 
             //for the size change at level 11
             ChangeUnitSize unitSizeplus = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = -1);
@@ -935,7 +747,6 @@ namespace trueTestmod
                 FeatureGroup.None,
                 
                 unitSizeplus,
-                //createstonegolemslow().CreateAddFact(),
                 Helpers.Create<AddStatBonus>(x =>
                 {
                     x.Stat = StatType.AC;
@@ -970,20 +781,11 @@ namespace trueTestmod
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
             //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodGolem");
+            PortraitData portraitData = new PortraitData("thelostgrimoireGolem");
             BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
             portrait.Data = portraitData;
             Main.library.AddAsset(portrait, Helpers.getGuid("StoneGolemPortrait"));
 
-            //BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); //Deleted fo this golem, maybe usefull for another
-
-
-
-
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
 
             //getting the golem
             BlueprintUnit StoneGolem = Main.library.CopyAndAdd<BlueprintUnit>("dfd21dba15fe7dd4f95961ff27d91836", "StoneGolemCompanion", Helpers.getGuid("StoneGolemCompanion"));
@@ -1063,7 +865,6 @@ namespace trueTestmod
                 l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
 
                 l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
 
 
             });
@@ -1075,16 +876,6 @@ namespace trueTestmod
             //Portrait (maybe SHENNANINGANS because the m_Portait field doesn't exist
             Helpers.SetField(StoneGolem, "m_Portrait", portrait);
 
-            /* BlueprintUnitAsksList StoneGolemBarks = Main.library.CopyAndAdd<BlueprintUnitAsksList>("841546117acf7c549804346499002840", "StoneGolemCompanionBarks", Helpers.getGuid("StoneGolemCompanionBarks"));
-             UnitAsksComponent component = StoneGolemBarks.GetComponent<UnitAsksComponent>();
-             foreach (var componentAnimationBark in component.AnimationBarks)
-             {
-                 if (componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound1 || componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound2)
-                 {
-                     componentAnimationBark.Cooldown = 10f;
-                     componentAnimationBark.DelayMin = 5f;
-                 }
-             }*/
 
             //for the size change at level 11
             ChangeUnitSize unitSizeplus = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = 0);
@@ -1156,23 +947,17 @@ namespace trueTestmod
             BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
 
             //Getting Protrait
-            PortraitData portraitData = new PortraitData("trueTestmodScarecrow");
+            PortraitData portraitData = new PortraitData("thelostgrimoireScarecrow");
             BlueprintPortrait portrait = Helpers.Create<BlueprintPortrait>();
             portrait.Data = portraitData;
             Main.library.AddAsset(portrait, Helpers.getGuid("ScarecrowPortrait"));
 
-            BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); //Deleted fo this golem, maybe usefull for another
-
-
-            //centipede Animal companion needed to make a knock off some of its blueprint
-            //BlueprintFeature animalCompanionUpgradeCentipede = Main.library.Get<BlueprintFeature>("c938099ca0438b242b3edecfa9083e9f");
-            //BlueprintUnit animalCompanionUnitCentipede = Main.library.Get<BlueprintUnit>("f9df16ffd0c8cec4d99a0ae6f025a3f8");
+            BlueprintUnitFact reducedReachFact = Main.library.Get<BlueprintUnitFact>("c33f2d68d93ceee488aa4004347dffca"); 
 
             //getting the Scarecrow
             BlueprintUnit ScarecrowBase = Main.library.CopyAndAdd<BlueprintUnit>("19a8d635157d1814fb55fe270e1b5ccc", "ScarecroweCompanion", Helpers.getGuid("ScarecroweCompanion"));
 
-            //Unholy00_Alignment_Aoe_20Feet	8a80d991f3d68e84293e098a6faa7620	GameObject	GameObject	8944916
-            //Resource:8a80d991f3d68e84293e098a6faa7620:Unholy00_Alignment_Aoe_20Feet
+          
             // Remove the gaze attack for now and redo it as this version is op
             //scarcrowgazearea.Fx.AssetId = "8a80d991f3d68e84293e098a6faa7620";
             var Scarecrowgazeattack = Main.library.Get<BlueprintFeature>("97677858a439d4d47af6ecc6a5d678f2");
@@ -1186,13 +971,13 @@ namespace trueTestmod
             ScarecrowBase.Charisma = 14;
 
             //Only one attack for the scarecrow whatever its level and getting rid of that enchant that doesn't work (we'll add it back later)
-            BlueprintItemWeapon GolemCompanionSlam = Main.library.Get<BlueprintItemWeapon>("bbdf5d550dc406640a77c5d2a05244ca");
-            
-            ScarecrowBase.Body.PrimaryHand = GolemCompanionSlam;
+            BlueprintItemWeapon ScarecrowCompanionSlam = Main.library.CopyAndAdd<BlueprintItemWeapon>("10687d9b0cc29d54cb86a06c07f1400e", "ScarecrowCompanionSlam", Helpers.getGuid("ScarecrowCompanionSlam"));
+            ScarecrowCompanionSlam.Enchantments.Clear();
+
+            ScarecrowBase.Body.PrimaryHand = ScarecrowCompanionSlam;
             ScarecrowBase.Body.AdditionalLimbs = Array.Empty<BlueprintItemWeapon>();
 
             ScarecrowBase.AddFacts = ScarecrowBase.AddFacts.AddToArray(CreateScarecrowFearTouch());
-            //ScarecrowBase.AddFacts = ScarecrowBase.AddFacts.AddToArray(CreateScarecrowFascinatingGaze());
             // Setting the golem right with class, archetype and all
             var ConstructType = Main.library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f");
             List<LevelEntry> addtypeFeatures = new List<LevelEntry>();
@@ -1217,7 +1002,6 @@ namespace trueTestmod
                 l.CharacterClass.Archetypes = l.CharacterClass.Archetypes.AddToArray(thearchetypeforthisnicegolem);
 
                 l.Selections = Array.Empty<SelectionEntry>();
-                //l.CharacterClass.Progression.LevelEntries = addtypeFeatures.ToArray();
 
 
             });
@@ -1228,16 +1012,6 @@ namespace trueTestmod
             //Portrait (maybe SHENNANINGANS because the m_Portait field doesn't exist
             Helpers.SetField(ScarecrowBase, "m_Portrait", portrait);
 
-            /* BlueprintUnitAsksList StoneGolemBarks = Main.library.CopyAndAdd<BlueprintUnitAsksList>("841546117acf7c549804346499002840", "StoneGolemCompanionBarks", Helpers.getGuid("StoneGolemCompanionBarks"));
-             UnitAsksComponent component = StoneGolemBarks.GetComponent<UnitAsksComponent>();
-             foreach (var componentAnimationBark in component.AnimationBarks)
-             {
-                 if (componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound1 || componentAnimationBark.AnimationEvent == MappedAnimationEventType.AlertSound2)
-                 {
-                     componentAnimationBark.Cooldown = 10f;
-                     componentAnimationBark.DelayMin = 5f;
-                 }
-             }*/
 
             //for the size change at level 11
             ChangeUnitSize unitSizeplus = Helpers.Create<ChangeUnitSize>(x => x.SizeDelta = 1);
@@ -1306,7 +1080,6 @@ namespace trueTestmod
                 Helpers.CreateAddFact(CreateScarecrowFascinatingGaze())
             ) ;
             addPetFact.UpgradeLevel = 11;
-            //addPetFact.UpgradeFeature.AddComponent(ScarecrowCompanionfascinatingaze);
             return ConstructCompanionScarecrowFeature;
         }
         private static BlueprintAbility CreateSteamDragonBreathWeapon()
@@ -1368,8 +1141,8 @@ namespace trueTestmod
                 Helpers.CreateAddAbilityResource(resource),
                 resourcelogic
                 ) ;
+            ability.ResourceAssetIds = new string[] { "d7263bcbe9cddf648b6df1816d50ba8f", "921700b1280d41f44a12fada77bbfe87" };
             ability.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.BreathWeapon;
-            //ability.AnimationStyle = Kingmaker.View.Animation.CastAnimationStyle.CastActionDirectional;
             ability.CanTargetEnemies = true;
             ability.CanTargetFriends = true;
             ability.CanTargetPoint = true;
@@ -1415,6 +1188,7 @@ namespace trueTestmod
 
             });
             spell.AddComponents(runaction, descriptor, aoe, spawnfx, param);
+            spell.ResourceAssetIds = new string[] { "2f714487dbde9554f85ba4b9627575dc" };
             Helpers.SetField(spell, "m_Icon", Icon);
 
             
@@ -1447,25 +1221,48 @@ namespace trueTestmod
             buff4fx.AssetId = "4ae01d6a8b5cdaa45a115fcf6aca4a48"; //wintermouth steam
             PrefabLink buff5fx = new PrefabLink();
             buff5fx.AssetId = Helpers.getGuid("NewFXforSpectrecycle"); //scpectre FX
+            PrefabLink fire = new PrefabLink();
+            fire.AssetId = "b936c023ae73e59498c67759ecbdb177";//Fire00_StandartHit
+            PrefabLink wind = new PrefabLink();
+            wind.AssetId = "d0d11b277d0e19c479e42ce891deec02";//WindProjectile00_Hit
+            PrefabLink decal = new PrefabLink();
+            decal.AssetId = "85a59070f10741745af33c96a5d967f4";//Fire00_MajorHit_Decal
             var icon = Helpers.GetIcon("68a23a419b330de45b4c3789649b5b41");
             //empty buff1 
             var buff1 = Helpers.CreateBuff("Steamlookpart1", "", "", Helpers.getGuid("Steamlookpart1"), icon, buff1fx);
             buff1.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff1.ResourceAssetIds = new string[] { buff1fx.AssetId };
             //empty buff2 
             var buff2 = Helpers.CreateBuff("Steamlookpart2", "", "", Helpers.getGuid("Steamlookpart2"), icon, buff2fx);
             buff2.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff2.ResourceAssetIds = new string[] { buff2fx.AssetId };
             //empty buff3 
             var buff3 = Helpers.CreateBuff("Steamlookpart3", "", "", Helpers.getGuid("Steamlookpart3"), icon, buff3fx);
+            buff3.ResourceAssetIds = new string[] { buff3fx.AssetId};
             buff3.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
             // empty buff 4
             var buff4 = Helpers.CreateBuff("Steamlookpart4", "", "", Helpers.getGuid("Steamlookpart4"), icon, buff4fx);
             buff4.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff4.ResourceAssetIds = new string[] { buff4fx.AssetId };
+
+
+
             var buff5 = Helpers.CreateBuff("Steamlookpart5", "", "", Helpers.getGuid("Steamlookpart5"), icon, buff4fx);
             buff5.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff5.ResourceAssetIds = new string[] { buff4fx.AssetId };
             //Buff5
-            var buff6 = Helpers.CreateBuff("Steamlookpart6", "", "", Helpers.getGuid("Steamlookpart6"), icon, buff5fx);
+            var buff6 = Helpers.CreateBuff("Steamlookpart6", "", "", Helpers.getGuid("Steamlookpart6"), icon, buff5fx, null,
+                Helpers.Create<AddIncomingDamageTrigger>(p => {
+                    p.TriggerOnStatDamageOrEnergyDrain = false;
+                    p.Actions = Helpers.CreateActionList(
+                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = fire),
+                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = wind),
+                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = decal));
+                })
+
+                );
             buff6.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
-            buff6.ResourceAssetIds = new string[] { buff5fx.AssetId };
+            buff6.ResourceAssetIds = new string[] { buff5fx.AssetId, fire.AssetId, wind.AssetId, decal.AssetId };
             ResourcesLibrary.LibraryObject.ResourceNamesByAssetId[buff5fx.AssetId] = buff5fx.AssetId;
             //Final Buff
             var buffcollection = new BlueprintBuff[]
@@ -1486,26 +1283,29 @@ namespace trueTestmod
             //empty buff1 
             var buff1 = Helpers.CreateBuff("Icylookpart1", "", "", Helpers.getGuid("Icylookpart1"), icon, buff1fx.FxOnStart);
             buff1.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff1.ResourceAssetIds = new string[] { buff1fx.FxOnStart.AssetId};
             //empty buff2 
             var buff2 = Helpers.CreateBuff("Icylookpart2", "", "", Helpers.getGuid("Icylookpart2"), icon, buff2fx.FxOnStart);
             buff2.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff2.ResourceAssetIds = new string[] { buff2fx.FxOnStart.AssetId};
             //empty buff3 
             var buff3 = Helpers.CreateBuff("Icylookpart3", "", "", Helpers.getGuid("Icylookpart3"), icon, buff3fx.FxOnStart);
             buff3.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
+            buff3.ResourceAssetIds = new string[] { buff3fx.FxOnStart.AssetId };
             // empty buff 4
-            Kingmaker.ResourceLinks.PrefabLink truc = new Kingmaker.ResourceLinks.PrefabLink();
-            truc.AssetId = "a7ba9833751047848a7eefbb3c9953b5";
-            Kingmaker.ResourceLinks.PrefabLink machin = new Kingmaker.ResourceLinks.PrefabLink();
-            machin.AssetId = "934310124d9f2c84abb77cba20d6ef0e";
-            var buff4 = Helpers.CreateBuff("Icylookpart4", "", "", Helpers.getGuid("Icylookpart4"), icon, buff4fx.FxOnStart,
+            PrefabLink cold = new PrefabLink();
+            cold.AssetId = "a7ba9833751047848a7eefbb3c9953b5";//Cold00_StandartHit
+            PrefabLink decal = new PrefabLink();
+            decal.AssetId = "934310124d9f2c84abb77cba20d6ef0e";//Cold00_StandartHit_Decal
+            var buff4 = Helpers.CreateBuff("Icylookpart4", "", "", Helpers.getGuid("Icylookpart4"), icon, buff4fx.FxOnStart, null,
                 Helpers.Create<AddIncomingDamageTrigger>(p => {
                     p.TriggerOnStatDamageOrEnergyDrain = false;
                     p.Actions = Helpers.CreateActionList(
-                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = truc),
-                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = machin));
+                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = cold),
+                        Helpers.Create<ContextActionSpawnFx>(f => f.PrefabLink = decal));
                     }) );
             buff4.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.StayOnDeath);
-
+            buff4.ResourceAssetIds = new string[] { buff4fx.FxOnStart.AssetId, cold.AssetId, decal.AssetId };
             //Final Buff
             var buffcollection = new BlueprintBuff[]
             {
@@ -1561,13 +1361,20 @@ namespace trueTestmod
         private static BlueprintFeature CreateScarecrowFascinatingGaze()
         {
 
-            //@@tomodify@@
-            var hypnotisme = Main.library.Get<BlueprintAbility>("88367310478c10b47903463c5d0152b0");//for Icon
-            var bardeffectbuff = Main.library.Get<BlueprintBuff>("2d4bd347dec7d8648afd502ee40ae661");// for Icon
+
             //Imunebuff
             var immunebuff = Main.library.Get<BlueprintBuff>("a50373fa77d30d34c8c6efb198b36921");//fascinate immunity buff
-            //effectbuff
-            var effectbuff = Main.library.Get<BlueprintBuff>("9c70d2ae017665b4b845e6c299cb7439"); //fascinate commonbuff
+
+            var hypnotisme = Main.library.Get<BlueprintAbility>("88367310478c10b47903463c5d0152b0");//for Icon
+
+            //Buff for effect, bard's one 
+            var bardeffectbuff = Main.library.CopyAndAdd<BlueprintBuff>("2d4bd347dec7d8648afd502ee40ae661", "ScarecroWCompanionGazeEffectBuff", Helpers.getGuid("ScarecroWCompanionGazeEffectBuff"));// for Icon
+            Helpers.SetLocalizedStringField(bardeffectbuff, "m_Description", "Three time a day, a scarecrow can make its eyes fascinating for two round. " +
+                "All enemy around it in a 20 feets radius must make a will saving throw (DC= 10+ 1/2 the scarecrow level + the scarecrow Charisma Modifier) or be fascinated for as long as long as this ability last. " +
+                "If an enemy succeed at the saving throw, it cannot be affected until 24hours have passed.");
+
+
+
             
             //Area (base is bard's one because it has the right condition
             var area = Main.library.CopyAndAdd<BlueprintAbilityAreaEffect>("a4fc1c0798359974e99e1d790935501d", "ScarecrowCompanionGazeArea", Helpers.getGuid("ScarecrowCompanionGazeArea"));
@@ -1583,12 +1390,12 @@ namespace trueTestmod
                         //Sucess:
                         Helpers.CreateApplyBuff(immunebuff, Helpers.CreateContextDuration(1, DurationRate.Days),false,false,false,false, false),
                         //failed:
-                        Helpers.CreateApplyBuff(effectbuff, Helpers.CreateContextDuration (), false, false, false, true, true)
+                        Helpers.CreateApplyBuff(bardeffectbuff, Helpers.CreateContextDuration (), false, false, false, true, true)
                     ))),
                  //exit :
-                 Helpers.CreateConditional(Helpers.CreateConditionsCheckerAnd(Helpers.CreateConditionHasFact(effectbuff), Helpers.Create<ContextConditionIsEnemy>()),
+                 Helpers.CreateConditional(Helpers.CreateConditionsCheckerAnd(Helpers.CreateConditionHasFact(bardeffectbuff), Helpers.Create<ContextConditionIsEnemy>()),
                     //if true:
-                    Helpers.Create<ContextActionRemoveBuff>(r => r.Buff = effectbuff)));
+                    Helpers.Create<ContextActionRemoveBuff>(r => r.Buff = bardeffectbuff)));
 
             
             //put the construct class for save
@@ -1605,11 +1412,11 @@ namespace trueTestmod
             buff.ReplaceComponent<AddAreaEffect>(a => a.AreaEffect = area);
             buff.RemoveComponent(buff.ComponentsArray.OfType<ContextCalculateAbilityParamsBasedOnClass>().First());// it's on the area rather than here
             buff.SetBuffFlags(BuffFlags.HiddenInUi);
-
+            buff.ResourceAssetIds = new string[] { "8a80d991f3d68e84293e098a6faa7620" };
 
             //Ability ressource
             var Resource = Helpers.CreateAbilityResource("ScarecrowCompanionGazeResource", "", "",
-              Helpers.getGuid("ScarecrowCompanionGazeResource"), effectbuff.Icon);
+              Helpers.getGuid("ScarecrowCompanionGazeResource"), bardeffectbuff.Icon);
             Resource.SetFixedResource(3);
 
             //Ability 
@@ -1626,6 +1433,7 @@ namespace trueTestmod
                 Resource.CreateAddAbilityResource(),
                 Helpers.CreateResourceLogic(Resource)
                 );
+            ability.ResourceAssetIds = new string[] { "8a80d991f3d68e84293e098a6faa7620", "725b02acb7286094688c0d5da974dcdc", "396af91a93f6e2b468f5fa1a944fae8a" };
 
 
             //Feature
@@ -1652,7 +1460,7 @@ namespace trueTestmod
 
             var buff = Helpers.CreateBuff("scarecrowfeartouchbuff", "Touch of Fear", "When a scarecrow blablabla", Helpers.getGuid("scarecrowfeartouchbuff"),
                 fear.Icon,
-                null, FearTouch);
+                null, null,FearTouch);
             buff.SetBuffFlags(BuffFlags.HiddenInUi);
 
 
@@ -1723,7 +1531,6 @@ namespace trueTestmod
             Helpers.SetLocalizedStringField(DR, "m_DisplayName", "Resistant Material");
             Helpers.SetLocalizedStringField(DR, "m_Description", "Through your magic and alchemical discovery, you are able to improve your construct's solidity.");
             DR.Ranks = 20;
-            //var modifydrcompo = DR.ComponentsArray.OfType<Kingmaker.UnitLogic.Mechanics.Components.ContextRankConfig>().First();
             var modifydrcompo = Helpers.CreateContextRankConfig(ContextRankBaseValueType.FeatureRank, ContextRankProgression.AsIs, AbilityRankType.Default, null, 20, 0, 1, false, StatType.Unknown, null, null, null, DR);
             var Drreplace = new BlueprintFeature[] { DR };
             DR.ReplaceContextRankConfig(modifydrcompo);
@@ -1744,7 +1551,6 @@ namespace trueTestmod
             //Creating the Archetype
             //The golem will gain no feat, due to construct being sensless idiot 
 
-            //var AnimalCompanionArchetype = Main.library.Get<BlueprintArchetype>("9f8a232fbe435a9458bf64c3024d7bee");
             BlueprintArchetype ConstructCompanionArchetype = Helpers.Create<BlueprintArchetype>(l =>
             {
                 l.name = "Constructcompanionarchetype";
@@ -1756,7 +1562,7 @@ namespace trueTestmod
             List<LevelEntry> addFeatures = new List<LevelEntry>();
             addFeatures.Add(Helpers.LevelEntry(1, ConstructType));
             addFeatures.Add(Helpers.LevelEntry(2,DR));
-            addFeatures.Add(Helpers.LevelEntry(3, Attack, DR, NatAC/*, ConstructType*/));
+            addFeatures.Add(Helpers.LevelEntry(3, Attack, DR, NatAC));
             addFeatures.Add(Helpers.LevelEntry(4, DR, Stats));
             addFeatures.Add(Helpers.LevelEntry(5, DR, NatAC));
             addFeatures.Add(Helpers.LevelEntry(6, Attack, DR, Stats));
@@ -1772,8 +1578,8 @@ namespace trueTestmod
             addFeatures.Add(Helpers.LevelEntry(16, DR, Stats));
             ConstructCompanionArchetype.AddFeatures = addFeatures.ToArray();
             ConstructCompanionArchetype.RemoveFeatures = CharacterClass.Progression.LevelEntries;
-            //CharacterClass.Archetypes.AddToArray(ConstructCompanionArchetype);
-
+            ConstructCompanionArchetype.ReplaceClassSkills = true;
+            ConstructCompanionArchetype.ClassSkills = Array.Empty<StatType>();
 
             return ConstructCompanionArchetype;
 
@@ -1806,27 +1612,7 @@ namespace trueTestmod
 
             var programfeat = CreateProgramFeatSpell();
             programfeat.AddToSpellList(Helpers.wizardSpellList, 5);
-            //Code Skill 3
-            /*Athletics
-             * Mobility
-             * Perception
-             * 
-             * 
-             * 
-             * 
-             */
-
-            //Unbreakable Construct
-
-
-            
-            //Program Feat, Greater 7
-            /*
-            offense:  critical focus (slam bite, claw, wings, tail)+ Ability focus
-            defense: improved initiative, combat reflexe
-            resistance: All save feat +
-            Cooperation: seize the moment, back to back
-          */
+      
 
         }
         private static BlueprintAbility CreateMakeWholeSpell()
@@ -1861,6 +1647,7 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
             spell.AvailableMetamagic = Kingmaker.UnitLogic.Abilities.Metamagic.Empower | Kingmaker.UnitLogic.Abilities.Metamagic.Maximize | Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach;
             spell.SpellResistance = false;
+            spell.ResourceAssetIds = new string[] { fx.AssetId };
             return spell;
         }
 
@@ -1898,6 +1685,7 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
             spell.AvailableMetamagic = Kingmaker.UnitLogic.Abilities.Metamagic.Empower | Kingmaker.UnitLogic.Abilities.Metamagic.Maximize | Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach;
             spell.SpellResistance = false;
+            spell.ResourceAssetIds = new string[] { fx.AssetId };
             return spell;
         }
         private static BlueprintAbility CreateRapidRepairSpell()
@@ -1935,6 +1723,7 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
             spell.AvailableMetamagic =  Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach | Kingmaker.UnitLogic.Abilities.Metamagic.Extend ;
             spell.SpellResistance = false;
+            spell.ResourceAssetIds = new string[] { fx.AssetId };
             return spell;
         }
 
@@ -1958,7 +1747,7 @@ namespace trueTestmod
             feat.HideInCharacterSheetAndLevelUp = true;
             feat.Ranks = 1;
 
-            var buff = Helpers.CreateBuff("UnbreakableConstructBuff", "Unbreakable", "This spell increases the target’s DR/adamantine by 5", Helpers.getGuid("UnbreakableConstructBuff"), magearmor.Icon, fx,
+            var buff = Helpers.CreateBuff("UnbreakableConstructBuff", "Unbreakable", "This spell increases the target’s DR/adamantine by 5", Helpers.getGuid("UnbreakableConstructBuff"), magearmor.Icon, fx, null,
                 Helpers.Create<AddTemporaryFeat>(t => 
                 {
                     t.Feat = feat;
@@ -1966,6 +1755,7 @@ namespace trueTestmod
                 ) ;
             //buff.Stacking = StackingType.Replace;
             buff.SetBuffFlags(BuffFlags.IsFromSpell);
+          
 
             var spell = Helpers.CreateAbility("UnbreakableConstructSpell", "Unbreakable Construct", "This spell increases the target’s DR/adamantine by 5 or its hardness by 5. ", Helpers.getGuid("UnbreakableConstructSpell"), magearmor.Icon,
                 AbilityType.Spell,
@@ -1993,6 +1783,7 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
             spell.AvailableMetamagic = Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach | Kingmaker.UnitLogic.Abilities.Metamagic.Extend;
             spell.SpellResistance = false;
+            spell.ResourceAssetIds = new string[] { fx.AssetId };
             return spell;
         }
 
@@ -2000,14 +1791,16 @@ namespace trueTestmod
         {
             //Thing we need
             var icon = Helpers.GetIcon("4093d5a0eb5cae94e909eb1e0e1a6b36");
+            var bufffx = new PrefabLink();
+            bufffx.AssetId = "352469f228a3b1f4cb269c7ab0409b8e";
             var fx = new PrefabLink();
-            fx.AssetId = "f447e243ab2c1da4c851c019c3196526";
+            fx.AssetId = "09f795c3900b21b47a1254bcb3f263c8";
             var perceptionI = Helpers.GetIcon("f74c6bdf5c5f5374fb9302ecdc1f7d64");
             var AthleticsI = Helpers.GetIcon("9db907332bdaec1468cff3a99efef5b4");
             var MobilityI = Helpers.GetIcon("52dd89af385466c499338b7297896ded");
 
             //The buffs
-            var Athleticsbuff = Helpers.CreateBuff("AthleticsCodeSkillBuff", "Athletics Coded", "", Helpers.getGuid("AthleticsCodeSkillBuff"), AthleticsI, fx,
+            var Athleticsbuff = Helpers.CreateBuff("AthleticsCodeSkillBuff", "Athletics Coded", "", Helpers.getGuid("AthleticsCodeSkillBuff"), AthleticsI, fx, null,
                 
                 Helpers.CreateAddContextStatBonus(StatType.SkillAthletics, ModifierDescriptor.Inherent, ContextValueType.Rank, AbilityRankType.Default),
                 Helpers.CreateContextRankConfig(ContextRankBaseValueType.OwnerSummClassLevelWithArchetype, ContextRankProgression.AsIs, AbilityRankType.Default, 1, 16, 1, 1, false, StatType.SkillAthletics, null, 
@@ -2018,7 +1811,7 @@ namespace trueTestmod
             Athleticsbuff.Stacking = StackingType.Replace;
             Athleticsbuff.SetBuffFlags(BuffFlags.IsFromSpell);
 
-            var Mobilitybuff = Helpers.CreateBuff("MobilityCodeSkillBuff", "Mobility Coded", "", Helpers.getGuid("MobilityCodeSkillBuff"), MobilityI, fx,
+            var Mobilitybuff = Helpers.CreateBuff("MobilityCodeSkillBuff", "Mobility Coded", "", Helpers.getGuid("MobilityCodeSkillBuff"), MobilityI, fx, null,
                 Helpers.CreateAddContextStatBonus(StatType.SkillMobility, ModifierDescriptor.Inherent, ContextValueType.Rank, AbilityRankType.Default),
                 Helpers.CreateContextRankConfig(ContextRankBaseValueType.OwnerSummClassLevelWithArchetype, ContextRankProgression.AsIs, AbilityRankType.Default, 1, 16, 1, 1, false, StatType.SkillMobility, null,
                 new BlueprintCharacterClass[] { Main.library.Get<BlueprintCharacterClass>("fd66bdea5c33e5f458e929022322e6bf") },
@@ -2028,11 +1821,12 @@ namespace trueTestmod
             Mobilitybuff.Stacking = StackingType.Replace;
             Mobilitybuff.SetBuffFlags(BuffFlags.IsFromSpell);
 
-            var Perceptionbuff = Helpers.CreateBuff("PerceptionCodeSkillBuff", "Perception Coded", "", Helpers.getGuid("PerceptionCodeSkillBuff"), perceptionI, fx,
-                Helpers.CreateAddContextStatBonus(StatType.SkillPerception, ModifierDescriptor.Inherent, ContextValueType.Rank, AbilityRankType.Default),
+            var Perceptionbuff = Helpers.CreateBuff("PerceptionCodeSkillBuff", "Perception Coded", "", Helpers.getGuid("PerceptionCodeSkillBuff"), perceptionI, fx, null,
+               /* Helpers.CreateAddContextStatBonus(StatType.SkillPerception, ModifierDescriptor.Inherent, ContextValueType.Rank, AbilityRankType.Default),
                 Helpers.CreateContextRankConfig(ContextRankBaseValueType.OwnerSummClassLevelWithArchetype, ContextRankProgression.AsIs, AbilityRankType.Default, 1, 16, 1, 1, false, StatType.SkillPerception, null,
                 new BlueprintCharacterClass[] { Main.library.Get<BlueprintCharacterClass>("fd66bdea5c33e5f458e929022322e6bf") },
-                Main.library.Get<BlueprintArchetype>(Helpers.getGuid("ConstructCompanionArchetype")))
+                Main.library.Get<BlueprintArchetype>(Helpers.getGuid("ConstructCompanionArchetype")))*/
+                Helpers.Create<AddClassSkill>(s => s.Skill = StatType.SkillPerception)
 
     );
             Perceptionbuff.Stacking = StackingType.Replace;
@@ -2047,7 +1841,7 @@ namespace trueTestmod
             var constructcheck = Helpers.Create<AbilityTargetHasFact>(f => f.CheckedFacts = new BlueprintUnitFact[] { Main.library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f") });
 
             //Base spell
-            var spell = Helpers.CreateAbility("CodeSkillBaseSpell", "Code Skill", "Code Skill Gives a cronstruct a bonus in certain skills, this bonus is equal to the construct level.", Helpers.getGuid("CodeSkillBaseSpell"), icon,
+            var spell = Helpers.CreateAbility("CodeSkillBaseSpell", "Code Skill", "Code Skill Gives a cronstruct a bonus in certain skills, this bonus is equal to the construct level or if the construct allready has rank in this skill, it make it a class skill.", Helpers.getGuid("CodeSkillBaseSpell"), icon,
                 AbilityType.Spell,
                 CommandType.Standard,
                 AbilityRange.Close,
@@ -2072,7 +1866,8 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
             spell.AvailableMetamagic = Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach | Kingmaker.UnitLogic.Abilities.Metamagic.Extend;
             spell.SpellResistance = false;
-            
+            spell.ResourceAssetIds = new string[] { fx.AssetId };
+
             //Creating the variant
             var athleticsspell = Main.library.CopyAndAdd<BlueprintAbility>(spell, "CodeSkillAthleticsSpell", Helpers.getGuid("CodeSkillAthleticsSpell"));
             athleticsspell.AddComponents(applyAthlecticsbuff, rankconsfig, constructcheck);
@@ -2102,8 +1897,10 @@ namespace trueTestmod
         {
             //Thing we need
             var icon = Helpers.GetIcon("4d9bf81b7939b304185d58a09960f589");
+            var bufffx = new PrefabLink();
+            bufffx.AssetId = "352469f228a3b1f4cb269c7ab0409b8e";
             var fx = new PrefabLink();
-            fx.AssetId = "f447e243ab2c1da4c851c019c3196526";
+            fx.AssetId = "09f795c3900b21b47a1254bcb3f263c8";
             var weaponfocus = Main.library.Get<BlueprintParametrizedFeature>("f4201c85a991369408740c6888362e20");
             var improvedcritcal = Main.library.Get<BlueprintParametrizedFeature>("1e1f627d26ad36f43bbd26cc2bf8ac7e");
 
@@ -2119,20 +1916,23 @@ namespace trueTestmod
             var dragonbitetype = Main.library.Get<BlueprintWeaponType>("12a8a3a89e62d6b4fbc09ecdc187a828");
             var dragonclawtype = Main.library.Get<BlueprintWeaponType>("d4f7aee36efe0b54e810c9d3407b6ab3");
             var slamtype = Main.library.Get<BlueprintWeaponType>("b6a50705eb5dfab4fafd577020f49c5e");
+            var slamtypescarecrow = Main.library.Get<BlueprintWeaponType>("f18cbcb39a1b35643a8d129b1ec4e716");
 
 
 
 
             //The buffs
-            var offensebuff = Helpers.CreateBuff("ProgramFeatOffenseBuff", "Offense Feats Programmed", "", Helpers.getGuid("ProgramFeatOffenseBuff"), weaponfocus.Icon, fx,
+            var offensebuff = Helpers.CreateBuff("ProgramFeatOffenseBuff", "Offense Feats Programmed", "", Helpers.getGuid("ProgramFeatOffenseBuff"), weaponfocus.Icon, bufffx, null,
 
                 Helpers.Create<AddTemporaryFeat>(f => f.Feat = weaponfocus),
                 Helpers.Create<AddTemporaryFeat>(f => f.Feat = improvedcritcal),
                 Helpers.Create<WeaponFocus>(w => {w.AttackBonus = 1; w.WeaponType = dragonbitetype;}),
                 Helpers.Create<WeaponFocus>(w => {w.AttackBonus = 1; w.WeaponType = slamtype;}),
                 Helpers.Create<WeaponFocus>(w => {w.AttackBonus = 1; w.WeaponType = dragonclawtype;}),
+                Helpers.Create<WeaponFocus>(w => { w.AttackBonus = 1; w.WeaponType = slamtypescarecrow; }),
                 Helpers.Create<WeaponTypeCriticalEdgeIncrease>(w =>  w.WeaponType = dragonbitetype),
                 Helpers.Create<WeaponTypeCriticalEdgeIncrease>(w =>  w.WeaponType = slamtype),
+                Helpers.Create<WeaponTypeCriticalEdgeIncrease>(w => w.WeaponType = slamtypescarecrow),
                 Helpers.Create<WeaponTypeCriticalEdgeIncrease>(w =>  w.WeaponType = dragonclawtype)
                 );
             offensebuff.Stacking = StackingType.Replace;
@@ -2140,7 +1940,7 @@ namespace trueTestmod
 
           
 
-            var resistancebuff = Helpers.CreateBuff("ProgramFeatResistanceBuff", "Resistance Feats Programmed", "", Helpers.getGuid("ProgramFeatResistanceBuff"), toughness.Icon, fx,
+            var resistancebuff = Helpers.CreateBuff("ProgramFeatResistanceBuff", "Resistance Feats Programmed", "", Helpers.getGuid("ProgramFeatResistanceBuff"), toughness.Icon, bufffx, null,
                 Helpers.Create<AddTemporaryFeat>(f => f.Feat = ironwill),
                 Helpers.Create<AddTemporaryFeat>(f => f.Feat = greatfortitude),
                 Helpers.Create<AddTemporaryFeat>(f => f.Feat = lightreflex),
@@ -2149,7 +1949,7 @@ namespace trueTestmod
             resistancebuff.Stacking = StackingType.Replace;
             resistancebuff.SetBuffFlags(BuffFlags.IsFromSpell);
 
-            var cooperationbuff = Helpers.CreateBuff("ProgmraFeatCoopBuff", "Cooperation Feat Programmed", "", Helpers.getGuid("ProgmraFeatCoopBuff"), outflank.Icon, fx,
+            var cooperationbuff = Helpers.CreateBuff("ProgmraFeatCoopBuff", "Cooperation Feat Programmed", "", Helpers.getGuid("ProgmraFeatCoopBuff"), outflank.Icon, bufffx, null,
                Helpers.Create<AddTemporaryFeat>(f => f.Feat = precisestrike),
                Helpers.Create<AddTemporaryFeat>(f => f.Feat = outflank)
                );
@@ -2200,6 +2000,7 @@ namespace trueTestmod
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
             spell.AvailableMetamagic = Kingmaker.UnitLogic.Abilities.Metamagic.Quicken | Kingmaker.UnitLogic.Abilities.Metamagic.Reach | Kingmaker.UnitLogic.Abilities.Metamagic.Extend;
             spell.SpellResistance = false;
+            spell.ResourceAssetIds = new string[] { fx.AssetId, bufffx.AssetId };
 
             //Creating the variant
             var offensespell = Main.library.CopyAndAdd<BlueprintAbility>(spell, "ProgramFeatOffenseSpell", Helpers.getGuid("ProgramFeatOffenseSpell"));
@@ -2232,9 +2033,9 @@ namespace trueTestmod
         {
             private static bool Prefix(CustomPortraitsManager __instance, string id, ref string __result)
             {
-                if (id.Contains("trueTestmod"))
+                if (id.Contains("thelostgrimoire"))
                 {
-                    __result = Path.Combine(Directory.GetCurrentDirectory(), "Mods/trueTestmod/Resources", id);
+                    __result = Path.Combine(Directory.GetCurrentDirectory(), "Mods/thelostgrimoire/Resources", id);
                     return false;
                 }
 
@@ -2262,6 +2063,17 @@ namespace trueTestmod
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(UnitAnimationManager), nameof(UnitAnimationManager.ExecuteIfIdle), typeof(UnitAnimationType))]
+        private static class DisableSteamDragonAnimationPatch
+        {
+            private static bool Prefix(UnitAnimationManager __instance, UnitAnimationType type)
+            {
+                 if (type == UnitAnimationType.VariantIdle && __instance.View?.EntityData?.Blueprint.AssetGuid == Helpers.getGuid("SteamDragonCompanion")) { return false; }
+                return true;
+            }
+        }
+
 
 
     }

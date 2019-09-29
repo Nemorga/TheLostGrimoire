@@ -20,7 +20,7 @@ using Kingmaker.Utility;
 using UnityEngine;
 using UnityModManagerNet;
 
-namespace trueTestmod
+namespace thelostgrimoire
 {
     public class Main
     {
@@ -48,10 +48,11 @@ namespace trueTestmod
                 //
                 // It needs to run after new classes too, because SpellSpecialization needs to find
                 // all class spell lists.
-                SafeLoad(MagicFeats.Load, "Magic feats");
-
-                SafeLoad(Addrayshiekdtoenemy.Load, "test");
-                SafeLoad(GolemDiscovery.Load, "Golem");
+                
+                SafeLoad(GolemDiscovery.Load, "Golem Constructor");
+                SafeLoad(RelatedFeat.Load, "Other feat");
+                SafeLoad(ArcaneDiscoveries.Load, "Other Arcane Discoveries");
+                SafeLoad(Fixandchange.Load, "Collection of feat and change");
                 // Note: needs to run after arcane spells (it uses some of them).
 
                 // Note: needs to run after things that add classes, and after bloodlines in case
@@ -133,10 +134,7 @@ namespace trueTestmod
                 {
                     if (Path.GetFileName(path) == "resource_" + Helpers.getGuid("NewFXforSpectrecycle"))
                     {
-                        Log.Write(Helpers.getGuid("NewFXforSpectrecycle"));
-                        Log.Write($"Loading asset bundle {path}");
-                        String stringy2 = Directory.GetCurrentDirectory() + "/Mods/trueTestMod/Resources/AssetBundles/" + Helpers.getGuid("NewFXforSpectrecycle");
-                        Log.Write(stringy2);
+                        
                         __result = AssetBundle.LoadFromFile($"{modpath}/Resources/AssetBundles/" + Helpers.getGuid("NewFXforSpectrecycle"), 0, 0);
                         var prefab = __result.LoadAllAssets<GameObject>()[0];
                         FixPrefab(prefab);
@@ -160,7 +158,7 @@ namespace trueTestmod
         
         public static UnityModManager.ModEntry.ModLogger logger;
         public static string modpath;
-        internal static Settings settings;
+        //internal static Settings settings;
 
 
         static Harmony12.HarmonyInstance harmonyInstance;
@@ -263,9 +261,9 @@ namespace trueTestmod
             logger = modEntry.Logger;
             modEntry.OnToggle = OnToggle;
             modEntry.OnGUI = OnGUI;
-            modEntry.OnSaveGUI = OnSaveGUI;
+            //modEntry.OnSaveGUI = OnSaveGUI;
             modpath = modEntry.Path;
-            settings = UnityModManager.ModSettings.Load<Settings>(modEntry);
+            //settings = UnityModManager.ModSettings.Load<Settings>(modEntry);
             harmonyInstance = Harmony12.HarmonyInstance.Create(modEntry.Info.Id);
             ApplyPatch(typeof(LibraryScriptableObject_LoadDictionary2_Patch), "Loading the shader");
             ApplyPatch(typeof(AssetBundle_LoadFromFile_Patch), "Loading the new fx");
@@ -321,7 +319,7 @@ namespace trueTestmod
                 }
                 GUILayout.EndVertical();
             }
-
+            /*
             settings.EldritchKnightFix = GUILayout.Toggle(settings.EldritchKnightFix,
                 "Eldritch Knight requires martial class (doesn't affect existing EKs)", fixedWidth);
 
@@ -336,13 +334,13 @@ namespace trueTestmod
                 "Any race can choose the Oracle Ancient Lorekeeper archetype", fixedWidth);
 
             settings.RelaxTonguesCurse = GUILayout.Toggle(settings.RelaxTonguesCurse,
-                "Disable Tongues curse penalty (that party members need 1 rank Knowledge: World to be controlled by PC in combat)", fixedWidth);
+                "Disable Tongues curse penalty (that party members need 1 rank Knowledge: World to be controlled by PC in combat)", fixedWidth);*/
         }
 
-        static void OnSaveGUI(UnityModManager.ModEntry modEntry)
+       /* static void OnSaveGUI(UnityModManager.ModEntry modEntry)
         {
             settings.Save(modEntry);
-        }
+        }*/
 
         internal static void SafeLoad(Action load, String name)
         {
@@ -379,7 +377,7 @@ namespace trueTestmod
     }
 
 
-    public class Settings : UnityModManager.ModSettings
+   /* public class Settings : UnityModManager.ModSettings
     {
         public bool EldritchKnightFix = true;
 
@@ -395,5 +393,5 @@ namespace trueTestmod
         {
             UnityModManager.ModSettings.Save<Settings>(this, modEntry);
         }
-    }
+    }*/
 }
