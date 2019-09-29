@@ -39,34 +39,12 @@ namespace thelostgrimoire
                 SafeLoad(Helpers.Load, "Initialization code");
 
 
-                // Note: needs to be loaded after other spells, so it can offer them as a choice.
-
-                // Note: needs to run before almost everything else, so they can find the Oracle class.
-                // However needs to run after spells are added, because it uses some of them.
-
-                // Note: spells need to be added before this, because it adds metamagics.
-                //
-                // It needs to run after new classes too, because SpellSpecialization needs to find
-                // all class spell lists.
                 
                 SafeLoad(GolemDiscovery.Load, "Golem Constructor");
                 SafeLoad(RelatedFeat.Load, "Other feat");
                 SafeLoad(ArcaneDiscoveries.Load, "Other Arcane Discoveries");
                 SafeLoad(Fixandchange.Load, "Collection of feat and change");
-                // Note: needs to run after arcane spells (it uses some of them).
-
-                // Note: needs to run after things that add classes, and after bloodlines in case
-                // they allow qualifying for racial prerequisites.
-
-
-                // Note: needs to run after we create Favored Prestige Class above.
-
-                // Note: needs to run after things that add bloodlines.
-
-                // Note: needs to run after things that add martial classes or bloodlines.
-
-                // Note: needs to run after crossblooded and spontaneous caster classes,
-                // so it can find their spellbooks.
+              
 
 
             }

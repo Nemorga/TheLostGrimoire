@@ -56,7 +56,7 @@ using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 
 namespace thelostgrimoire
 {
-   static class ArcaneDiscoveries
+    static class ArcaneDiscoveries
     {
         static LibraryScriptableObject library => Main.library;
         static BlueprintCharacterClass wizardclass = Main.library.Get<BlueprintCharacterClass>("ba34257984f4c41408ce1dc2004e342e");
@@ -66,7 +66,7 @@ namespace thelostgrimoire
         {
             // Load  feats
             Main.SafeLoad(CreateImmortality, "Who wants to live for ever?");
-
+            Main.SafeLoad(CreateStaffLikeWand, "Laser pistols, kinda");
 
 
 
@@ -79,8 +79,8 @@ namespace thelostgrimoire
             var oldage = library.Get<BlueprintFeature>(Helpers.getGuid("OldAgeMalusFeature"));
             var venerableage = library.Get<BlueprintFeature>(Helpers.getGuid("VenerableAgeMalusFeature"));
             var icon = Helpers.GetIcon("80a1a388ee938aa4e90d427ce9a7a3e9");
-            
-            var immortality = Helpers.CreateFeature("ImmortalityArcaneDiscovery",  "Arcane Discovery: Immortality", " You discover a cure for aging, and from this point forward you take no penalty to your physical ability scores from advanced age. If you are already taking such penalties, they are removed at this time. ",
+
+            var immortality = Helpers.CreateFeature("ImmortalityArcaneDiscovery", "Arcane Discovery: Immortality", " You discover a cure for aging, and from this point forward you take no penalty to your physical ability scores from advanced age. If you are already taking such penalties, they are removed at this time. ",
                 Helpers.getGuid("ImmortalityArcaneDiscovery"), icon, FeatureGroup.WizardFeat,
                 Helpers.PrerequisiteClassLevel(wizardclass, 1),
                 Helpers.Create<RemoveFeatureOnApply>(r => r.Feature = middleage),
@@ -95,9 +95,45 @@ namespace thelostgrimoire
 
         }
 
-        
-    }
+        static void CreateStaffLikeWand()
+        {
+            //var prereq = Helpers.Create<BlueprintFeature>("f43ffc8e3f8ad8a43be2d44ad6e27914");//skilfocus umd
 
-  
+            var prereq = library.TryGet<BlueprintFeature>("46fad72f54a33dc4692d3b62eca7bb78#CraftMagicItems(feat=wand)");
+            if (prereq == null)
+                prereq = library.Get<BlueprintFeature>("f43ffc8e3f8ad8a43be2d44ad6e27914");//skilfocus umd
+
+            var icon = Helpers.GetIcon("1b94043744e83494c8a083319e1602f3"); //wandmastery
+            var StaffLikeWandFeature = Helpers.CreateFeature("StaffLikeWandArcaneDiscovery", "Arcane Discovery : Staff-Like Wand", "Similar to using a magic staff, you use your own Intelligence score and relevant feats to set the DC for saves against spells you cast from a wand, and you can use your caster level when activating the power of a wand if it’s higher than the caster level of the wand.",
+                Helpers.getGuid("StaffLikeWandArcaneDiscovery"), icon, FeatureGroup.WizardFeat,
+                Helpers.PrerequisiteFeature(prereq),
+                Helpers.PrerequisiteClassLevel(wizardclass, 5),
+                Helpers.Create<StafflikewandMechanic>()
+                );
+
+            StaffLikeWandFeature.Groups = StaffLikeWandFeature.Groups.AddToArray(FeatureGroup.Feat);
+            library.AddFeats(StaffLikeWandFeature);
+        }
+
+        public class StafflikewandMechanic : OwnedGameLogicComponent<UnitDescriptor>, IInitiatorRulebookHandler<RuleCastSpell>, IRulebookHandler<RuleCastSpell>, IInitiatorRulebookSubscriber
+        {
+            public void OnEventAboutToTrigger(RuleCastSpell evt)
+            {
+                if (!(evt.Spell.SourceItemUsableBlueprint == null) && evt.Spell.SourceItemUsableBlueprint.Type == UsableItemType.Wand)
+                {
+                    evt.Spell.SourceItemUsableBlueprint.CasterLevel = evt.Spell.Caster.GetSpellbook(wizardclass).CasterLevel;
+                    evt.Spell.SourceItemUsableBlueprint.DC = 10 + evt.Spell.SpellLevel + evt.Spell.Caster.Stats.Intelligence.Bonus;
+                }
+            }
+
+
+            public void OnEventDidTrigger(RuleCastSpell evt)
+            {
+
+            }
+
+
+        }
+    }
 }
 

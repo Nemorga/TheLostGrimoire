@@ -74,11 +74,21 @@ namespace thelostgrimoire
 
         static void FixMissingDescriptorOnMagicMissile()
         {
-       
+            var spell = library.Get<BlueprintAbility>("4ac47ddb9fa1eaf43a1b6809980cfbd2");//magic missile
+            var descriptor = Helpers.Create<SpellDescriptorComponent>();
+            descriptor.Descriptor = SpellDescriptor.Force;
+            spell.AddComponent(descriptor);
+
+
+
         }
 
         static void FixMissingDescriptorOnMagicBateringBlast()
         {
+            var spell = library.Get<BlueprintAbility>("0a2f7c6aa81bc6548ac7780d8b70bcbc");//batering blast
+            var descriptor = Helpers.Create<SpellDescriptorComponent>();
+            descriptor.Descriptor = SpellDescriptor.Force;
+            spell.AddComponent(descriptor);
 
         }
 
@@ -101,12 +111,6 @@ namespace thelostgrimoire
 
             DyingWisdomEnchant.AddComponents(newcomponents);
 
-            var testitem = library.Get<BlueprintItemEquipmentNeck>("c4c7997fb14c9ee47a384d76fbc4512a");
-            testitem.Enchantments.Clear();
-            testitem.Enchantments.Add(DyingWisdomEnchant);
-                
-                
-
         }
 
         public class HandleImmortality : ItemEnchantmentLogic
@@ -116,10 +120,7 @@ namespace thelostgrimoire
             
             public override void OnTurnOn()
             {
-                var immortality = library.Get<BlueprintFeature>(Helpers.getGuid("ImmortalityArcaneDiscovery"));
-                var middleage = library.Get<BlueprintFeature>(Helpers.getGuid("MiddleAgeFeature"));
-                var oldage = library.Get<BlueprintFeature>(Helpers.getGuid("OldAgeFeature"));
-                var venerableage = library.Get<BlueprintFeature>(Helpers.getGuid("VenerableAgeFeature"));
+               
                 ModifiableValue stat = base.Owner.Wielder.Stats.GetStat(this.Stat);
                 if (stat != null)
                 {
@@ -185,10 +186,13 @@ namespace thelostgrimoire
                 this.m_Modifier = null;
             }
 
-            
-            
 
-            
+            BlueprintFeature immortality = library.Get<BlueprintFeature>(Helpers.getGuid("ImmortalityArcaneDiscovery"));
+            BlueprintFeature middleage = library.Get<BlueprintFeature>(Helpers.getGuid("MiddleAgeFeature"));
+             BlueprintFeature oldage = library.Get<BlueprintFeature>(Helpers.getGuid("OldAgeFeature"));
+             BlueprintFeature venerableage = library.Get<BlueprintFeature>(Helpers.getGuid("VenerableAgeFeature"));
+
+
             public StatType Stat;
             private ModifiableValue.Modifier m_Modifier;
 
