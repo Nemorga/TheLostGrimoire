@@ -121,8 +121,14 @@ namespace thelostgrimoire
             {
                 if (!(evt.Spell.SourceItemUsableBlueprint == null) && evt.Spell.SourceItemUsableBlueprint.Type == UsableItemType.Wand)
                 {
-                    evt.Spell.SourceItemUsableBlueprint.CasterLevel = evt.Spell.Caster.GetSpellbook(wizardclass).CasterLevel;
-                    evt.Spell.SourceItemUsableBlueprint.DC = 10 + evt.Spell.SpellLevel + evt.Spell.Caster.Stats.Intelligence.Bonus;
+                    var wand = evt.Spell.SourceItemUsableBlueprint;
+                    var caster = evt.Spell.Caster;
+                    var spell = evt.Spell; 
+                    //@@Nemorga : If balance issue, add condition for it to work only with wizars spell or even only spell in spellbook
+                    if (wand.CasterLevel< caster.GetSpellbook(wizardclass).CasterLevel)
+                    wand.CasterLevel = caster.GetSpellbook(wizardclass).CasterLevel;
+                    if(wand.DC < 10 + spell.SpellLevel + caster.Stats.Intelligence.Bonus)
+                    wand.DC = 10 + spell.SpellLevel + caster.Stats.Intelligence.Bonus;
                 }
             }
 
