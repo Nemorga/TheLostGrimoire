@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Pathfinder Kingmaker\Mods\thelostgrimoire\</OutputPath>
+    <OutputPath>D:\SteamLibrary\steamapps\common\Pathfinder Kingmaker\Mods\thelostgrimoire\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
