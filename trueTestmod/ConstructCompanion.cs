@@ -210,7 +210,7 @@ namespace thelostgrimoire
             GolemConstructor.Groups = GolemConstructor.Groups.AddToArray(FeatureGroup.Feat);
 
             Main.library.AddFeats(GolemConstructor);
-
+            Main.library.AddFeats("8c3102c2ff3b69444b139a98521a4899", GolemConstructor);
 
             //Disable Taking animal companion if you have the golem constructor feat
             var noconstructprereq = Helpers.PrerequisiteNoFeature(GolemConstructor);
