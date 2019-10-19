@@ -164,7 +164,7 @@ namespace thelostgrimoire
         public override string GetUIText()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(string.Format("{0}: {1}", UIStrings.Instance.Tooltips.CharacterLevel, "Only at level"+ this.Level));
+            stringBuilder.Append(string.Format("{0}: {1}", "Only at level", this.Level));
             return stringBuilder.ToString();
         }
 

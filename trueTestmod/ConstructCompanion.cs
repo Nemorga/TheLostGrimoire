@@ -70,34 +70,20 @@ namespace thelostgrimoire
             Main.ApplyPatch(typeof(DisallowAddingFeatureToConstructPatch), "Do not add Animal companion feature to golem ");
             Main.ApplyPatch(typeof(DisallowSharingFeaturewithConstructPatch), "Do not share animal companion feature with golem");
             Main.ApplyPatch(typeof(DisableSteamDragonAnimationPatch), "Make the steam dragon not move while iddle"); 
-            BlueprintFeature cannyobserver = Main.library.Get<BlueprintFeature>("68a23a419b330de45b4c3789649b5b41");
+            var cannyobserver = Helpers.GetIcon("4093d5a0eb5cae94e909eb1e0e1a6b36");
 
-            //BlueprintFeature animalDomainProgressionSecondary = Main.library.Get<BlueprintFeature>("f13eb6be93dd5234c8126e5384040009");
-            //BlueprintFeature animalDomainProgression = Main.library.Get<BlueprintFeature>("23d2f87aa54c89f418e68e790dba11e0");
-            //BlueprintFeature animaldomainprogressiondruid = Main.library.Get<BlueprintFeature>("a75ad4936e099c54881cf553e2110703");
-            //BlueprintArchetype sacredHuntsmasterArchetype = Main.library.Get<BlueprintArchetype>("46eb929c8b6d7164188eb4d9bcd0a012");
-            //BlueprintCharacterClass inquisitorClass = Main.library.Get<BlueprintCharacterClass>("f1a70d9e1b0b41e49874e1fa9052a1ce");
+           
             BlueprintCharacterClass wizardclass = Main.library.Get<BlueprintCharacterClass>("ba34257984f4c41408ce1dc2004e342e");
 
             BlueprintFeature AnimalCompanionEmptyCompanion = Main.library.Get<BlueprintFeature>("472091361cf118049a2b4339c4ea836a");
-            //BlueprintFeature AnimalCompanionFeatureBear = Main.library.Get<BlueprintFeature>("f6f1cdcc404f10c4493dc1e51208fd6f");
-            //BlueprintFeature AnimalCompanionFeatureBoar = Main.library.Get<BlueprintFeature>("afb817d80b843cc4fa7b12289e6ebe3d");
-            /*BlueprintFeature AnimalCompanionFeatureCentipede = Main.library.Get<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46");
-            BlueprintFeature AnimalCompanionFeatureDog = Main.library.Get<BlueprintFeature>("f894e003d31461f48a02f5caec4e3359");
-            BlueprintFeature AnimalCompanionFeatureEkun = Main.library.Get<BlueprintFeature>("e992949eba096644784592dc7f51a5c7");
-            BlueprintFeature AnimalCompanionFeatureElk = Main.library.Get<BlueprintFeature>("aa92fea676be33d4dafd176d699d7996");
-            BlueprintFeature AnimalCompanionFeatureLeopard = Main.library.Get<BlueprintFeature>("2ee2ba60850dd064e8b98bf5c2c946ba");
-            BlueprintFeature AnimalCompanionFeatureMammoth = Main.library.Get<BlueprintFeature>("6adc3aab7cde56b40aa189a797254271");
-            BlueprintFeature AnimalCompanionFeatureMonitor = Main.library.Get<BlueprintFeature>("ece6bde3dfc76ba4791376428e70621a");
-            BlueprintFeature AnimalCompanionFeatureSmilodon = Main.library.Get<BlueprintFeature>("126712ef923ab204983d6f107629c895");
-            BlueprintFeature AnimalCompanionFeatureWolf = Main.library.Get<BlueprintFeature>("67a9dc42b15d0954ca4689b13e8dedea");*/
+            
 
             
 
 
 
             //creating Construct Companion Rank
-            var constructrank = Helpers.CreateFeature("ContstructCompanionRank", "Construct Companion", "Construct Companion", Helpers.getGuid("ConstructCompanionRank"), cannyobserver.Icon, FeatureGroup.None);
+            var constructrank = Helpers.CreateFeature("ContstructCompanionRank", "Construct Companion", "Construct Companion", Helpers.getGuid("ConstructCompanionRank"), cannyobserver, FeatureGroup.None);
             constructrank.HideInUI = true;
             constructrank.Ranks = 20;
             constructrank.IsClassFeature = true;
@@ -165,7 +151,7 @@ namespace thelostgrimoire
             //Creating an Abilities to heal the golem 
             var persuasion = Main.library.Get<BlueprintFeature>("1621be43793c5bb43be55493e9c45924");
             var PatchGolemResource = Helpers.CreateAbilityResource("PatchGolemResource", "", "",
-               Helpers.getGuid("PatchGolemResource"), cannyobserver.Icon);
+               Helpers.getGuid("PatchGolemResource"), cannyobserver);
             PatchGolemResource.SetFixedResource(3);
 
             BlueprintAbility PatchGolem = Helpers.CreateAbility("PatchConstruct", "Patch Construct", "Three time per day per day as a full round action you can use expensive material to make a quick patch to a damaged " +
@@ -195,7 +181,7 @@ namespace thelostgrimoire
                 "You have learned the art and craft of creating a single type of golem (such as stone golems) and after hours of work, one of the construct is now ready to travel with you." +
                 "Golem are construct and are not living creature: they do not need to drink, sleep or eat and are immune to wide variety of effect.",
                 Helpers.getGuid("ArcaneDiscoveriesgolemconstructor"),
-                cannyobserver.Icon,
+                cannyobserver,
                 FeatureGroup.WizardFeat,
                 Helpers.PrerequisiteClassLevel(wizardclass, 9),
                 Helpers.Create<AddFeatureOnApply>(x => x.Feature = golemCompanionProgression),
@@ -959,7 +945,6 @@ namespace thelostgrimoire
 
           
             // Remove the gaze attack for now and redo it as this version is op
-            //scarcrowgazearea.Fx.AssetId = "8a80d991f3d68e84293e098a6faa7620";
             var Scarecrowgazeattack = Main.library.Get<BlueprintFeature>("97677858a439d4d47af6ecc6a5d678f2");
            
             ScarecrowBase.AddFacts = ScarecrowBase.AddFacts.RemoveFromArray(Scarecrowgazeattack);
@@ -1822,10 +1807,6 @@ namespace thelostgrimoire
             Mobilitybuff.SetBuffFlags(BuffFlags.IsFromSpell);
 
             var Perceptionbuff = Helpers.CreateBuff("PerceptionCodeSkillBuff", "Perception Coded", "", Helpers.getGuid("PerceptionCodeSkillBuff"), perceptionI, fx, null,
-               /* Helpers.CreateAddContextStatBonus(StatType.SkillPerception, ModifierDescriptor.Inherent, ContextValueType.Rank, AbilityRankType.Default),
-                Helpers.CreateContextRankConfig(ContextRankBaseValueType.OwnerSummClassLevelWithArchetype, ContextRankProgression.AsIs, AbilityRankType.Default, 1, 16, 1, 1, false, StatType.SkillPerception, null,
-                new BlueprintCharacterClass[] { Main.library.Get<BlueprintCharacterClass>("fd66bdea5c33e5f458e929022322e6bf") },
-                Main.library.Get<BlueprintArchetype>(Helpers.getGuid("ConstructCompanionArchetype")))*/
                 Helpers.Create<AddClassSkill>(s => s.Skill = StatType.SkillPerception)
 
     );

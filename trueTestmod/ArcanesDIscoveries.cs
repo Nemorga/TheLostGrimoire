@@ -77,7 +77,7 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateResilientIllusions, "Shadows and Light");
             Main.SafeLoad(CreateIdealize, "I am perfect");
             Main.SafeLoad(CreateKnowledgeIsPower, "Quill thrower");
-
+            Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
 
@@ -326,7 +326,34 @@ namespace thelostgrimoire
 
         static void CreateOppositionResearch()
         {
+            var oppositionschoolselection = library.Get<BlueprintFeatureSelection>("6c29030e9fea36949877c43a6f94ff31");
+            var oppositionlist = oppositionschoolselection.AllFeatures;
+            var icon = Helpers.GetIcon("68a23a419b330de45b4c3789649b5b41");
+            BlueprintFeature[] ResearchList = new BlueprintFeature[] { };
+            foreach (BlueprintFeature school in oppositionlist)
+            {
+                SpellSchool spellschool = school.GetComponent<AddOppositionSchool>().School;
 
+                var feat = Helpers.CreateFeature(school.name + "ResearchFeature","Research "+school.Name,school.Description, Helpers.getGuid(school.name + "ResearchFeature"),school.Icon, FeatureGroup.WizardFeat,
+                    Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = school),
+                    Helpers.Create<RemoveOppositionSchool>(s => s.School = spellschool),
+                    Helpers.PrerequisiteFeature(school)
+                    );
+                ResearchList = ResearchList.AddToArray(feat);
+            }
+            var noFeature = Helpers.CreateFeature("OppositionResearchNoFeature", "Opposition Research", "", Helpers.getGuid("OppositionResearchNoFeature"), icon, FeatureGroup.WizardFeat);
+            noFeature.HideInCharacterSheetAndLevelUp = true;
+            noFeature.HideInUI = true;
+            var featselection = Helpers.CreateFeatureSelection("OppositionResearchSelection", "Arcane Discovery : Opposition Research", "Select one Wizard opposition school; preparing spells of this school now only requires one spell slot of the appropriate level instead of two, and you no longer have the –4 Spellcraft penalty for crafting items from that school.\nNOTE: Feat from The Lost Grimoire", Helpers.getGuid("OppositionResearchSelection"), icon, FeatureGroup.WizardFeat,
+                                Helpers.PrerequisiteClassLevel(wizardclass, 9),
+                                Helpers.PrerequisiteFeaturesFromList(oppositionlist, true),
+                                Helpers.Create<PrerequisiteNoFeature>(f => f.Feature = noFeature),
+                                Helpers.Create<AddFeatureOnApply>(a => a.Feature = noFeature)
+                                );
+            featselection.SetFeatures(ResearchList);
+            
+            library.AddFeats(featselection);
+            library.AddFeats("8c3102c2ff3b69444b139a98521a4899", featselection);
         }
         static void CreateKnowledgeIsPower()
         {
@@ -346,7 +373,17 @@ namespace thelostgrimoire
             library.AddFeats("8c3102c2ff3b69444b139a98521a4899", feat);
         }
 
-        
+        public class RemoveOppositionSchool : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnFactActivate()
+            {
+                base.Owner.DemandSpellbook(wizardclass).OppositionSchools.Remove(this.School);
+            }
+
+            
+          
+            public SpellSchool School;
+        }
 
         public class BuffFixerForParty: OwnedGameLogicComponent<UnitDescriptor>
         {

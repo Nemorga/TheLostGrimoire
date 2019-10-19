@@ -67,7 +67,7 @@ namespace thelostgrimoire
             //Load fix
             Main.SafeLoad(FixMissingDescriptorOnMagicMissile, "Add the force descriptor to Magic missile");
             Main.SafeLoad(FixMissingDescriptorOnBateringBlast, "Add the force descriptor to BateringBLast");
-
+            Main.SafeLoad(FixMissingDescriptorOnBaleFulPolymorph, "Add the polymorph descriptor on baleful polymorph");
 
         }
 
@@ -89,6 +89,14 @@ namespace thelostgrimoire
             var descriptor = Helpers.Create<SpellDescriptorComponent>();
             descriptor.Descriptor = SpellDescriptor.Force;
             spell.AddComponent(descriptor);
+
+        }
+
+        static void FixMissingDescriptorOnBaleFulPolymorph()
+        {
+            var spell = library.Get<BlueprintAbility>("3105d6e9febdc3f41a08d2b7dda1fe74");//Balefulpolymorph
+            spell.GetComponent<SpellDescriptorComponent>().Descriptor |= SpellDescriptor.Polymorph;
+
 
         }
 
