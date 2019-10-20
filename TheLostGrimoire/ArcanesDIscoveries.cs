@@ -64,7 +64,7 @@ namespace thelostgrimoire
         static LibraryScriptableObject library => Main.library;
         static BlueprintCharacterClass wizardclass = Main.library.Get<BlueprintCharacterClass>("ba34257984f4c41408ce1dc2004e342e");
 
-
+        
         internal static void Load()
         {
             // Load  feats
@@ -79,7 +79,6 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
-
         }
 
 
