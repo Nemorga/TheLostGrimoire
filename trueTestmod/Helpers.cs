@@ -1503,9 +1503,8 @@ namespace thelostgrimoire
         {
             ReplaceComponent(obj, obj.GetComponent<T>(), replacement);
         }
-
-
-        public static void ReplaceComponent<T>(this BlueprintScriptableObject obj, Action<T> action) where T : BlueprintComponent
+        //@@Nemorga added:
+                public static void ReplaceComponent<T>(this BlueprintScriptableObject obj, Action<T> action) where T : BlueprintComponent
         {
             var replacement = obj.GetComponent<T>().CreateCopy();
             action(replacement);
@@ -1690,7 +1689,7 @@ namespace thelostgrimoire
             return hasBuff;
         }
 
-
+        //@@Noemorga : modified to include the Not option
         public static ContextConditionHasFact CreateConditionHasFact(this BlueprintUnitFact fact, bool not = false)
         {
             var c = Create<ContextConditionHasFact>();
@@ -2079,7 +2078,7 @@ namespace thelostgrimoire
             i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
             return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
         }
-
+        //@@ Nemorga added guid creation
         internal static String getGuid(String s)
         {
             var md5 = MD5.Create();
