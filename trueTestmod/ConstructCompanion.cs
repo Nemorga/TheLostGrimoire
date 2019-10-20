@@ -138,13 +138,6 @@ namespace thelostgrimoire
             //Creating an Ability to resurect Golem ? TODO later only if there is balance problem = pet construct wont resurect on rest and this ability must be used, and can be only 1 time per rest and cost diamond dust
 
 
-            //Create test ability to summon shit and verify that base game unit aren't modified
-            var Testsummon = Main.library.CopyAndAdd<BlueprintAbility>("4b76d32feb089ad4499c3a1ce8e1ac27", "testsummonfortests", Helpers.getGuid("testsummmonfortests"));
-            var Testsummoncompo = Testsummon.ComponentsArray.OfType<AbilityEffectRunAction>().First();
-            Testsummon.ReplaceComponent<AbilityEffectRunAction>(r =>
-            {
-                r.Actions.Actions.OfType<ContextActionSpawnMonster>().First().Blueprint = Main.library.Get<BlueprintUnit>("64589573eba29d541b5240c7485e1aec");
-            });
          
 
 
@@ -179,7 +172,7 @@ namespace thelostgrimoire
                 "Golem Constructor",
                 "Arcane Discovery : Golem Constructor",
                 "You have learned the art and craft of creating a single type of golem (such as stone golems) and after hours of work, one of the construct is now ready to travel with you." +
-                "Golem are construct and are not living creature: they do not need to drink, sleep or eat and are immune to wide variety of effect.",
+                "\nGolem are construct and are not living creature: they do not need to drink, sleep or eat and are immune to wide variety of effect.",
                 Helpers.getGuid("ArcaneDiscoveriesgolemconstructor"),
                 cannyobserver,
                 FeatureGroup.WizardFeat,
@@ -187,7 +180,6 @@ namespace thelostgrimoire
                 Helpers.Create<AddFeatureOnApply>(x => x.Feature = golemCompanionProgression),
                 Helpers.Create<AnimalAllyAdjustToLevelLogic>(),
                 PatchGolem.CreateAddFact(),
-                Testsummon.CreateAddFact(),
                 Helpers.Create<PrerequisitePet>(p => p.NoCompanion = true)
 
             ) ; 
@@ -256,6 +248,7 @@ namespace thelostgrimoire
             SteamDragon.Wisdom = 11;
             SteamDragon.Charisma = 1;
             SteamDragon.Size = Size.Huge;
+            SteamDragon.Speed = 30.Feet();
 
             //Changing those weapons
             BlueprintItemWeapon EmptyHandWeapon = Main.library.Get<BlueprintItemWeapon>("20375b5a0c9243d45966bd72c690ab74");
@@ -351,7 +344,7 @@ namespace thelostgrimoire
             //Creating the Feature
             BlueprintAbility dragonbreathfeature = Main.library.Get<BlueprintAbility>("5e826bcdfde7f82468776b55315b2403");
             BlueprintFeature ConstructCompanionSteamDragonFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "SteamDragonCompanionFeature", Helpers.getGuid("SteamDragonCompanionFeature"));
-            ConstructCompanionSteamDragonFeature.SetNameDescription("Steam Dragon", "Size Medium\nSpeed 20 ft.\nAC +9 natural armor\nAttacks 2 Slam 1d8 \nAbility Scores Str 20, Dex 11, Con --, Int --, Wis 11, Cha 1\n Gains DR/Adamantine with level \nAt 11th level size becomes Large, Str +4, Dex -2,  +6 natural armor and gain the Slow Ability.");
+            ConstructCompanionSteamDragonFeature.SetNameDescription("Steam Dragon", "Size Small\nSpeed 30 ft.\nAC +7 natural armor\nResistance to Fire(20) and weakness to Elecritcity.\nAttacks: 1 Bite 1d4, 2 Claw 1d3, 2 Wing 1d3, 1 Tail 1d4 (All natural weapons are considered Adamantine weapons) \nAbility Scores: Str 14, Dex 15, Con --, Int --, Wis 11, Cha 1 \nAt 11th level size becomes Large, Str +4, Dex +4,  +4 natural armor and gain the Breath Weapon Ability");
             Helpers.SetField(ConstructCompanionSteamDragonFeature, "m_Icon", dragonbreathfeature.Icon);
 
             //Adding the pet
@@ -542,7 +535,7 @@ namespace thelostgrimoire
             //Creating the Feature
             BlueprintAbility icyprison = Main.library.Get<BlueprintAbility>("65e8d23aef5e7784dbeb27b1fca40931");
             BlueprintFeature ConstructCompanionIceGolemFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "IceGolemCompanionFeature", Helpers.getGuid("IceGolemCompanionFeature"));
-            ConstructCompanionIceGolemFeature.SetNameDescription("Ice Golem", "Size Small\nSpeed 30 ft.\nAC +2 natural armor\nAttacks 1 Slam 1d6 +1d8 Cald \nAbility Scores Str 10, Dex 11, Con --, Int --, Wis 11, Cha 1\n Gains DR/Adamantine with level, has the cold touch and Death Throes ability. \nAt 11th level size becomes Large, Str +4,  +4 natural armor and gain the Icy Breath ability.");
+            ConstructCompanionIceGolemFeature.SetNameDescription("Ice Golem", "Size Small\nSpeed 30 ft.\nAC +2 natural armor, Cold Immunity and Fire weakness\nAttacks 1 Slam 1d6 +1d8 Cold \nHas the death throes ability and inflict cold damage to attacking creature\nAbility Scores Str 10, Dex 11, Con --, Int --, Wis 11, Cha 1 \nAt 11th level size becomes Large, Str +4,  +4 natural armor and gain the Icy Breath ability.");
             Helpers.SetField(ConstructCompanionIceGolemFeature, "m_Icon", icyprison.Icon);
 
             //Adding the pet
@@ -628,7 +621,7 @@ namespace thelostgrimoire
             
 
             //Changing the Abilities a bit
-            MudGolem.Strength = 16;
+            MudGolem.Strength = 14;
             MudGolem.Dexterity = 11;
             MudGolem.Wisdom = 11;
             MudGolem.Charisma = 1;
@@ -712,7 +705,7 @@ namespace thelostgrimoire
             //Creating the Feature
             BlueprintAbility slowspell = Main.library.Get<BlueprintAbility>("f492622e473d34747806bdb39356eb89");
             BlueprintFeature ConstructCompanionMudGolemFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "MudGolemCompanionFeature", Helpers.getGuid("MudGolemCompanionFeature"));
-            ConstructCompanionMudGolemFeature.SetNameDescription("Mud Golem", "Size Small\nSpeed 40 ft.\nAC +6 natural armor\nAttacks 1 Slam 1d6 \nAbility Scores Str 16, Dex 11, Con --, Int --, Wis 11, Cha 1 and can Hast itself once a day.\n Gains DR/Adamantine with level  \nAt 11th level size becomes Large, Str +4, Dex -2,  +4 natural armor and gain the Slippery Mud ability.");
+            ConstructCompanionMudGolemFeature.SetNameDescription("Mud Golem", "Size Small\nSpeed 20 ft.\nAC +6 natural armor\nAttacks 1 Slam 1d6 \nAbility Scores Str 14, Dex 11, Con --, Int --, Wis 11, Cha 1 and can Hast itself once a day.\n Gains DR/Adamantine with level  \nAt 11th level size becomes Large, Str +4, Dex -2,  +4 natural armor and gain the Slippery Mud ability.");
             Helpers.SetField(ConstructCompanionMudGolemFeature, "m_Icon", slowspell.Icon);
 
             //Adding the pet
@@ -877,7 +870,7 @@ namespace thelostgrimoire
             //Creating the Feature
             BlueprintFeature camouflagefeature = Main.library.Get<BlueprintFeature>("ff1b5aa8dcc7d7d4d9aa85e1cb3f9e88");
             BlueprintFeature ConstructCompanionStoneGolemFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "StoneGolemCompanionFeature", Helpers.getGuid("StoneGolemCompanionFeature"));
-            ConstructCompanionStoneGolemFeature.SetNameDescription("Stone Golem", "Size Medium\nSpeed 20 ft.\nAC +9 natural armor\nAttacks 1 Slam 1d8 \nAbility Scores Str 20, Dex 11, Con --, Int --, Wis 11, Cha 1\n Gains DR/Adamantine with level \nAt 11th level size becomes Large, Str +4, Dex -2,  +6 natural armor and gain the Slow Ability.");
+            ConstructCompanionStoneGolemFeature.SetNameDescription("Stone Golem", "Size Medium\nSpeed 20 ft.\nAC +9 natural armor\nAttacks 1 Slam 1d8 \nAbility Scores Str 20, Dex 11, Con --, Int --, Wis 11, Cha 1\nAt 11th level size becomes Large, Str +4, Dex -2,  +6 natural armor and gain the Slow Ability.");
             Helpers.SetField(ConstructCompanionStoneGolemFeature, "m_Icon", camouflagefeature.Icon);
 
             //Adding the pet
@@ -1009,7 +1002,7 @@ namespace thelostgrimoire
             //Creating the Feature
             BlueprintAbility fear = Main.library.Get<BlueprintAbility>("d2aeac47450c76347aebbc02e4f463e0");
             BlueprintFeature ConstructCompanionScarecrowFeature = Main.library.CopyAndAdd<BlueprintFeature>("f9ef7717531f5914a9b6ecacfad63f46", "ScarecrowCompanionFeature", Helpers.getGuid("ScarecrowCompanionFeature"));
-            ConstructCompanionScarecrowFeature.SetNameDescription("Scarecrow", "Size Medium\nSpeed 20 ft.\nAC +6 natural armor\nAttacks 1 Slam 1d8 + Fear Touch \nAbility Scores Str 10, Dex 14, Con --, Int --, Wis 11, Cha 14\n Gains DR/Adamantine with level \nAt 11th level size becomes Large, Str +4, Dex +4, Wis +4, Cha +6, +2 natural armor and gain the Fascinating Gaze ability.");
+            ConstructCompanionScarecrowFeature.SetNameDescription("Scarecrow", "Size Medium\nSpeed 20 ft.\nAC +6 natural armor\nAttacks 1 Slam 1d8 + Fear Touch \nAbility Scores Str 10, Dex 14, Con --, Int --, Wis 11, Cha 14\nAt 11th level size becomes Large, Str +4, Dex +4, Wis +4, Cha +6, +2 natural armor and gain the Fascinating Gaze ability.");
             Helpers.SetField(ConstructCompanionScarecrowFeature, "m_Icon", fear.Icon);
 
             //Adding the pet
@@ -1100,7 +1093,7 @@ namespace thelostgrimoire
             var resourcelogic = Helpers.CreateResourceLogic(resource);
 
             //Ability
-            var ability = Helpers.CreateAbility("IceGolemBreathWeaponAbility", "Icy Breath", "An ice golem can breath a 15feet cone of ice as a swift action, the cone deals 3d6 cold damage to every creature inside it or half as much if they succeed at a reflex saving throw.", Helpers.getGuid("IceGolemBreathWeaponAbility"),
+            var ability = Helpers.CreateAbility("IceGolemBreathWeaponAbility", "Icy Breath", "An ice golem can breath a 15feet cone of ice as a swift action, the cone deals 5d6 cold damage to every creature inside it or half as much if they succeed at a reflex saving throw.", Helpers.getGuid("IceGolemBreathWeaponAbility"),
                 Icon, AbilityType.Supernatural, CommandType.Swift, AbilityRange.Projectile, "", "",
                 Helpers.Create<AbilityDeliverProjectile>(p =>
                 {
@@ -1114,7 +1107,7 @@ namespace thelostgrimoire
                 Helpers.Create<AbilityEffectRunAction>(a =>
                 {
                     a.SavingThrowType = SavingThrowType.Reflex;
-                    a.Actions = Helpers.CreateActionList(Helpers.CreateActionDealDamage(Kingmaker.Enums.Damage.DamageEnergyType.Cold, Helpers.CreateContextDiceValue(DiceType.D6, 3), true, true));
+                    a.Actions = Helpers.CreateActionList(Helpers.CreateActionDealDamage(Kingmaker.Enums.Damage.DamageEnergyType.Cold, Helpers.CreateContextDiceValue(DiceType.D6, 5), true, true));
 
                 }),
                 Helpers.Create<ContextCalculateAbilityParamsBasedOnClass>(p =>
@@ -1476,7 +1469,8 @@ namespace thelostgrimoire
 
             var ability = Main.library.CopyAndAdd<BlueprintAbility>(GolembaseSlowAbility, "StoneGolemCompanionSlowAbility", Helpers.getGuid("StoneGolemCompanionSlowAbility"));
             ability.AddComponent(Helpers.CreateResourceLogic(resource));
-            Helpers.SetLocalizedStringField(ability, "m_Description", "A stone golem companion can use a Slow effect as a free action 3 time per day. The effect has a range of 10 feet in a burst centered around the golem, and lasts for 7 rounds. A DC 17 Will save is required to negate the effect. The save DC is Constitution-based.");
+            ability.ActionType = CommandType.Swift;
+            Helpers.SetLocalizedStringField(ability, "m_Description", "A stone golem companion can use a Slow effect as a swift action 3 time per day. The effect has a range of 10 feet in a burst centered around the golem, and lasts for 7 rounds. A DC 17 Will save is required to negate the effect. The save DC is Constitution-based.");
 
             var feature = Helpers.CreateFeature("StoneGolemCompanionSlowFeature", "Stone Golem Slow",
                 "A stone golem companion can use a Slow effect as a free action 3 time per day.The effect has a range of 10 feet in a burst centered around the golem, and lasts for 7 rounds.A DC 17 Will save is required to negate the effect.The save DC is Constitution - based.",

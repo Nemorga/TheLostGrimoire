@@ -1,5 +1,4 @@
-// Copyright (c) 2019 Jennifer Messerly
-// This code is licensed under MIT license (see LICENSE for details)
+
 
 using System;
 using System.Collections.Generic;
