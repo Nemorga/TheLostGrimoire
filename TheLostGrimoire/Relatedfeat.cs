@@ -73,10 +73,10 @@ namespace thelostgrimoire
 
         static void CreateOlderFeat()
         {
-            var icon1 = Helpers.GetIcon("82fbb68796a4e6d4a8b79cf3f14600b7");
-            var icon2 = Helpers.GetIcon("82fbb68796a4e6d4a8b79cf3f14600b7");
-            var icon3 = Helpers.GetIcon("82fbb68796a4e6d4a8b79cf3f14600b7");
-            var icon4 = Helpers.GetIcon("82fbb68796a4e6d4a8b79cf3f14600b7");
+            var icon1 = Helpers.GetIcon("4c7205d859a1e114895e798af383d76a");//Sickening critical
+            var icon2 = Helpers.GetIcon("7c492212d25d8f04fbd43eb99d780b1e");//Exhausting critical
+            var icon3 = Helpers.GetIcon("12c1b556df3b667458ae200bfb38ccb8");//tiring critical
+            var icon4 = Helpers.GetIcon("787e56055e3ef864d9c78a3ec21e56be");//Blinding critical
 
             var MiddleAgeMalus = Helpers.CreateFeature("MiddleAgeMalusFeature", "Old Age", "", Helpers.getGuid("MiddleAgeMalusFeature"), null, FeatureGroup.None,
                 Helpers.CreateAddStatBonus(StatType.Strength, -1, ModifierDescriptor.Racial),

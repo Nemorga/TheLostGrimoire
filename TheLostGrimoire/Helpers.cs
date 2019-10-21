@@ -406,8 +406,14 @@ namespace thelostgrimoire
                 var school = spell.School;
                 var specialistList = specialistSchoolList.Value[(int)school];
                 specialistList?.SpellsByLevel[level].Spells.Add(spell);
-                var thassilonianList = thassilonianSchoolList.Value[(int)school];
-                thassilonianList?.SpellsByLevel[level].Spells.Add(spell);
+
+                for (int i = 0; i < thassilonianSchoolList.Value.Length; i++)
+                {
+                    if (thassilonianOpposedSchools.Value[i] != null && !thassilonianOpposedSchools.Value[i].Contains(school))
+                    {
+                        thassilonianSchoolList.Value[i]?.SpellsByLevel[level].Spells.Add(spell);
+                    }
+                }
             }
         }
 
@@ -440,6 +446,22 @@ namespace thelostgrimoire
             result[(int)SpellSchool.Transmutation] = library.Get<BlueprintSpellList>("f3a8f76b1d030a64084355ba3eea369a");
             return result;
         });
+
+
+        static readonly Lazy<SpellSchool[][]> thassilonianOpposedSchools = new Lazy<SpellSchool[][]>(() =>
+        {
+            var result = new SpellSchool[(int)SpellSchool.Universalist + 1][];
+
+            result[(int)SpellSchool.Abjuration] = new SpellSchool[] { SpellSchool.Evocation, SpellSchool.Necromancy };
+            result[(int)SpellSchool.Conjuration] = new SpellSchool[] { SpellSchool.Evocation, SpellSchool.Illusion };
+            result[(int)SpellSchool.Enchantment] = new SpellSchool[] { SpellSchool.Necromancy, SpellSchool.Transmutation };
+            result[(int)SpellSchool.Evocation] = new SpellSchool[] { SpellSchool.Abjuration, SpellSchool.Conjuration };
+            result[(int)SpellSchool.Illusion] = new SpellSchool[] { SpellSchool.Conjuration, SpellSchool.Transmutation };
+            result[(int)SpellSchool.Necromancy] = new SpellSchool[] { SpellSchool.Abjuration, SpellSchool.Enchantment };
+            result[(int)SpellSchool.Transmutation] = new SpellSchool[] { SpellSchool.Enchantment, SpellSchool.Illusion };
+            return result;
+        });
+
 
         public static void FixDomainSpell(this BlueprintAbility spell, int level, string spellListId)
         {
