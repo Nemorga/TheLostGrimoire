@@ -21,14 +21,14 @@ Also, respect to the base material wasn't always the focus of this mod, rather I
 - [Staff-Like Wand](https://www.d20pfsrd.com/classes/core-classes/wizard/arcane-discoveries/arcane-discoveries-paizo/staff-like-wand/) : If you use the Craft Magic Item mod then the prerequisite should be Craft Wand, if not it will be Skill Focus(UMD)
 
 **New Feat** 
-- Older Hero : Allow you to make an older character as per pnp [rules](https://www.d20pfsrd.com/alignment-description/description/#Age), except it's a feat(For balance reason: warrior will never take this option and it is really advantageous for caster)). 
+- Older Hero : Allow you to make an older character as per pnp [rules](https://www.d20pfsrd.com/alignment-description/description/#Age), except it's a feat(For balance reason: warrior will never take this option and it is really advantageous for caster). 
 The amulet of dying wisdom have been modified to not stack with this feat.
 
 **Golem Companion**
 
 This is the part of the mod that is heavily adapted and depart from the pnp rule: 
 1) You don't have to build the golem: selecting the feat give you a permanent pet, like animal companion. The construct companion gain ability and power as they gain level (Gainnig Strength, Ac, DR, Attack and Saves Bonus, and Also the spell immunity at higher level). 
-2) The construct don't have their pnp spell vulnerability/advantage (special effects that happen when specifique spell are casted at them). It is again for balance reason: the IA wouldn't know how to use the vulnerability so it would only be an advantage for the wizard and be a bit much to powerful in certain case.
+2) The construct don't have their pnp spell vulnerability/advantage (special effects that happen when specifique spell are casted at them). It is again for balance reason: the AI wouldn't know how to use the vulnerability so it would only be an advantage for the wizard and be a bit much to powerful in certain case.
 3) The pet level is tied to your wizard level 
 4) The pet upgrade like animal companion, but at level 11
 5) I tried to follow pnp rule when I could for the construct stats but often deviated from it for balance reason (A level 9 wizard with a by pnp rule Steam Dragon would be op). 
@@ -87,5 +87,5 @@ Also at one point I'll add the mod content to some npc (when it make sense and d
 - To Holic92: I borrowed some tiny bit of their fix to EA and their advice were a great help
 - To SpaceHamster : Without their help this mod wouldn't exist, period. Especially for dealing with modified asset.
 - To Hsinyuhcan: for their great help and because without their support I'd never started modding in the first place
-- To everyone(minus one) on the Kingmaker Discord, you guys are the best. 
+- To everyone on the Kingmaker Discord, you guys are the best. 
 
