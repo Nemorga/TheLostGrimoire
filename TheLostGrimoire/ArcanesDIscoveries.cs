@@ -362,7 +362,7 @@ namespace thelostgrimoire
                 Helpers.PrerequisiteClassLevel(wizardclass, 1),
                 Helpers.Create<AddContextStatBonus>(s => { s.Stat = StatType.AdditionalCMB; s.Descriptor = ModifierDescriptor.UntypedStackable; s.Multiplier = 1; s.Value = Helpers.CreateContextValue(AbilityRankType.StatBonus); }),
                 Helpers.Create<AddContextStatBonus>(s => { s.Stat = StatType.AdditionalCMD; s.Descriptor = ModifierDescriptor.UntypedStackable; s.Multiplier = 1; s.Value = Helpers.CreateContextValue(AbilityRankType.StatBonus); }),                
-                Helpers.Create<AbilityScoreCheckBonus>(s => { s.Stat = StatType.AdditionalCMD; s.Descriptor = ModifierDescriptor.UntypedStackable; s.Bonus = Helpers.CreateContextValue(AbilityRankType.StatBonus); }),
+                Helpers.Create<AbilityScoreCheckBonus>(s => { s.Stat = StatType.Strength; s.Descriptor = ModifierDescriptor.UntypedStackable; s.Bonus = Helpers.CreateContextValue(AbilityRankType.StatBonus); }),
                 Helpers.CreateContextRankConfig(ContextRankBaseValueType.StatBonus, ContextRankProgression.AsIs,AbilityRankType.StatBonus, null, null, 0, 0, false, StatType.Intelligence), 
                 Helpers.Create<RecalculateOnStatChange>(r => r.Stat = StatType.Intelligence)
                 );

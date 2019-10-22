@@ -3,6 +3,6 @@
   "DisplayName": "The Lost Grimoire",
   "Author": "Nemorga",
   "Version": "0.5",
-  "ManagerVersion": "0.18.0",
+  "ManagerVersion": "0.20.0",
   "EntryMethod": "thelostgrimoire.Main.Load"
 }
