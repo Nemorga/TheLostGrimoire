@@ -25,7 +25,8 @@ using Kingmaker.ElementsSystem;
 using Kingmaker.Enums;
 using Kingmaker.Enums.Damage;
 using Kingmaker.Items;
-
+using Kingmaker;
+using Kingmaker.GameModes;
 using Kingmaker.Items.Slots;
 using Kingmaker.PubSubSystem;
 using Kingmaker.RuleSystem;
@@ -77,6 +78,8 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateIdealize, "I am perfect");
             Main.SafeLoad(CreateKnowledgeIsPower, "Quill thrower");
             Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
+            Main.SafeLoad(CreateStewardBeyond, "Mouhahaha");
+
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
         }
@@ -371,6 +374,162 @@ namespace thelostgrimoire
             library.AddFeats("8c3102c2ff3b69444b139a98521a4899", feat);
         }
 
+        static void CreateStewardBeyond()
+        {
+            var dispel = library.Get<BlueprintAbility>("92681f181b507b34ea87018e8f7a528a");
+            var icon = dispel.Icon;
+            var fx = new PrefabLink();
+            fx.AssetId = "3eaac4c26129c2848ab8482706a420b2";
+            var name = "StewardOfTheGreatBeyond";
+
+            var effectbuff = Helpers.CreateBuff(name+"EffectBuff", "plop","", Helpers.getGuid(name+"EffectBuff"), icon, null, null, 
+                Helpers.Create<CounterSummonSpell>(a => a.type = CounterSummonSpell.source.feat)
+                );
+            
+            effectbuff.SetBuffFlags(BuffFlags.HiddenInUi);
+            
+            var area = Helpers.Create<BlueprintAbilityAreaEffect>(a => a.name = name+"Area");
+            area.AffectEnemies = true;
+            area.AggroEnemies = false;
+            area.IgnoreSleepingUnits = false;
+            area.Fx = fx;
+            area.Shape = AreaEffectShape.Cylinder;
+            area.Size = 30.Feet();
+            area.SpellResistance = false;
+            var areacompos = new BlueprintComponent[] {
+                Helpers.CreateAreaEffectRunAction(
+                    //Enter
+                    Helpers.CreateConditional(Helpers.Create<ContextConditionIsEnemy>(),
+                        Helpers.CreateApplyBuff(effectbuff, Helpers.CreateContextDuration(1, DurationRate.Rounds), false, false, false, true, true),null
+                    ),
+                    //exit 
+                    Helpers.CreateConditional(Helpers.CreateConditionsCheckerAnd(Helpers.CreateConditionHasFact(effectbuff), Helpers.Create<ContextConditionIsEnemy>()),
+                        Helpers.Create<ContextActionRemoveBuff>(r => r.Buff = effectbuff)), 
+                    //move
+                    null,
+                    Helpers.CreateConditional(Helpers.Create<ContextConditionIsEnemy>(),
+                        Helpers.CreateApplyBuff(effectbuff, Helpers.CreateContextDuration(1, DurationRate.Rounds), false, false, false, true, true),null
+                    )
+
+                    )
+            };
+            area.SetComponents(areacompos);
+            library.AddAsset(area, Helpers.getGuid(area.name));
+
+            var buff = Helpers.CreateBuff(name+"Buff", "Steward of the Great Beyond", "Whenever a creature attempts to summon a creature within 30 feet of you, you may attempt to block the effect",Helpers.getGuid(name+"Buff"), icon, null, null,
+                Helpers.Create<AddAreaEffect>(a => {
+                    a.AreaEffect = area;
+                    
+                }));
+            var ressource = Helpers.CreateAbilityResource(name+"Resource", "","", Helpers.getGuid(name + "Resource"), icon);
+            ressource.SetIncreasedByLevelStartPlusDivStep(1, 15, 1, 5, 1, 1, 0, new BlueprintCharacterClass[] { wizardclass }, null);
+            var ability = Helpers.CreateActivatableAbility(name+"Ability", "Steward of the Great Beyond", "Whenever a creature attempts to use a teleportation effect or summon a creature within 30 feet of you, you may attempt to block the effect.Make an opposed caster level check(1d20 + caster level) as an immediate action.If the check succeeds, the spell or effect fails and is wasted; otherwise, it is unaffected.",
+                Helpers.getGuid(name+"Ability"), icon, buff, AbilityActivationType.Immediately,CommandType.Free, null, 
+                Helpers.CreateActivatableResourceLogic(ressource, ActivatableAbilityResourceLogic.ResourceSpendType.Never)
+                );
+            
+            var feat = Helpers.CreateFeature(name+"Feature", "Arcane Discovery : Steward of the Great Beyond", "Whenever a creature attempts to use a teleportation effect or summon a creature within 30 feet of you, you may attempt to block the effect. Make an opposed caster level check (1d20 + caster level) as an immediate action. If the check succeeds, the spell or effect fails and is wasted; otherwise, it is unaffected. You can use this ability once per day plus one additional time for every 5 wizard levels you possess beyond 10th.", Helpers.getGuid(name+"Feature"), icon,
+                FeatureGroup.WizardFeat,
+                ability.CreateAddFact(),
+                Helpers.PrerequisiteClassLevel(wizardclass, 9),
+                ressource.CreateAddAbilityResource()
+                );
+
+            feat.Groups = feat.Groups.AddToArray(FeatureGroup.Feat);
+            library.AddFeats(feat);
+            library.AddFeats("8c3102c2ff3b69444b139a98521a4899", feat);
+
+
+
+        }
+
+     
+        public class CounterSummonSpell: BuffLogic, IInitiatorRulebookHandler<RuleCastSpell>
+        {
+            public void OnEventAboutToTrigger(RuleCastSpell evt)
+            {
+                bool flag = false;
+                switch (type)
+                {
+                    case source.feat:
+                        flag = evt.Spell.Blueprint.SpellDescriptor == SpellDescriptor.Summoning ? true : false;
+                        break;
+                    case source.spell:
+                        flag = true;
+                        break;
+                }
+                
+                if (evt.Initiator.IsInCombat && Game.Instance.CurrentMode != GameModeType.Cutscene && !Buff.Context.MaybeCaster.CombatState.HasCooldownForCommand(CommandType.Swift) && flag)
+                {
+                    var CasterCheck = 0;
+                    var BuffCheck = 0;
+                    var buffroll = RulebookEvent.Dice.D20;
+                    var Casterroll = RulebookEvent.Dice.D20;
+                    var SpellCL = evt.Context.Params.CasterLevel;
+                    var buffCL = 0;
+
+                    var difficulty = 10+ evt.Spell.SpellLevel;
+
+                    if (Buff.Context.MaybeCaster.Descriptor.HasFact(Improved) && Buff.Context.SpellLevel > evt.Spell.SpellLevel)
+                    {
+                        SpellCL = 0;
+                        difficulty = 0;
+                    }
+
+
+                    if (type == source.feat)
+                    {
+                        buffCL = Buff.Context.MaybeCaster.Descriptor.GetSpellbook(wizardclass).CasterLevel;
+                        CasterCheck = SpellCL + Casterroll;
+                        BuffCheck = buffCL + buffroll;
+                    }
+                    else if (type == source.spell)
+                    {
+
+                        buffCL = Buff.Context.Params.CasterLevel;
+                        CasterCheck = SpellCL + difficulty;
+                        if (Teamwork == 2)
+                            bonus += 2;
+                        buffroll = RulebookEvent.Dice.D20;
+                        BuffCheck = buffCL + buffroll + bonus;
+                    }
+
+                    if (BuffCheck > CasterCheck)
+                    {
+                        var caseimproved = difficulty == 0 ? "(improved counterspell)" : "";
+                        evt.SpellFailureChance = 100;
+                        var message = new Kingmaker.UI.Log.LogDataManager.LogItemData(evt.Initiator.CharacterName + "'s " + evt.Spell.Name + " blocked by " + Buff.Context.MaybeCaster.CharacterName + "\nCaster Level Check = " + BuffCheck + " vs " + CasterCheck+caseimproved, Kingmaker.Blueprints.Root.Strings.GameLog.GameLogStrings.Instance.DefaultColor, null, Kingmaker.UI.Log.PrefixIcon.LeftArrow);
+                        Game.Instance.UI.BattleLogManager.LogView.AddLogEntry(message);
+                    }
+                    else
+                    {
+                        
+                        var message = new Kingmaker.UI.Log.LogDataManager.LogItemData(Buff.Context.MaybeCaster.CharacterName+" failed to block "+ evt.Initiator.CharacterName + "'s " + evt.Spell.Name + "\nCaster Level Check = " + BuffCheck + " vs " + CasterCheck, Kingmaker.Blueprints.Root.Strings.GameLog.GameLogStrings.Instance.DefaultColor, null, Kingmaker.UI.Log.PrefixIcon.LeftArrow);
+                        Game.Instance.UI.BattleLogManager.LogView.AddLogEntry(message);
+
+                    }
+                    Buff.Context.MaybeCaster.CombatState.Cooldown.SwiftAction = 6f;
+
+                    if(type == source.feat)
+                    { 
+                    Buff.Context.MaybeCaster.Descriptor.Resources.Spend(library.Get<BlueprintAbilityResource>(Helpers.getGuid("StewardOfTheGreatBeyondResource")), 1);
+                    
+                    if (Buff.Context.MaybeCaster.Descriptor.Resources.GetResourceAmount(library.Get<BlueprintAbilityResource>(Helpers.getGuid("StewardOfTheGreatBeyondResource"))) < 1)
+                        Buff.Context.MaybeCaster.Descriptor.ActivatableAbilities.GetFact(library.Get<BlueprintActivatableAbility>(Helpers.getGuid("StewardOfTheGreatBeyondAbility"))).Deactivate();
+                    }
+                    if (type == source.spell)
+                        Buff.Remove();
+                }
+            }
+
+            public void OnEventDidTrigger(RuleCastSpell evt)
+            { }
+            public int Teamwork = 0;
+            public BlueprintFeature Improved = library.Get<BlueprintFeature>(Helpers.getGuid("ImprovedCounterspellfeature"));
+            public source type;
+            public int bonus = 0;
+            public enum source { feat, spell };
+        }
         public class RemoveOppositionSchool : OwnedGameLogicComponent<UnitDescriptor>
         {
             public override void OnFactActivate()
@@ -459,13 +618,11 @@ namespace thelostgrimoire
 
             public void OnPostLoad()
             {
-                Log.Write("Entering OnPostload");
 
             }
 
             public override void OnTurnOn()
             {
-                Log.Write("Starting TurnOn");
                 
                 
 

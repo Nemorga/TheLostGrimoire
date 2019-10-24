@@ -64,14 +64,19 @@ namespace thelostgrimoire
         {
             // Load  feats
             Main.SafeLoad(CreateOlderFeat, "More aged hero");
-
+            Main.SafeLoad(CreateImprovedCounterspell, "no more cl");
 
 
 
         }
+        static void CreateImprovedCounterspell()
+        {
+            var icon = Helpers.GetIcon("cad1b9175e8c0e64583432a22134d33c");
+            var feat = Helpers.CreateFeature("ImprovedCounterspellfeature", "Improved Counterspell", "When counterspelling, you automatically succeed if the targeted spell level is inferior to your counterspell level.", Helpers.getGuid("ImprovedCounterspellfeature"), icon, FeatureGroup.Feat);
+            library.AddFeats(feat);
+        }
 
-
-        static void CreateOlderFeat()
+            static void CreateOlderFeat()
         {
             var icon1 = Helpers.GetIcon("4c7205d859a1e114895e798af383d76a");//Sickening critical
             var icon2 = Helpers.GetIcon("7c492212d25d8f04fbd43eb99d780b1e");//Exhausting critical
