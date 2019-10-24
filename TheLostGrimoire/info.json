@@ -4,5 +4,6 @@
   "Author": "Nemorga",
   "Version": "0.6",
   "ManagerVersion": "0.20.0",
-  "EntryMethod": "thelostgrimoire.Main.Load"
+  "EntryMethod": "thelostgrimoire.Main.Load",
+  "Repository": "https://raw.githubusercontent.com/Nemorga/TheLostGrimoire/master/TheLostGrimoire/Repository.json"
 }
