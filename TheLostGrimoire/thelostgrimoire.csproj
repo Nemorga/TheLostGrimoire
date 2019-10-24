@@ -97,6 +97,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NewSpell.cs" />
     <Compile Include="Fixandchange.cs" />
     <Compile Include="Relatedfeat.cs" />
     <Compile Include="ConstructCompanion.cs" />
