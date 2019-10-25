@@ -114,9 +114,8 @@ namespace thelostgrimoire
 
             var abilitylesser = Helpers.CreateAbility(name+"LesserAbility", "Lesser Counterspell", "This spell allows the caster to see glimpses of the future, immediately learning what spell their target will cast, if any, before the start of their next round.\nOnce the caster learn the nature of this spell, they automatically spend a standard action to prepare a counterspell and start accumulating magical energy to disrupt the future spell.\n"+
                 "Then, when the target finally cast their spell, the caster release their counterspell as an immediate action and must make a Caster level check against a DC equal to 11 + the spell level +the target caster level.\nIf the check is successful, the target's spell is blocked and wasted.", 
-                Helpers.getGuid(name+"LesserAbility"), icon, AbilityType.Spell, CommandType.Move, AbilityRange.Medium, "1 round", "",
+                Helpers.getGuid(name+"LesserAbility"), icon, AbilityType.Spell, CommandType.Standard, AbilityRange.Medium, "1 round", "",
                 Helpers.CreateRunActions(Helpers.CreateApplyBuff(bufflesser, Helpers.CreateContextDuration(1, DurationRate.Rounds), true, false, false)),
-                Helpers.Create<SpendAction>(a => a.Action = CommandType.Standard),
                 Helpers.Create<AbilitySpawnFx>(f =>
                  {
                      f.PrefabLink = fx2;
@@ -125,7 +124,7 @@ namespace thelostgrimoire
                  }),
                Helpers.CreateSpellComponent(SpellSchool.Divination)
                 );
-            abilitylesser.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
+            abilitylesser.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Immediate;
             abilitylesser.CanTargetPoint = false;
             abilitylesser.CanTargetSelf = false;
             abilitylesser.CanTargetEnemies = true;
@@ -133,15 +132,15 @@ namespace thelostgrimoire
             abilitylesser.AvailableMetamagic = Metamagic.Heighten | Metamagic.Reach;
             abilitylesser.EffectOnEnemy = AbilityEffectOnUnit.Harmful;
             abilitylesser.EffectOnAlly = AbilityEffectOnUnit.Harmful;
-            abilitylesser.HasFastAnimation = true;
+            
+            Helpers.SetField(abilitylesser, "m_IsFullRoundAction", true);
             abilitylesser.ResourceAssetIds = new string[] { fx.AssetId, fx2.AssetId };
 
             var ability = Helpers.CreateAbility(name + "Ability", "Counterspell", "This spell is similar to Lesser Counterspell except that the caster level check receive a bonus of +2 to their caster level check.\n\n" +
                 "LESSER COUNTERSPELL :\nThis spell allows the caster to see glimpses of the future, immediately learning what spell their target will cast, if any, before the start of their next round.\nOnce the caster learn the nature of this spell, they automatically spend a standard action to prepare a counterspell and start accumulating magical energy to disrupt the future spell.\n" +
-                "Then, when the target finally cast their spell, the caster release their counterspell as an immediate action and must make a Caster level check against a DC equal to 11 + the spell level +the target caster level.\nIf the check is successful, the target's spell is blocked and wasted.", Helpers.getGuid(name + "Ability"), icon2, AbilityType.Spell, CommandType.Move, AbilityRange.Medium, "1 round", "",
+                "Then, when the target finally cast their spell, the caster release their counterspell as an immediate action and must make a Caster level check against a DC equal to 11 + the spell level +the target caster level.\nIf the check is successful, the target's spell is blocked and wasted.", Helpers.getGuid(name + "Ability"), icon2, AbilityType.Spell, CommandType.Standard, AbilityRange.Medium, "1 round", "",
 
                 Helpers.CreateRunActions(Helpers.CreateApplyBuff(buff, Helpers.CreateContextDuration(1, DurationRate.Rounds), true, false, false)),
-                Helpers.Create<SpendAction>(a => a.Action = CommandType.Standard),
                 Helpers.Create<AbilitySpawnFx>(f =>
                 {
                     f.PrefabLink = fx2;
@@ -150,7 +149,7 @@ namespace thelostgrimoire
                 }),
                Helpers.CreateSpellComponent(SpellSchool.Divination)
                 );
-            ability.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
+            ability.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Immediate;
             ability.CanTargetPoint = false;
             ability.CanTargetSelf = false;
             ability.CanTargetEnemies = true;
@@ -158,17 +157,16 @@ namespace thelostgrimoire
             ability.AvailableMetamagic = Metamagic.Heighten | Metamagic.Reach;
             ability.EffectOnEnemy = AbilityEffectOnUnit.Harmful;
             ability.EffectOnAlly = AbilityEffectOnUnit.Harmful;
-            ability.HasFastAnimation = true;
+            Helpers.SetField(ability, "m_IsFullRoundAction", true);
             ability.ResourceAssetIds = new string[] { fx.AssetId, fx2.AssetId };
 
 
 
-            var abilitygreater = Helpers.CreateAbility(name + "GreaterAbility", "Greater Counterspell", "This spell is similar to Lesser Counterspell except that the caster level check receive a bonus of +2 to their caster level check.\n\n" +
+            var abilitygreater = Helpers.CreateAbility(name + "GreaterAbility", "Greater Counterspell", "This spell is similar to Lesser Counterspell except that the caster level check receive a bonus of +5 to their caster level check.\n\n" +
                 "LESSER COUNTERSPELL :\nThis spell allows the caster to see glimpses of the future, immediately learning what spell their target will cast, if any, before the start of their next round.\nOnce the caster learn the nature of this spell, they automatically spend a standard action to prepare a counterspell and start accumulating magical energy to disrupt the future spell.\n" +
-                "Then, when the target finally cast their spell, the caster release their counterspell as an immediate action and must make a Caster level check against a DC equal to 11 + the spell level +the target caster level.\nIf the check is successful, the target's spell is blocked and wasted.", Helpers.getGuid(name + "GreaterAbility"), icon3, AbilityType.Spell, CommandType.Move, AbilityRange.Medium, "1 round", "",
+                "Then, when the target finally cast their spell, the caster release their counterspell as an immediate action and must make a Caster level check against a DC equal to 11 + the spell level +the target caster level.\nIf the check is successful, the target's spell is blocked and wasted.", Helpers.getGuid(name + "GreaterAbility"), icon3, AbilityType.Spell, CommandType.Standard, AbilityRange.Medium, "1 round", "",
 
                 Helpers.CreateRunActions(Helpers.CreateApplyBuff(buffgreater, Helpers.CreateContextDuration(1, DurationRate.Rounds), true, false, false)),
-                Helpers.Create<SpendAction>(a => a.Action = CommandType.Standard),
                 Helpers.Create<AbilitySpawnFx>(f =>
                 {
                     f.PrefabLink = fx2;
@@ -177,7 +175,7 @@ namespace thelostgrimoire
                 }),
                Helpers.CreateSpellComponent(SpellSchool.Divination)
                 );
-            abilitygreater.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
+            abilitygreater.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Immediate;
             abilitygreater.CanTargetPoint = false;
             abilitygreater.CanTargetSelf = false;
             abilitygreater.CanTargetEnemies = true;
@@ -185,7 +183,7 @@ namespace thelostgrimoire
             abilitygreater.AvailableMetamagic = Metamagic.Heighten | Metamagic.Reach;
             abilitygreater.EffectOnEnemy = AbilityEffectOnUnit.Harmful;
             abilitygreater.EffectOnAlly = AbilityEffectOnUnit.Harmful;
-            abilitygreater.HasFastAnimation = true;
+            Helpers.SetField(abilitygreater, "m_IsFullRoundAction", true);
             abilitygreater.ResourceAssetIds = new string[] { fx.AssetId, fx2.AssetId };
 
             abilitylesser.AddToSpellList(Helpers.wizardSpellList, 1);
@@ -226,6 +224,9 @@ namespace thelostgrimoire
                 abilitygreater.AddToSpellList(shamanlist, 7);
 
             }
+            Helpers.AddSpell(abilitylesser);
+            Helpers.AddSpell(ability);
+            Helpers.AddSpell(abilitygreater);
 
 
         }
@@ -233,14 +234,15 @@ namespace thelostgrimoire
         public class SpendAction : BlueprintComponent, IAbilityOnCastLogic
         {
 
-            public void OnCast(AbilityExecutionContext Context)
+            public void  OnCast(AbilityExecutionContext Context)
             {
-                Log.Write("Turning on");
+                Log.Write("on cast");
                 switch(Action)
                 {
                     case CommandType.Standard:
                         Context.Caster.Descriptor.Unit.CombatState.Cooldown.StandardAction = 6f;
                         break;
+
                     case CommandType.Move:
                         Context.Caster.Descriptor.Unit.CombatState.Cooldown.MoveAction = 6f;
                         break;
@@ -248,13 +250,17 @@ namespace thelostgrimoire
                     case CommandType.Swift:
                         Context.Caster.Descriptor.Unit.CombatState.Cooldown.SwiftAction = 6f;
                         break;
+
                     case CommandType.Free:
                         break;
 
                 }
         }
 
-            public CommandType Action; 
+          
+
+            public CommandType Action;
+            
             
 
             
