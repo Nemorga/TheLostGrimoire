@@ -225,6 +225,8 @@ namespace thelostgrimoire
 
             }
             Helpers.AddSpell(abilitylesser);
+            Helpers.AddSpell(ability);
+            Helpers.AddSpell(abilitygreater);
 
 
         }
