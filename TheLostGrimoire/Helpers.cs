@@ -2018,6 +2018,58 @@ namespace thelostgrimoire
             {
                 Log.Write($"Error: spell {spell.name} is missing metamagic (should have heighten, quicken at least)");
             }
+            //add to all parametrized features
+            BlueprintFeature[] spell_specializations = Main.library.Get<BlueprintFeatureSelection>("fe67bc3b04f1cd542b4df6e28b6e0ff5").AllFeatures;
+            spell_specializations = spell_specializations.AddToArray(Main.library.Get<BlueprintParametrizedFeature>("f327a765a4353d04f872482ef3e48c35"), //spell specialization first
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("4a2e8388c2f0dd3478811d9c947bebfb"), //Arcane Bloodline Sorc
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("c66e61dea38f3d8479a54eabec20ac99"), //Arcane Bloodline Magus
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("ea0ce0aeef8c9e04eadc1ed766455178"), //Feyspeaker
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("bcd757ac2aeef3c49b77e5af4e510956"), //MT Inqui 1
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("4869109802e135e45af20741f9056fd5"), //MT Inqui 2
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("e3a9ed781f9093341ac1073f59018e3f"), //MT Inqui 3
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("7668fd94a4f943e4f85ee025a0140434"), //MT Inqui 4
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("d3d8b837733879848b549189f02f535c"), //MT Inqui 5
+                                                                     Main.library.Get<BlueprintParametrizedFeature>("0495474b37304054eaf016016d0002b4")  //MT Inqui 6
+                                                                    );
+            //add other mod paramtrized feature 
+            String[] othermodid = new string[] {
+                "ed15a168d00546fda9536236fccc509c",//Shaman Enlightenment 1
+                "09dc118c66244cc5a790201d44f69b14",//Shaman Enlightenment 2
+                "7baf6a04cc9f4fc594c29eb424b92901",//Shaman Enlightenment 3
+                "9abf6b18ced448aabbba544ee718a890",//Shaman Enlightenment 4
+                "071508bf96854b179fb0c26321203daa",//Shaman Enlightenment 5
+                "00e50ea543324105a44eeabeb2de4e63",//Shaman Enlightenment 6
+                "e404a8059f5b470bb46fdf748a614890",//Shaman Enlightenment 7
+                "31f704d28c9a4a06a3d23026b4ecad76",//Shaman Enlightenment 8
+                "13b815157bbf4a3fbe7b18e4d9c05b9b",//Shaman Enlightenment 9
+
+                "8c583bf870b84dc898651168c6ed2292",//MT Hunter 1.1
+                "ae318a5570234dc7a430b86baedb7cf6",//MT Hunter 1.2
+                "b5a851d04b0b4908b4b8b715e79ab117",//MT Hunter 2.1
+                "62f4de5f7e1149dea845870281c06e95",//MT Hunter 2.2
+                "d441c012581a48b18fb0207fb7217a68",//MT Hunter 3.1
+                "b2480623264f4609aefd4c12e0206d65",//MT Hunter 3.2
+                "a9665cb5569c4bf5bcdc4f410a05d376",//MT Hunter 4.1
+                "85251a1976a94af4b3bc01bdac72a012",//MT Hunter 4.2
+                "813e2261ae2048898af769540d543a8b",//MT Hunter 5.1
+                "75b77072d6ae4f9fbc6a8548a28b7ff8",//MT Hunter 5.2
+                "79277255d6c342ce8b335c363bde0aa3",//MT Hunter 6.1
+                "b8854a25d64c44d1843669c72bb11656"//MT Hunter 6.2
+
+
+            };
+            foreach(String id in othermodid)
+            {
+                var paramfeat = Main.library.TryGet<BlueprintParametrizedFeature>(id);
+                if (paramfeat != null)
+                    spell_specializations = spell_specializations.AddToArray(paramfeat);
+                
+            }
+
+            foreach (BlueprintParametrizedFeature ss in spell_specializations)
+            {
+                ss.BlueprintParameterVariants = ss.BlueprintParameterVariants.AddToArray(spell);
+            }
         }
 
         public static void AddSpellAndScroll(this BlueprintAbility spell, String scrollIconId, int variant = 0)
