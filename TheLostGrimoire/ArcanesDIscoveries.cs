@@ -56,6 +56,7 @@ using Kingmaker.Utility;
 using Kingmaker.Controllers.Projectiles;
 using Harmony12;
 using Newtonsoft.Json;
+using UnityEngine;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 
 namespace thelostgrimoire
@@ -79,7 +80,7 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateKnowledgeIsPower, "Quill thrower");
             Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
             Main.SafeLoad(CreateStewardBeyond, "Mouhahaha");
-
+            
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
         }
@@ -443,7 +444,8 @@ namespace thelostgrimoire
 
         }
 
-     
+       
+
         public class CounterSummonSpell: BuffLogic, IInitiatorRulebookHandler<RuleCastSpell>
         {
             public void OnEventAboutToTrigger(RuleCastSpell evt)
@@ -452,7 +454,7 @@ namespace thelostgrimoire
                 switch (type)
                 {
                     case source.feat:
-                        flag = evt.Spell.Blueprint.SpellDescriptor == SpellDescriptor.Summoning ? true : false;
+                        flag = evt.Spell.Blueprint.SpellDescriptor.HasFlag(SpellDescriptor.Summoning) ? true : false;
                         break;
                     case source.spell:
                         flag = true;
@@ -862,11 +864,12 @@ namespace thelostgrimoire
         private static class UseCasterLevelWithwand
         {
 
-            static void Postfix(AbilityData __instance, AbilityParams __result)
+            static void Postfix(AbilityData __instance, AbilityParams __result, BlueprintItemEquipment item)
             {
                 var Stafflikewandfeature = Main.library.Get<BlueprintFeature>(Helpers.getGuid("StaffLikeWandArcaneDiscovery"));
-
-              if (__instance.SourceItemUsableBlueprint.Type == UsableItemType.Wand && __instance.Caster.HasFact(Stafflikewandfeature))
+                BlueprintItemEquipmentUsable Source = item as BlueprintItemEquipmentUsable;
+                var Sourcetype = Source != null ? Source.Type : UsableItemType.Other;
+                if (Sourcetype == UsableItemType.Wand && __instance.Caster.HasFact(Stafflikewandfeature))
                {
                     if(__result.CasterLevel < __instance.Caster.GetSpellbook(wizardclass).CasterLevel)
                     __result.CasterLevel = __instance.Caster.GetSpellbook(wizardclass).CasterLevel;
