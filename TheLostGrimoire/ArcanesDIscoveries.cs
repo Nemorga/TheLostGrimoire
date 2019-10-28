@@ -450,6 +450,7 @@ namespace thelostgrimoire
         {
             public void OnEventAboutToTrigger(RuleCastSpell evt)
             {
+                
                 bool flag = false;
                 switch (type)
                 {
@@ -537,6 +538,7 @@ namespace thelostgrimoire
             public override void OnFactActivate()
             {
                 base.Owner.DemandSpellbook(wizardclass).OppositionSchools.Remove(this.School);
+                
             }
 
             

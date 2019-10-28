@@ -44,8 +44,9 @@ namespace thelostgrimoire
                 SafeLoad(RelatedFeat.Load, "Other feat");
                 SafeLoad(ArcaneDiscoveries.Load, "Other Arcane Discoveries");
                 SafeLoad(Fixandchange.Load, "Collection of feat and change");
-                SafeLoad(NewSpell.Load, "");
-              
+                SafeLoad(NewSpell.Load, "New spell");
+                SafeLoad(Archetype.Load, "New Archetype");
+
 
 
             }
