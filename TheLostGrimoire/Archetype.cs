@@ -63,6 +63,7 @@ using Harmony12;
 using Newtonsoft.Json;
 using UnityEngine;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
+using Kingmaker.UnitLogic.Commands;
 namespace thelostgrimoire
 {
     class Archetype
@@ -74,6 +75,7 @@ namespace thelostgrimoire
         static BlueprintFeatureSelection SpecialistSchoolSelection = library.Get<BlueprintFeatureSelection>("5f838049069f1ac4d804ce0862ab5110");
         static BlueprintSpellbook Wizardbook = library.Get<BlueprintSpellbook>("5a38c9ac8607890409fcb8f6342da6f4");
         static BlueprintFeature BondedItem = library.Get<BlueprintFeature>("2fb5e65bd57caa943b45ee32d825e9b9");
+        static BlueprintFeatureSelection wizardfeats = library.Get<BlueprintFeatureSelection>("8c3102c2ff3b69444b139a98521a4899");
         //SpecialistSchoolSelection
         static BlueprintSpellList wizardlist = Main.library.Get<BlueprintSpellList>("ba0401fdeb4062f40a7aa95b6f07fe89");
         static BlueprintSpellList ThassAbjurationList = library.Get<BlueprintSpellList>("280dd5167ccafe449a33fbe93c7a875e");
@@ -103,12 +105,24 @@ namespace thelostgrimoire
             // Load  feats
             Main.SafeLoad(CreateSpellBinder, "Mage Domain");
             Main.SafeLoad(CreatePoleiheiraAdherent, "Travel Far");
-
+            
             //needed patch
 
         }
 
+        
 
+        public class AddArchetypeOnFeatureApply : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnFactActivate()
+            {
+                base.Owner.Progression.AddArchetype(this.CharacterClass, this.Archetype);
+                
+            }
+            public BlueprintCharacterClass CharacterClass;
+            public BlueprintArchetype Archetype;
+
+        }
         static void CreatePoleiheiraAdherent()
         {
             //needed thing
@@ -386,6 +400,33 @@ namespace thelostgrimoire
             var spellspecialisation = library.Get<BlueprintParametrizedFeature>("f327a765a4353d04f872482ef3e48c35");
             var levlspellX = spellspecialisation.BlueprintParameterVariants;//Spell list from spellspecialisation
 
+            //creating copy of the list
+            foreach (BlueprintAbility spell in levlspellX)
+            {
+               bool Iswizardspell = spell.GetComponents<SpellListComponent>().Any((SpellListComponent p) => p.SpellList == wizardlist && p.SpellLevel > 0);
+                if(Iswizardspell && !spell.IsFullRoundAction)
+                {
+                    if(spell.HasVariants)
+                    {
+                        foreach(BlueprintAbility Variant in spell.Variants)
+                        {
+                            var varcopy = library.CopyAndAdd<BlueprintAbility>(Variant, Variant.name+"BoundCopy", Helpers.getGuid(Variant.name + "BoundCopy"));
+                            varcopy.ActionType = CommandType.Standard;
+                            Helpers.SetField(varcopy, "m_IsFullRoundAction", true);
+                            
+                        }
+                    }
+                    else
+                    {
+                        var copy = library.CopyAndAdd<BlueprintAbility>(spell, spell.name + "BoundCopy", Helpers.getGuid(spell.name + "BoundCopy"));
+                        copy.ActionType = CommandType.Standard;
+                        Helpers.SetField(copy, "m_IsFullRoundAction", true);
+                        
+                    }
+
+                }
+            }
+
             //Starting progression
             var SpellBinderProgression = Helpers.CreateProgression(name + "Progression", "", "", Helpers.getGuid(name + "Progression"), icon, FeatureGroup.WizardFeat);
             SpellBinderProgression.IsClassFeature = true;
@@ -499,39 +540,22 @@ namespace thelostgrimoire
             {
                 BlueprintAbility[] SpellSpontaneous = { null, null, null, null, null, null, null, null, null, null };
                 BlueprintAbility blueprintAbility = (!(base.Param != null)) ? null : (base.Param.Value.Blueprint as BlueprintAbility);
-                
                 if(blueprintAbility.HasVariants)
                 {
                     var Hasvariant = blueprintAbility.Variants;
                     foreach(BlueprintAbility variant in Hasvariant)
                     {
-                        
-                        var variantcopy = library.TryGet<BlueprintAbility>(Helpers.getGuid("SpellBinder" + variant.name + base.Owner.Unit.UniqueId)); //copy exist already ?
-                        if(variantcopy == null)
-                        {
-                            var variantcopyfirst = library.CopyAndAdd<BlueprintAbility>(variant.AssetGuid, "SpellBinder" + variant.name + base.Owner.Unit.UniqueId, Helpers.getGuid("SpellBinder" + variant.name + base.Owner.Unit.UniqueId));
-                            variantcopyfirst.ActionType = CommandType.Standard;
-                            Helpers.SetField(variantcopyfirst, "m_IsFullRoundAction", true);
-                            variantcopy = variantcopyfirst;
-                        }
+                        var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid(variant.name+ "BoundCopy"));
                         BlueprintAbility[] SpellSpontaneousmany = { null, null, null, null, null, null, null, null, null, null };
-                        SpellSpontaneousmany[SpellLevel] = variantcopy;
+                        SpellSpontaneousmany[SpellLevel] = copy != null ? copy : variant;
                         Owner.DemandSpellbook(wizardclass).AddSpellConversionList(SpellSpontaneousmany);
                     }
 
                 }
                 else
                 {
-                    var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid("SpellBinder" + blueprintAbility.name + base.Owner.Unit.UniqueId));//copy exist already ?
-
-                    if (copy == null)
-                    {
-                        var copyfirst = library.CopyAndAdd<BlueprintAbility>(blueprintAbility.AssetGuid, "SpellBinder" + blueprintAbility.name + base.Owner.Unit.UniqueId, Helpers.getGuid("SpellBinder" + blueprintAbility.name + base.Owner.Unit.UniqueId));
-                        copyfirst.ActionType = CommandType.Standard;
-                        Helpers.SetField(copyfirst, "m_IsFullRoundAction", true);
-                        copy = copyfirst;
-                    }
-                    SpellSpontaneous[SpellLevel] = copy;
+                    var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid(blueprintAbility.name + "BoundCopy"));
+                    SpellSpontaneous[SpellLevel] = copy != null? copy: blueprintAbility;
                     Owner.DemandSpellbook(wizardclass).AddSpellConversionList(SpellSpontaneous);
                 }
 
@@ -547,9 +571,9 @@ namespace thelostgrimoire
             {
                 
             }
+           
 
-
-
+            
 
             public int SpellLevel;
 

@@ -2,7 +2,7 @@
   "Id": "TheLostGrimoire",
   "DisplayName": "The Lost Grimoire",
   "Author": "Nemorga",
-  "Version": "0.6.4",
+  "Version": "0.6.4a",
   "ManagerVersion": "0.20.0",
   "EntryMethod": "thelostgrimoire.Main.Load",
   "Repository": "https://raw.githubusercontent.com/Nemorga/TheLostGrimoire/master/TheLostGrimoire/Repository.json"

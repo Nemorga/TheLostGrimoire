@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Kingmaker.Blueprints;
@@ -79,10 +80,12 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateIdealize, "I am perfect");
             Main.SafeLoad(CreateKnowledgeIsPower, "Quill thrower");
             Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
-            Main.SafeLoad(CreateStewardBeyond, "Mouhahaha");
+            Main.SafeLoad(CreateStewardBeyond, "watching like a watcher");
+            
             
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
+          
         }
 
 
@@ -538,7 +541,6 @@ namespace thelostgrimoire
             public override void OnFactActivate()
             {
                 base.Owner.DemandSpellbook(wizardclass).OppositionSchools.Remove(this.School);
-                
             }
 
             
@@ -777,6 +779,7 @@ namespace thelostgrimoire
 
         public class OtherListAffinityLogic : RuleInitiatorLogicComponent<RuleCalculateAbilityParams>
         {
+            
             public override void OnEventAboutToTrigger(RuleCalculateAbilityParams evt)
             {
                 if (evt.Spell.IsInSpellList(Helpers.wizardSpellList) && evt.Spell.IsInSpellList(otherlist))
@@ -882,6 +885,8 @@ namespace thelostgrimoire
 
 
         }
+
+       
 
     }
 }
