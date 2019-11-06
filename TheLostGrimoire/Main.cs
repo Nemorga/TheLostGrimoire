@@ -24,9 +24,13 @@ namespace thelostgrimoire
 {
     public class Main
     {
+
+        //Assembly GetAssemblyByName(string name) { return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == name).DefinedTypes; }
+
         [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary", new Type[0])]
         static class LibraryScriptableObject_LoadDictionary_Patch
         {
+            [Harmony12.HarmonyPriority(Harmony12.Priority.Low)]
             static void Postfix(LibraryScriptableObject __instance)
             {
                 var self = __instance;

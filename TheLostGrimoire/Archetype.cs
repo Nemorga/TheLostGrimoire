@@ -105,24 +105,58 @@ namespace thelostgrimoire
             // Load  feats
             Main.SafeLoad(CreateSpellBinder, "Mage Domain");
             Main.SafeLoad(CreatePoleiheiraAdherent, "Travel Far");
-            
+            Main.SafeLoad(AddTurnbasedInterface, "Take your turn");
             //needed patch
 
         }
 
         
-
-        public class AddArchetypeOnFeatureApply : OwnedGameLogicComponent<UnitDescriptor>
+        static void AddTurnbasedInterface()
         {
-            public override void OnFactActivate()
-            {
-                base.Owner.Progression.AddArchetype(this.CharacterClass, this.Archetype);
-                
-            }
-            public BlueprintCharacterClass CharacterClass;
-            public BlueprintArchetype Archetype;
-
+            var diviner = library.Get<BlueprintFeature>("54d21b3221ea82a4d90d5a91b7872f3d");//diviner base feature
+            diviner.AddComponent(Helpers.Create<TurnbasedInterface>());
         }
+       
+        public class TurnbasedInterface: RuleInitiatorLogicComponent<RuleInitiativeRoll>, IUnitInitiativeHandler
+        {
+
+            public void HandleUnitRollsInitiative(RuleInitiativeRoll rule)
+            {
+                if(rule.Initiator == Owner.Unit)
+                {
+                    Log.Write("Init check, Yeah!!!!");
+                    var main = AccessTools.TypeByName("TurnBased.Main, TurnBased");
+                    if (main != null) //Turnbased is installed
+                    {
+                        Log.Write("TB is enabled, Yeah!!!!");
+                        var mod = AccessTools.Field(main, "Mod").GetValue(null);
+                        var core = AccessTools.Property(mod.GetType(), "Core").GetValue(mod);
+                        var isEnabled = (bool)AccessTools.Property(core.GetType(), "Enabled").GetValue(core);
+
+                        if (isEnabled)
+                        {
+                            rule.Initiator.CombatState.Cooldown.Initiative = oldCD -6f;
+
+                        }
+
+
+                    }
+                }
+            }
+
+            public override void OnEventAboutToTrigger(RuleInitiativeRoll evt)
+            {
+               
+            }
+
+            
+            public override void OnEventDidTrigger(RuleInitiativeRoll evt)
+            {
+                oldCD = evt.Initiator.CombatState.Cooldown.Initiative;
+            }
+            public float oldCD; 
+        }
+
         static void CreatePoleiheiraAdherent()
         {
             //needed thing
@@ -261,7 +295,6 @@ namespace thelostgrimoire
             Arcanebondselection.Features = Arcanebondselection.Features.AddToArray(BondedBook);
             SpecialistSchoolSelection.Features = SpecialistSchoolSelection.Features.AddToArray(archetypeselection);
             SpecialistSchoolSelection.AllFeatures = SpecialistSchoolSelection.AllFeatures.AddToArray(archetypeselection);
-
 
             
         }
@@ -578,8 +611,47 @@ namespace thelostgrimoire
             public int SpellLevel;
 
         }
+        public class AddArchetypeOnFeatureApply : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnFactActivate()
+            {
+                base.Owner.Progression.AddArchetype(this.CharacterClass, this.Archetype);
 
-    
+
+            }
+            public BlueprintCharacterClass CharacterClass;
+            public BlueprintArchetype Archetype;
+
+        }
+        public class SchoolUtility
+        {
+           public static void AddSchoolVariant(BlueprintProgression originalschool, BlueprintProgression newschool)
+            {
+                var Selection = library.TryGet<BlueprintFeatureSelection>(Helpers.getGuid(originalschool.name + "Selection"));
+                if (Selection == null)
+                {
+                    var NewSlection = Helpers.CreateFeatureSelection(originalschool.name + "Selection", originalschool.Name, "", Helpers.getGuid(originalschool.name + "Selection"), originalschool.Icon, FeatureGroup.SpecialistSchool);
+                    NewSlection.Features = NewSlection.Features.AddToArray(originalschool);
+                    NewSlection.AllFeatures = NewSlection.AllFeatures.AddToArray(originalschool);
+                    Selection = NewSlection;
+                }
+
+                Selection.Features = Selection.Features.AddToArray(newschool);
+                Selection.AllFeatures = Selection.AllFeatures.AddToArray(newschool);
+                if (SpecialistSchoolSelection.Features.HasItem(originalschool))
+                {
+                    SpecialistSchoolSelection.Features = SpecialistSchoolSelection.Features.RemoveFromArray(originalschool);
+                    SpecialistSchoolSelection.Features = SpecialistSchoolSelection.Features.AddToArray(Selection);
+                }
+                if (SpecialistSchoolSelection.AllFeatures.HasItem(originalschool))
+                {
+                    SpecialistSchoolSelection.AllFeatures = SpecialistSchoolSelection.AllFeatures.RemoveFromArray(originalschool);
+                    SpecialistSchoolSelection.AllFeatures = SpecialistSchoolSelection.AllFeatures.AddToArray(Selection);
+                }
+            }
+
+        }
 
     }
+   
 }

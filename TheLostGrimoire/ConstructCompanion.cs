@@ -115,7 +115,7 @@ namespace thelostgrimoire
             addFeatures.Add(Helpers.LevelEntry(18, constructrank));
             addFeatures.Add(Helpers.LevelEntry(19, constructrank));
             addFeatures.Add(Helpers.LevelEntry(20, constructrank));
-
+            
             golemCompanionProgression.LevelEntries = addFeatures.ToArray();
             //Creating feature list 
             BlueprintFeature MudGolemCompanion = AddMudGolemCompanion();
