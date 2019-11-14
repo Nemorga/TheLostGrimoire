@@ -535,7 +535,7 @@ namespace thelostgrimoire
 
             setMaxAmount(resource, amount);
         }
-
+        public static void SetWizardBaseResource(this BlueprintAbilityResource resource) => resource.SetIncreasedByStat(3, StatType.Intelligence);
         public static void SetIncreasedByStat(this BlueprintAbilityResource resource, int baseValue, StatType stat)
         {
             var amount = getMaxAmount(resource);
@@ -698,6 +698,7 @@ namespace thelostgrimoire
         public static BlueprintSpellList wizardSpellList, magusSpellList, druidSpellList, clericSpellList, paladinSpellList, inquisitorSpellList, alchemistSpellList, bardSpellList;
 
         public static BlueprintItemWeapon touchWeapon;
+        public static BlueprintItemWeapon rayWeapon;
         public static List<BlueprintUnit> ennemies = new List<BlueprintUnit>();
         public static List<BlueprintWeaponType> weaponTypes = new List<BlueprintWeaponType>();
         public static readonly List<BlueprintAbility> allSpells = new List<BlueprintAbility>();
@@ -755,7 +756,7 @@ namespace thelostgrimoire
             bardSpellList = library.Get<BlueprintSpellList>("25a5013493bdcf74bb2424532214d0c8");
 
             touchWeapon = library.Get<BlueprintItemWeapon>("bb337517547de1a4189518d404ec49d4"); // TouchItem
-
+            rayWeapon = library.Get<BlueprintItemWeapon>("f6ef95b1f7bb52b408a5b345a330ffe8"); //ray weapon
             bloodlineSelection = library.Get<BlueprintFeatureSelection>("24bef8d1bee12274686f6da6ccbc8914");
 
             ghostTouch = library.Get<BlueprintWeaponEnchantment>("47857e1a5a3ec1a46adf6491b1423b4f");
@@ -1297,6 +1298,7 @@ namespace thelostgrimoire
             var a = Create<AbilityResourceLogic>();
             a.IsSpendResource = spend;
             a.RequiredResource = resource;
+            
             return a;
         }
 
@@ -1615,7 +1617,17 @@ namespace thelostgrimoire
         static readonly FastSetter setCustomProgression = Helpers.CreateFieldSetter<ContextRankConfig>("m_CustomProgression");
         static readonly Type customProgressionItemType = Harmony12.AccessTools.Inner(typeof(ContextRankConfig), "CustomProgressionItem");
 
-
+        public static PrefabLink GetFx(string fxguid)
+        {
+            var fx = new PrefabLink();
+                fx.AssetId = fxguid;
+            return fx;
+        }
+        public static PrefabLink GetBuffFx(string buffguid, bool onremove = false)
+        {
+             BlueprintBuff buff = Main.library.Get<BlueprintBuff>(buffguid);
+            return onremove ? buff.FxOnRemove : buff.FxOnStart;
+        }
         public static AbilityTargetsAround CreateAbilityTargetsAround(Feet radius, TargetType targetType, ConditionsChecker conditions = null, Feet spreadSpeed = default(Feet), bool includeDead = false)
         {
             var around = Create<AbilityTargetsAround>();

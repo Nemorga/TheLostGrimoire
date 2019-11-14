@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Kingmaker.Blueprints;
@@ -79,11 +80,185 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateIdealize, "I am perfect");
             Main.SafeLoad(CreateKnowledgeIsPower, "Quill thrower");
             Main.SafeLoad(CreateOppositionResearch, "Mouhahaha");
-            Main.SafeLoad(CreateStewardBeyond, "Mouhahaha");
+            Main.SafeLoad(CreateStewardBeyond, "watching like a watcher");
+            Main.SafeLoad(CreateSplitSLot, "Yo!");
             
             //needed patch
             Main.ApplyPatch(typeof(UseCasterLevelWithwand), "enlarge your wand");
+            Main.ApplyPatch(typeof(ManageSpellPerDayForSplitSlot), "enlarge your spell slot");
+          
         }
+
+        static void CreateSplitSLot()//This method is a complete mess but it works. I'm lazy so I'm not cleaning now, if you're lucky I'll comment it.
+        {
+            string name = "SplitSlot";
+            string Name = "Split Slot";
+            string desc = "When you prepare spells you may treat any one of your open spell slots as if it were two spell slots that were two spell levels lower. For all purposes, the two lower-level slots are treated as that lower level.\n";
+            string longdesc = "Once per day when you prepare spells, you may treat any one of your open spell slots as if it were two spell slots that were two spell levels lower. For example, a 9th-level Wizard can split a 5th-level slot into two 3rd-level slots, preparing fireball and lightning bolt in those 3rd-level slots. For all purposes, the two lower-level slots are treated as that lower level (so the split 5th-level slot used for a fireball has a DC as if it were in a normal 3rd-level slot). This discovery has no effect on cantrips or 1st and 2nd–level spells. ";
+            Sprite[] icons = new Sprite[] {
+            Helpers.GetIcon("92681f181b507b34ea87018e8f7a528a"),    
+            Helpers.GetIcon("e5dcf71e02e08fc448d9745653845df1"),
+            Helpers.GetIcon("c9165b50a298ba346bd1b34f8d9cb9f9"),
+            Helpers.GetIcon("5e6fe442c2b4be24f969505cef85f61b"),
+            Helpers.GetIcon("541bb8d595532ec419343b7a93cdb449"),
+            Helpers.GetIcon("0933849149cfc9244ac05d6a5b57fd80"),
+            Helpers.GetIcon("d7d18ce5c24bd324d96173fdc3309646")
+            };
+            BlueprintBuff[] buffs = new BlueprintBuff[7];
+            BlueprintAbility[] abilities = new BlueprintAbility[7];
+            BlueprintFeature[] features = new BlueprintFeature[7];
+            ContextAction[] RemoveBuff = new ContextAction[7];
+            
+            StringBuilder[] buildedstring = new StringBuilder[7];
+            var Globaleresource = Helpers.CreateAbilityResource(name + "resource", Name + " resource", "", Helpers.getGuid(name + "resource"), icons[0]);
+            Globaleresource.SetFixedResource(1);
+            var addresource = Helpers.CreateAddAbilityResource(Globaleresource);
+            Sprite icon;
+            var fx = Helpers.GetFx("c4d861e816edd6f4eab73c55a18fdadd");
+            for (int i = 0; i < 7; i++)
+            {
+                icon = icons[i];
+                buildedstring[i] = new StringBuilder();
+                buildedstring[i].Append(string.Format("This ability split a {0}th level slot, loosing it for the day, and create two {1}th level spells.", i + 3, i + 1));
+                
+
+                buffs[i] = Helpers.CreateBuff(name + "buff" + i, Name, "", Helpers.getGuid(name + "buff" + i), icon, fx, fx,
+                    Helpers.Create<ReinitializeSlot>(s => { s.SplitedSlot = i + 3; s.AddedSlot = i + 1; })
+                    );
+                buffs[i].SetBuffFlags(BuffFlags.StayOnDeath);
+                int num = (i + 3);
+                abilities[i] = Helpers.CreateAbility(name +"ability"+i , Name + ": Spell Level " +num, desc + buildedstring[i], Helpers.getGuid(name + "ability" + i), icon, AbilityType.Special, CommandType.Free, AbilityRange.Personal, "", "",
+                    
+                    Helpers.CreateResourceLogic(Globaleresource, true)
+                    );
+                abilities[i].ResourceAssetIds = new string[] { fx.AssetId };
+                features[i] = Helpers.CreateFeature(name + "Feature" + i, Name, desc, Helpers.getGuid(name + "Feature" + i), icon, FeatureGroup.WizardFeat, abilities[i].CreateAddFact());
+                features[i].HideInCharacterSheetAndLevelUp = true;
+                features[i].HideInUI = true;
+                
+                
+                RemoveBuff[i] = Helpers.Create<ContextActionRemoveBuff>(r => { r.Buff = buffs[i]; r.ToCaster = true; });
+                
+
+
+            }
+            
+            for (int i = 0; i < 7; i++)
+            {
+                GameAction[] abilitiesactions = new GameAction[] {Helpers.CreateApplyBuff(buffs[i], Helpers.CreateContextDuration(1, DurationRate.Days), false, false, true, false, true)};
+                foreach (ContextAction action in RemoveBuff)
+                {
+                    if (i != RemoveBuff.IndexOf(action))
+                    {
+                        abilitiesactions = abilitiesactions.AddToArray(action);
+                    }
+
+
+                }
+                abilities[i].AddComponent(Helpers.CreateRunActions(abilitiesactions));
+                abilities[i].AddComponent(Helpers.Create<AbilityCasterHasSlot>(s => s.Slot = i + 3));
+            }
+
+
+
+            var removeresource = Helpers.CreateAbilityResource(name + "removeresource", "", "", Helpers.getGuid(name + "removeresource"), icons[0]);
+            removeresource.SetFixedResource(1);
+            var removeresourcelogic = Helpers.CreateResourceLogic(removeresource);
+            var addremoveresource = Helpers.CreateAddAbilityResource(removeresource);
+            addremoveresource.RestoreAmount = true;
+
+            RemoveBuff = RemoveBuff.AddToArray(Helpers.Create<RestoreOtherResource>(c => { c.Resource = Globaleresource; }));
+            var removeability = Helpers.CreateAbility(name + "removeABility", "Unsplit Slot", "Immeditly restore your spell slot to their normal state.", Helpers.getGuid(name + "removeABility"), icons[6], AbilityType.Special, CommandType.Free, AbilityRange.Personal,
+                "", "",
+                Helpers.CreateRunActions(RemoveBuff),
+                removeresourcelogic
+                
+                );
+            removeability.CanTargetSelf = true;
+
+            var feat = Helpers.CreateFeature(name + "Feat", "Arcane Discovery: "+Name, longdesc, Helpers.getGuid(name + "Feat"), icons[6], FeatureGroup.WizardFeat,
+                removeability.CreateAddFact(), 
+                Helpers.PrerequisiteClassLevel(wizardclass, 5),
+                addresource,
+                addremoveresource
+                );
+            feat.Groups = feat.Groups.AddToArray(FeatureGroup.Feat);
+
+            for(int i = 0; i< 7; i++)
+            {
+                
+
+                feat.AddComponent(Helpers.Create<AddFeatureOnClassLevel>(c =>
+                {
+                    c.BeforeThisLevel = false;
+                    c.Class = wizardclass;
+                    c.Level = ((i + 3) * 2) - 1;
+                    c.Feature = features[i];
+
+                }
+                ));
+            }
+
+            library.AddFeats(feat);
+            library.AddFeats("8c3102c2ff3b69444b139a98521a4899", feat);
+
+        }
+
+        public class AbilityCasterHasSlot: BlueprintComponent, IAbilityCasterChecker
+        {
+            public bool CorrectCaster(UnitEntityData caster)
+            {
+                return caster.Descriptor.DemandSpellbook(wizardclass).GetSpellsPerDay(Slot) > 0;
+            }
+
+            public string GetReason()
+            {
+                return LocalizedTexts.Instance.Reasons.OutOfSpellsPerDay;
+            }
+
+           public int Slot; 
+
+        }
+
+        public class RestoreOtherResource: ContextAction
+        {
+            public override string GetCaption()
+            {
+                return "restore resource";
+            }
+            public override void RunAction()
+            {
+                UnitEntityData maybeCaster = base.Context.MaybeCaster;
+                if (maybeCaster == null)
+                {
+                    UberDebug.LogError("Caster is missing", Array.Empty<object>());
+                    return;
+                }
+                maybeCaster.Descriptor.Resources.Restore(Resource, amount);
+            }
+            public BlueprintAbilityResource Resource;
+            public int amount = 1;
+
+        }
+        public class ReinitializeSlot : BuffLogic
+        {
+            public override void OnFactActivate()
+            {
+                base.Owner.DemandSpellbook(wizardclass).CalcSlotsLimit(AddedSlot, SpellSlotType.Common);
+                base.Owner.DemandSpellbook(wizardclass).CalcSlotsLimit(SplitedSlot, SpellSlotType.Common);
+            }
+
+            public override void OnFactDeactivate()
+            {
+                base.Owner.DemandSpellbook(wizardclass).CalcSlotsLimit(AddedSlot, SpellSlotType.Common);
+                base.Owner.DemandSpellbook(wizardclass).CalcSlotsLimit(SplitedSlot, SpellSlotType.Common);
+            }
+
+            public int SplitedSlot;
+            public int AddedSlot;
+
+        }
+
 
 
         static void CreateImmortality()
@@ -257,7 +432,7 @@ namespace thelostgrimoire
                 Helpers.getGuid("FeralSpeechFeature"), icon, FeatureGroup.WizardFeat,
                 Helpers.PrerequisiteClassLevel(wizardclass, 5),
                 ability.CreateAddFact(),
-                
+                Helpers.PrerequisiteNoFeature(upgrade),
                 Helpers.Create<AddFeatureOnClassLevel>(c => 
                 {
                     c.Class = Helpers.GetClass("ba34257984f4c41408ce1dc2004e342e");
@@ -270,6 +445,7 @@ namespace thelostgrimoire
 
             var deletecompo = Helpers.Create<RemoveFeatureOnApply>(r => { r.Feature = feat; });
             upgrade.AddComponent(deletecompo);
+            
 
             library.AddFeats(feat);
             library.AddFeats("8c3102c2ff3b69444b139a98521a4899", feat);
@@ -286,7 +462,7 @@ namespace thelostgrimoire
             var feat = Helpers.CreateFeature("ResilentIllusionsFeature", "Arcane Discovery : Resilient Illusions", "Anytime a creature tries to disbelieve one of your illusion effects, make a caster level check. Treat the illusion’s save DC as its normal DC or the result of the caster level check, whichever is higher.",
                 Helpers.getGuid("ResilentIllusionsFeature"), icon, FeatureGroup.WizardFeat,
                 Helpers.PrerequisiteClassLevel(wizardclass, 5),
-                Helpers.Create<ApplyBuffOnSpellSchoolCast>(b => { b.Buff = buff; b.School = SpellSchool.Illusion; })
+                Helpers.Create<ApplyBuffOnSpellSchoolCast>(b => { b.Buff = buff; b.School = SpellSchool.Illusion; b.duration = 1; })
                 );
             feat.Groups = feat.Groups.AddToArray(FeatureGroup.Feat);
             library.AddFeats(feat);
@@ -318,7 +494,7 @@ namespace thelostgrimoire
                 Helpers.getGuid("IdealizeFeature"), icon, FeatureGroup.WizardFeat,
                 Helpers.PrerequisiteClassLevel(wizardclass, 10),
                 compo,
-                Helpers.Create<ApplyBuffOnSpellSchoolCast>(a => { a.Buff = buff; a.School = SpellSchool.Transmutation; }),
+                Helpers.Create<ApplyBuffOnSpellSchoolCast>(a => { a.Buff = buff; a.School = SpellSchool.Transmutation; a.duration = 1; }),
                 Helpers.Create<BuffFixerForParty>()
                 );
             feat.Groups = feat.Groups.AddToArray(FeatureGroup.Feat);
@@ -538,7 +714,6 @@ namespace thelostgrimoire
             public override void OnFactActivate()
             {
                 base.Owner.DemandSpellbook(wizardclass).OppositionSchools.Remove(this.School);
-                
             }
 
             
@@ -762,13 +937,14 @@ namespace thelostgrimoire
             {
                 if (evt.Ability.School == School && evt.Ability.IsSpell)
                 {
-                    Buff buff = evt.Target.Descriptor.AddBuff(this.Buff, evt.Context.MaybeCaster, new TimeSpan?(1.Rounds().Seconds));
+                    Buff buff = evt.Target.Descriptor.AddBuff(this.Buff, evt.Context.MaybeCaster, new TimeSpan?(duration.Rounds().Seconds));
                 }
             }
             public override void OnEventDidTrigger(RuleSpellResistanceCheck evt)
             {
 
             }
+            public int duration;
             public SpellSchool School;
             public BlueprintBuff Buff;
 
@@ -777,6 +953,7 @@ namespace thelostgrimoire
 
         public class OtherListAffinityLogic : RuleInitiatorLogicComponent<RuleCalculateAbilityParams>
         {
+            
             public override void OnEventAboutToTrigger(RuleCalculateAbilityParams evt)
             {
                 if (evt.Spell.IsInSpellList(Helpers.wizardSpellList) && evt.Spell.IsInSpellList(otherlist))
@@ -861,6 +1038,44 @@ namespace thelostgrimoire
             
         }
 
+        [HarmonyPatch(typeof(Spellbook))]
+        [Harmony12.HarmonyPatch("GetSpellsPerDay")]
+        private static class ManageSpellPerDayForSplitSlot
+        {
+
+            static void Postfix(Spellbook __instance, ref int __result, int spellLevel)
+            {
+                if (spellLevel > 0 && spellLevel < 8)
+                {
+                    int buffid = spellLevel - 1;
+                    var Buff = library.Get<BlueprintBuff>(Helpers.getGuid("SplitSlotbuff" + buffid));
+                    if (Buff != null && __instance.Owner.Buffs.HasFact(Buff))
+                    {
+                        __result += 2;
+                    }
+
+                }
+                if (spellLevel > 2)
+                {
+
+                    int buffid = spellLevel - 3;
+                    var Buff = library.Get<BlueprintBuff>(Helpers.getGuid("SplitSlotbuff" + buffid));
+                    if (Buff != null && __instance.Owner.Buffs.HasFact(Buff))
+                    {
+                        __result -= 1;
+
+                    }
+                }
+
+
+
+            }
+
+
+        }
+
+
+
         [HarmonyPatch(typeof(AbilityData))]
         [Harmony12.HarmonyPatch("GetParamsFromItem")]
         private static class UseCasterLevelWithwand
@@ -882,6 +1097,8 @@ namespace thelostgrimoire
 
 
         }
+
+       
 
     }
 }

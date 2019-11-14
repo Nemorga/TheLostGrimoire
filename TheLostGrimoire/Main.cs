@@ -24,9 +24,13 @@ namespace thelostgrimoire
 {
     public class Main
     {
+
+        //Assembly GetAssemblyByName(string name) { return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == name).DefinedTypes; }
+
         [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary", new Type[0])]
         static class LibraryScriptableObject_LoadDictionary_Patch
         {
+            [Harmony12.HarmonyPriority(Harmony12.Priority.Low)]
             static void Postfix(LibraryScriptableObject __instance)
             {
                 var self = __instance;
@@ -46,11 +50,17 @@ namespace thelostgrimoire
                 SafeLoad(Fixandchange.Load, "Collection of feat and change");
                 SafeLoad(NewSpell.Load, "New spell");
                 SafeLoad(Archetype.Load, "New Archetype");
+#if DEBUG
+                // Perform extra sanity checks in debug builds.
+                SafeLoad(CheckPatchingSuccess, "Check that all patches are used, and were loaded");
+                SafeLoad(SaveCompatibility.CheckCompat, "Check save game compatibility");
+                Log.Write("Loaded finished.");
+#endif
 
 
 
             }
-           
+
         }
         [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary")]
         static class LibraryScriptableObject_LoadDictionary2_Patch

@@ -228,7 +228,7 @@ namespace thelostgrimoire
             Helpers.AddSpell(ability);
             Helpers.AddSpell(abilitygreater);
 
-
+            
         }
 
         public class SpendAction : BlueprintComponent, IAbilityOnCastLogic
