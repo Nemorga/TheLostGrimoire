@@ -154,7 +154,27 @@ namespace thelostgrimoire
             Main.ApplyPatch(typeof(MakeCreatureFlankedByBuff), "you're surounded");
         }
 
+        static void CreateAdmixtureSubSchool()
+        {
+            string name = "";
+            string Name = "";
+            string lvl1 = "VersatileEvocation";
+            string lvl1Name = "Versatile Evocation (Su)";
+            string lvl1Desc = " When you cast an evocation spell that does acid, cold, electricity, or fire damage, you may change the damage dealt " +
+                "to one of the other four energy types. This changes the descriptor of the spell to match the new energy type. " +
+                "Any non-damaging effects remain unchanged. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.";
+            string Lvl8 = "ElementalManipulation";
+            string Lvl8Name = "Elemental Manipulation (Su)";
+            string Lvl8Dessc = "";
+            string name = "";
+            string name = "";
+            string name = "";
+            string name = "";
 
+        }
+
+
+        
         static void CreateTeleportationSubSchool()
         {
             string name = "TeleportationSchool";
