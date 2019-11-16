@@ -38,14 +38,14 @@ namespace thelostgrimoire
                 var self = __instance;
                 if (Main.library != null) return;
                 Main.library = self;
-
+                //needed for thing
                 EnableGameLogging();
 
-            
+            //Needed to use helper
                 SafeLoad(Helpers.Load, "Initialization code");
 
 
-                
+                //all mys file, you don't need that
                 SafeLoad(GolemDiscovery.Load, "Golem Constructor");
                 SafeLoad(RelatedFeat.Load, "Other feat");
                 SafeLoad(ArcaneDiscoveries.Load, "Other Arcane Discoveries");
