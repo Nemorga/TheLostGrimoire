@@ -522,7 +522,7 @@ namespace thelostgrimoire
             var noFeature = Helpers.CreateFeature("OppositionResearchNoFeature", "Opposition Research", "", Helpers.getGuid("OppositionResearchNoFeature"), icon, FeatureGroup.WizardFeat);
             noFeature.HideInCharacterSheetAndLevelUp = true;
             noFeature.HideInUI = true;
-            var featselection = Helpers.CreateFeatureSelection("OppositionResearchSelection", "Arcane Discovery : Opposition Research", "Select one Wizard opposition school; preparing spells of this school now only requires one spell slot of the appropriate level instead of two, and you no longer have the –4 Spellcraft penalty for crafting items from that school.\nNOTE: Feat from The Lost Grimoire", Helpers.getGuid("OppositionResearchSelection"), icon, FeatureGroup.WizardFeat,
+            var featselection = Helpers.CreateFeatureSelection("OppositionResearchSelection2", "Arcane Discovery : Opposition Research", "Select one Wizard opposition school; preparing spells of this school now only requires one spell slot of the appropriate level instead of two, and you no longer have the –4 Spellcraft penalty for crafting items from that school.\nNOTE: Feat from The Lost Grimoire", Helpers.getGuid("OppositionResearchSelection"), icon, FeatureGroup.WizardFeat,
                                 Helpers.PrerequisiteClassLevel(wizardclass, 9),
                                 Helpers.PrerequisiteFeaturesFromList(oppositionlist, true),
                                 Helpers.Create<PrerequisiteNoFeature>(f => f.Feature = noFeature),

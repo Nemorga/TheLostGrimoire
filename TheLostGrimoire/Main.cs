@@ -25,8 +25,10 @@ namespace thelostgrimoire
     public class Main
     {
 
-        //Assembly GetAssemblyByName(string name) { return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == name).DefinedTypes; }
-
+        //@@Nemorga : that's athing I need for later Assembly GetAssemblyByName(string name) { return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == name).DefinedTypes; }
+        
+            
+        //Main patch to the library everythiong done here is eithyer geting the library in a variable or modifying it
         [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary", new Type[0])]
         static class LibraryScriptableObject_LoadDictionary_Patch
         {
@@ -36,14 +38,14 @@ namespace thelostgrimoire
                 var self = __instance;
                 if (Main.library != null) return;
                 Main.library = self;
-
+                //needed for thing
                 EnableGameLogging();
 
-            
+            //Needed to use helper
                 SafeLoad(Helpers.Load, "Initialization code");
 
 
-                
+                //all mys file, you don't need that
                 SafeLoad(GolemDiscovery.Load, "Golem Constructor");
                 SafeLoad(RelatedFeat.Load, "Other feat");
                 SafeLoad(ArcaneDiscoveries.Load, "Other Arcane Discoveries");
@@ -62,6 +64,8 @@ namespace thelostgrimoire
             }
 
         }
+
+        //Patch needed for replacing dummy shader, only intresting if you added custom asset
         [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary")]
         static class LibraryScriptableObject_LoadDictionary2_Patch
         {
@@ -91,7 +95,7 @@ namespace thelostgrimoire
                 }
             }
         }
-
+        // Loading my custom asset bundle
         [Harmony12.HarmonyPatch(typeof(AssetBundle), "LoadFromFile", new Type[] { typeof(string) })]
         static class AssetBundle_LoadFromFile_Patch
         {
@@ -139,9 +143,9 @@ namespace thelostgrimoire
             }
         }
 
-
+        //All this are thing needed later 
         internal static LibraryScriptableObject library;
-        static Dictionary<string, Shader> ShaderLookup;
+        static Dictionary<string, Shader> ShaderLookup;//this one is for shader lookup 
         public static UnityModManager.ModEntry modEntry;
         public static bool enabled;
         
@@ -246,6 +250,7 @@ namespace thelostgrimoire
             }
         }
 
+        //this is the function that load the mod, the info.json must point to it In entry method
         static bool Load(UnityModManager.ModEntry modEntry)
         {
             logger = modEntry.Logger;
@@ -332,6 +337,7 @@ namespace thelostgrimoire
             settings.Save(modEntry);
         }*/
 
+        //The safe load function used in the mod so that a failed thing don't failed alll the mod
         internal static void SafeLoad(Action load, String name)
         {
             try

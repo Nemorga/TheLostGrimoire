@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Validation;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Designers.Mechanics.EquipmentEnchants;
 using Kingmaker.Blueprints.Classes.Prerequisites;
@@ -84,8 +85,8 @@ namespace thelostgrimoire
         static BlueprintFeature BondedItem = library.Get<BlueprintFeature>("2fb5e65bd57caa943b45ee32d825e9b9");
         static BlueprintFeatureSelection wizardfeats = library.Get<BlueprintFeatureSelection>("8c3102c2ff3b69444b139a98521a4899");
         static BlueprintFeature OppositionSchool = library.Get<BlueprintFeatureSelection>("6c29030e9fea36949877c43a6f94ff31");
-        
-        
+        static string Guid(string name) => Helpers.getGuid(name);
+
         //Specialist progression 
         static BlueprintProgression AbjurationProgression = library.Get<BlueprintProgression>("c451fde0aec46454091b70384ea91989");
         static BlueprintProgression ConjurationProgression = library.Get<BlueprintProgression>("567801abe990faf4080df566fadcd038");
@@ -106,7 +107,7 @@ namespace thelostgrimoire
         static BlueprintFeature NecromancyBaseFeature = library.Get<BlueprintFeature>("927707dce06627d4f880c90b5575125f");
         static BlueprintFeature TransmurationBaseFeature = library.Get<BlueprintFeature>("c459c8200e666ef4c990873d3e501b91");
 
-        
+
 
         //Wizard Spelllist (Base+ thassilonian)
         static BlueprintSpellList wizardlist = Main.library.Get<BlueprintSpellList>("ba0401fdeb4062f40a7aa95b6f07fe89");
@@ -128,9 +129,9 @@ namespace thelostgrimoire
         static BlueprintFeature ThassTran = library.Get<BlueprintFeature>("dd163630abbdace4e85284c55d269867");//ThassilonianTransmutationFeature
 
         //Array of thing needed
-        static BlueprintFeature[] SpecialistBaseFeatures = new BlueprintFeature[] {AbjurationBaseFeature, ConjurationBaseFeature, DivinationBaseFeature, EnchantementBaseFeature, EvocationBaseFeature, IllusionBaseFeature, NecromancyBaseFeature, TransmurationBaseFeature };
-        static BlueprintProgression[] SpecialistProgression = new BlueprintProgression[] {AbjurationProgression, ConjurationProgression, DivinationProgression, EnchantmentProgression, EvocationProgression, IllusionProgression, NecromancyProgression, TransmutationProgression};
-        static BlueprintFeature[] WizFeatureList = new BlueprintFeature[]{null,ThassAbju, ThassConj, ThassEnch, ThassEvoc, ThassIllu, ThassNecr, ThassTran };//School slection option for Thass
+        static BlueprintFeature[] SpecialistBaseFeatures = new BlueprintFeature[] { AbjurationBaseFeature, ConjurationBaseFeature, DivinationBaseFeature, EnchantementBaseFeature, EvocationBaseFeature, IllusionBaseFeature, NecromancyBaseFeature, TransmurationBaseFeature };
+        static BlueprintProgression[] SpecialistProgression = new BlueprintProgression[] { AbjurationProgression, ConjurationProgression, DivinationProgression, EnchantmentProgression, EvocationProgression, IllusionProgression, NecromancyProgression, TransmutationProgression };
+        static BlueprintFeature[] WizFeatureList = new BlueprintFeature[] { null, ThassAbju, ThassConj, ThassEnch, ThassEvoc, ThassIllu, ThassNecr, ThassTran };//School slection option for Thass
         static BlueprintSpellList[] spellLists = new BlueprintSpellList[] { wizardlist, ThassAbjurationList, ThassConjurationList, ThassEnchantmentList, ThassEvocationList, ThassIllusionList, ThassNecromancyList, ThassTransmutationList };//Array of base spelllist
 
         //creature type
@@ -149,33 +150,372 @@ namespace thelostgrimoire
             Main.SafeLoad(CreatePhantasmSubSchool, "All your wildest dream");
             Main.SafeLoad(CreateLifeSubSchool, "Live or die");
             Main.SafeLoad(CreateTeleportationSubSchool, "Not there");
+            Main.SafeLoad(CreateAdmixtureSubSchool, "Many flavor of destruction");
             //needed patch
             Main.ApplyPatch(typeof(ShowCasterNameOnBuffToolTip), "Anonymous buff killer");
             Main.ApplyPatch(typeof(MakeCreatureFlankedByBuff), "you're surounded");
         }
 
+        static void CreateAdmixtureSubSchool()
+        {
+            string name = "AdmixtureSchool";
+            string Name = "Focused School -- Admixture";
+            string lvl1 = "VersatileEvocation";
+            string lvl1Name = "Versatile Evocation (Su)";
+            string lvl1Desc = " When you cast an evocation spell that does acid, cold, electricity, or fire damage, you may change the damage dealt " +
+                "to one of the other four energy types. This changes the descriptor of the spell to match the new energy type. " +
+                "Any non-damaging effects remain unchanged. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.";
+
+            string lvl8 = "ElementalManipulation";
+            string Lvl8Name = "Elemental Manipulation (Su)";
+            string Lvl8Dessc = "At 8th level, you can emit a 30-foot aura that transforms magical energy gathered by your allies. Choose an energy type from acid, cold, electricity, and fire, any magical source of energy of this type casted by one of your allies is altered to the chosen energy type. This includes supernatural effects and spell-like ability as well as a Kinetiscist's blast. You can use this ability for a number of rounds per day equal to half your wizard level. The rounds do not need to be consecutive.";
+
+            string basedesc = "Intense Spells: Whenever you cast an evocation spell that deals hit point damage, add 1/2 your wizard level to the damage (minimum +1). " +
+                "This bonus only applies once to a spell, not once per missile or ray, and cannot be split between multiple missiles or rays. This damage is of the same " +
+                "type as the spell. At 20th level, whenever you cast an evocation spell, you can roll twice to penetrate a creature's spell resistance and take the " +
+                "better result." +
+                "\n" + lvl1Name + ": " + lvl1Desc;
+            string vardesc = basedesc + "\n" + Lvl8Name + ": " + Lvl8Dessc;
+
+            BlueprintActivatableAbility ColdAbility = library.CopyAndAdd<BlueprintActivatableAbility>("dd484f0706325de40aee5dba15fbce45", lvl1 + "ColdAbility", Guid(lvl1 + "ColdAbility"));
+            BlueprintActivatableAbility FireAbility = library.CopyAndAdd<BlueprintActivatableAbility>("924dfcd481c0be54c959c2846b3fb7da", lvl1 + "FireAbility", Guid(lvl1 + "FireAbility"));
+            BlueprintActivatableAbility AcidAbility = library.CopyAndAdd<BlueprintActivatableAbility>("94ce51ed666fc8d42830aa9fe48897f9", lvl1 + "AcidAbility", Guid(lvl1 + "AcidAbility"));
+            BlueprintActivatableAbility ElecAbility = library.CopyAndAdd<BlueprintActivatableAbility>("5f6315dfeb74a564f96f460d72f7206c", lvl1 + "ElecAbility", Guid(lvl1 + "ElecAbility"));
+
+            //VERSATILE EVOVCATION
+            var Baseresource = SchoolUtility.GetWizardBaseResource(SpellSchool.Evocation);
+            Baseresource.ToggleLogic.SpendType = ActivatableAbilityResourceLogic.ResourceSpendType.Judgment;
+
+            //Creating each element ability
+
+            //------fire
+            //----------Buff
+            string FireVersatility = "When you cast an evocation spell that does elemental damage, you will change the damage dealt to Fire. This changes the descriptor of the spell but any non-damaging effects remain unchanged.";
+            var firebuff = Helpers.CreateBuff(lvl1 + "FireBuff", "Fire Versatility", FireVersatility, Guid(lvl1 + "FireBuff"), FireAbility.Icon, Helpers.GetFx("ac9eb9c722a6074488c7b120b6839efc"), null,
+                Helpers.Create<AdmixtureChangeElementalDamage>(a => {
+                    a.Element = DamageEnergyType.Fire;
+                    a.RestrictedSchool = SpellSchool.Evocation;
+                    a.RestrictSchool = true;
+                    a.resource = Baseresource.resource;
+                }));
+            //---------Setting up actibatable ability
+            FireAbility.Buff = firebuff;
+            FireAbility.DeactivateImmediately = true;
+            FireAbility.ActivationType = AbilityActivationType.WithUnitCommand;
+            FireAbility.SetNameDescription(lvl1Name, FireVersatility);
+            FireAbility.AddComponent(Baseresource.ToggleLogic);
+            Helpers.SetField(FireAbility, "m_ActivateWithUnitCommand", CommandType.Free);
+
+            //------Cold
+            //----------Buff
+            string ColdVersatility = "When you cast an evocation spell that does elemental damage, you will change the damage dealt to Cold. This changes the descriptor of the spell but any non-damaging effects remain unchanged.";
+            var Coldbuff = Helpers.CreateBuff(lvl1 + "ColdBuff", "Cold Versatility", ColdVersatility, Guid(lvl1 + "ColdBuff"), ColdAbility.Icon, Helpers.GetFx("6b0e6932d794790419a7a606b95be2c7"), null,
+                Helpers.Create<AdmixtureChangeElementalDamage>(a => {
+                    a.Element = DamageEnergyType.Cold;
+                    a.RestrictedSchool = SpellSchool.Evocation;
+                    a.RestrictSchool = true;
+                    a.resource = Baseresource.resource;
+                }));
+            //---------Setting up actibatable ability
+            ColdAbility.Buff = Coldbuff;
+            ColdAbility.DeactivateImmediately = true;
+            ColdAbility.ActivationType = AbilityActivationType.WithUnitCommand;
+            ColdAbility.SetNameDescription(lvl1Name, ColdVersatility);
+            ColdAbility.AddComponent(Baseresource.ToggleLogic);
+            Helpers.SetField(ColdAbility, "m_ActivateWithUnitCommand", CommandType.Free);
+
+            //------Electricity
+            //----------Buff
+            string ElecVersatility = "When you cast an evocation spell that does elemental damage, you will change the damage dealt to Electricity. This changes the descriptor of the spell but any non-damaging effects remain unchanged.";
+            var Elecbuff = Helpers.CreateBuff(lvl1 + "ElecBuff", "Electricity Versatility", ElecVersatility, Guid(lvl1 + "ElecBuff"), ElecAbility.Icon, Helpers.GetFx("db5ef84b0b43f8e4aa44a5721c4d2df6"), null,
+                Helpers.Create<AdmixtureChangeElementalDamage>(a => {
+                    a.Element = DamageEnergyType.Electricity;
+                    a.RestrictedSchool = SpellSchool.Evocation;
+                    a.RestrictSchool = true;
+                    a.resource = Baseresource.resource;
+                }));
+            //---------Setting up actibatable ability
+            ElecAbility.Buff = Elecbuff;
+            ElecAbility.DeactivateImmediately = true;
+            ElecAbility.ActivationType = AbilityActivationType.WithUnitCommand;
+            ElecAbility.SetNameDescription(lvl1Name, ElecVersatility);
+            ElecAbility.AddComponent(Baseresource.ToggleLogic);
+            Helpers.SetField(ElecAbility, "m_ActivateWithUnitCommand", CommandType.Free);
+
+            //------Acid
+            //----------Buff
+            string AcidVersatility = "When you cast an evocation spell that does elemental damage, you will change the damage dealt to Acid. This changes the descriptor of the spell but any non-damaging effects remain unchanged.";
+            var Acidbuff = Helpers.CreateBuff(lvl1 + "AcidBuff", "Acid Versatility", AcidVersatility, Guid(lvl1 + "AcidBuff"), AcidAbility.Icon, Helpers.GetFx("f49dc9f7b7c816240b42ef957083be21"), null,
+                Helpers.Create<AdmixtureChangeElementalDamage>(a => {
+                    a.Element = DamageEnergyType.Acid;
+                    a.RestrictedSchool = SpellSchool.Evocation;
+                    a.RestrictSchool = true;
+                    a.resource = Baseresource.resource;
+                }));
+            //---------Setting up actibatable ability
+            AcidAbility.Buff = Acidbuff;
+            AcidAbility.DeactivateImmediately = true;
+            AcidAbility.ActivationType = AbilityActivationType.WithUnitCommand;
+            AcidAbility.SetNameDescription(lvl1Name, AcidVersatility);
+            AcidAbility.AddComponent(Baseresource.ToggleLogic);
+            Helpers.SetField(AcidAbility, "m_ActivateWithUnitCommand", CommandType.Free);
+
+            //Creating and adding an exclusive activation componnent to mimic the group mechanic of Activatable ABility
+            BlueprintActivatableAbility[] Group = new BlueprintActivatableAbility[] { AcidAbility, ColdAbility, ElecAbility, FireAbility };
+
+            var AcidExcluCompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { ColdAbility, ElecAbility, FireAbility });
+            Acidbuff.AddComponent(AcidExcluCompo);
+
+            var ColdExcluCompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { AcidAbility, ElecAbility, FireAbility });
+            Coldbuff.AddComponent(ColdExcluCompo);
+
+            var ElecExcluCompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { AcidAbility, ColdAbility, FireAbility });
+            Elecbuff.AddComponent(ElecExcluCompo);
+
+            var FireExcluCompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] {AcidAbility, ColdAbility, ElecAbility});
+            firebuff.AddComponent(FireExcluCompo);
+
+            //ELEMENTAL MANIPULATION
+            var Greaterresource = SchoolUtility.CreateWizardResource("AdmixtureGreaterResource", EvocationProgression.Icon, false);
+            Greaterresource.resource.SetIncreasedByLevelStartPlusDivStep(0, 2, 1, 2, 1, 1, 0, new BlueprintCharacterClass[] { wizardclass }); //SetIncreasedByLevel(0, 1, new BlueprintCharacterClass[] { wizardclass }, null);
+            var EvocFx = Helpers.GetFx("dfc59904273f7ee49ab00e5278d86e16");
+
+            var ProtectionVsEnergyCommu = library.Get<BlueprintAbility>("76a629d019275b94184a1a8733cac45e");
+            var AcidIcon = ProtectionVsEnergyCommu.Variants[0].Icon;
+            var ColdIcon = ProtectionVsEnergyCommu.Variants[1].Icon;
+            var ElecIcon = ProtectionVsEnergyCommu.Variants[2].Icon;
+            var FireIcon = ProtectionVsEnergyCommu.Variants[3].Icon;
+            //Creating each element ability
+            string ElemManipDesc = " As a Standard Action, you can emit a 30-foot aura : any magical energy created by your allies inside this aura is altered to {0}.";
+            var FireManipulationAbility = CreateElementalManipulation(lvl8, "Fire", string.Format(ElemManipDesc, "Fire"), FireIcon, DamageEnergyType.Fire, EvocFx, Helpers.GetFx("ac9eb9c722a6074488c7b120b6839efc"),
+                Helpers.GetFx("379c602be99d76644a8fb70ad0645f94"), Greaterresource);
+            var AcidManipulationAbility = CreateElementalManipulation(lvl8, "Acid", string.Format(ElemManipDesc, "Acid"), AcidIcon, DamageEnergyType.Acid, EvocFx, Helpers.GetFx("f49dc9f7b7c816240b42ef957083be21"),
+                Helpers.GetFx("61b82291a449add469bd953239fdd64c"), Greaterresource);
+            var ColdManipulationAbility = CreateElementalManipulation(lvl8, "Cold", string.Format(ElemManipDesc, "Cold"), ColdIcon, DamageEnergyType.Cold, EvocFx, Helpers.GetFx("6b0e6932d794790419a7a606b95be2c7"),
+                Helpers.GetFx("d266e80a8c99a3d4299bcfef13896108"), Greaterresource);
+            var ElecManipulationAbility = CreateElementalManipulation(lvl8, "Electricity", string.Format(ElemManipDesc, "Electricity"), ElecIcon, DamageEnergyType.Electricity, EvocFx, Helpers.GetFx("db5ef84b0b43f8e4aa44a5721c4d2df6"),
+                Helpers.GetFx("c946053d3cb4bd04bacdfd42ab8a70a7"), Greaterresource);
+
+            var AcidManipulationExclucompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { ColdManipulationAbility, ElecManipulationAbility, FireManipulationAbility });
+            var ColdManipulationExclucompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { AcidManipulationAbility, ElecManipulationAbility, FireManipulationAbility });
+            var ElecManipulationExclucompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { AcidManipulationAbility, ColdManipulationAbility, FireManipulationAbility });
+            var FireManipulationExclucompo = Helpers.Create<FalseGroupMechanic>(f => f.Group = new BlueprintActivatableAbility[] { AcidManipulationAbility, ColdManipulationAbility, ElecManipulationAbility});
+
+            AcidManipulationAbility.Buff.AddComponent(AcidManipulationExclucompo);
+            ColdManipulationAbility.Buff.AddComponent(ColdManipulationExclucompo);
+            ElecManipulationAbility.Buff.AddComponent(ElecManipulationExclucompo);
+            FireManipulationAbility.Buff.AddComponent(FireManipulationExclucompo);
+
+            var Basefeature = SchoolUtility.CreateFeature(lvl1 + "BaseFeature", "Admixture Focused School", basedesc, EvocationBaseFeature.Icon, 1, false, false,
+                Baseresource.add,
+                Helpers.Create<IntenseSpells>(c => c.Wizard = wizardclass),
+                SchoolUtility.SpeciaListComponent(SpellSchool.Evocation),
+                Helpers.CreateAddFacts(FireAbility, AcidAbility, ColdAbility, ElecAbility)
+                );
+            var GreaterFeature = SchoolUtility.CreateFeature(lvl8 + "Feature", Lvl8Name, Lvl8Dessc, Helpers.GetIcon("0340fe43f35e7a448981b646c638c83d"), 1, false, false,  
+                Greaterresource.add, 
+                Helpers.CreateAddFacts(AcidManipulationAbility, ColdManipulationAbility, ElecManipulationAbility, FireManipulationAbility)
+                );
+
+            var AdmixtureProgression = SchoolUtility.CreateSchoolVariantProgression(EvocationProgression, name, Name, vardesc, true, 
+                SchoolUtility.BuildLevelEntry(
+                    (1, Basefeature),
+                    (1, OppositionSchool), 
+                    (1, OppositionSchool), 
+                    (8, GreaterFeature)
+                    ));
+        }
+        public static BlueprintActivatableAbility CreateElementalManipulation(string basename, string ElementName, string Description, Sprite Icon, DamageEnergyType Element, PrefabLink Aurafx, PrefabLink EffectBuffFx, PrefabLink AuraBuffFx, SchoolUtility.wizardressource ResourceWrapper)
+
+        {
+            
+            //----------Buff
+            
+            
+            var Manipulationbuff = Helpers.CreateBuff(basename +ElementName+ "Buff", ElementName+" Manipulation", Description, Guid(basename + ElementName + "Buff"), Icon, EffectBuffFx, null,
+                Helpers.Create<AdmixtureChangeElementalDamage>(a => {
+                    a.Element = Element;
+                }));
+            //---------Creating Aura
+            var Area = Helpers.Create<BlueprintAbilityAreaEffect>(a => {
+                a.name = basename + ElementName+"Aura";
+                a.AffectEnemies = false;
+                a.AggroEnemies = false;
+                a.Fx = Aurafx;
+                a.Shape = AreaEffectShape.Cylinder;
+                a.Size = 30.Feet();
+                a.SetComponents(
+                Helpers.Create<AbilityAreaEffectBuff>(c => {
+                    c.Condition = Helpers.CreateConditionsCheckerAnd(Helpers.Create<ContextConditionIsAlly>()
+                        );
+                    c.Buff = Manipulationbuff;
+                }));
+            });
+            library.AddAsset(Area, Helpers.getGuid(Area.name));
+
+            //------- Buff for Aura
+            var ManipulationAuraBuff = Helpers.CreateBuff(basename + ElementName+"AuraBuff", "", "", Guid(basename + ElementName + "AuraBuff"), Icon,AuraBuffFx, null,
+                 Helpers.Create<AddAreaEffect>(a => a.AreaEffect = Area)
+                 );
+            ManipulationAuraBuff.SetBuffFlags(BuffFlags.HiddenInUi);
+
+
+            var ManipulationAbility = Helpers.CreateActivatableAbility(basename + ElementName+"ActivatbleAbility", "Elemental Manipulation: "+ElementName, Description, Guid(basename + ElementName + "ActivatbleAbility"), Icon, ManipulationAuraBuff, AbilityActivationType.WithUnitCommand, CommandType.Standard, null,
+               ResourceWrapper.ToggleLogic);
+            ManipulationAbility.DeactivateImmediately = true;
+            ManipulationAbility.DeactivateIfOwnerUnconscious = true;
+            
+
+            return ManipulationAbility;
+
+        } 
+       
+
+        public class FalseGroupMechanic : BuffLogic
+        {
+            public override void OnTurnOn()
+            {
+                ActivatableAbility[] array = Owner.ActivatableAbilities.Enumerable.ToArray();
+                foreach (ActivatableAbility ability in array)
+                {
+                    if (Group.Contains(ability.Blueprint))
+                    {
+                        if (ability.IsOn)
+                        {
+                            ability.IsOn = false;
+                        }
+                    }
+                }
+            }
+            public BlueprintActivatableAbility[] Group;
+        }
+
+        public class AdmixtureChangeElementalDamage : OwnedGameLogicComponent<UnitDescriptor>, IInitiatorRulebookHandler<RuleCastSpell>,
+            IInitiatorRulebookHandler<RuleCalculateDamage>, IRulebookHandler<RuleCastSpell>, IInitiatorRulebookSubscriber, IRulebookHandler<RuleCalculateDamage>
+        {
+
+            public bool ConditionForExecution(MechanicsContext context, bool AtCastEvent = true)
+            {
+                bool IsOk = true;
+                if (AtCastEvent && RestrictElement && !context.SpellDescriptor.HasFlag(ElementToSpellDescriptor(RestrictedElement)))
+                    IsOk = false;
+                if (RestrictSchool && (context.SpellSchool != RestrictedSchool || !context.SourceAbility.IsSpell))
+                    IsOk = false;
+                if (!context.SpellDescriptor.HasAnyFlag(SpellDescriptor.Acid | SpellDescriptor.Cold | SpellDescriptor.Fire | SpellDescriptor.Electricity))
+                    IsOk = false;
+                if (context.SourceAbility.Type == AbilityType.Extraordinary)
+                    IsOk = false;
+                return IsOk;
+
+            }
+            public bool CheckEnergy(DamageEnergyType damagetype)
+            {
+                bool IsOk = true;
+                if (RestrictElement && damagetype != RestrictedElement)
+                    IsOk = false;
+                if (damagetype != DamageEnergyType.Acid && damagetype != DamageEnergyType.Cold && damagetype != DamageEnergyType.Electricity && damagetype != DamageEnergyType.Fire)
+                    IsOk = false;
+                return IsOk;
+            }
+
+            public void OnEventAboutToTrigger(RuleCastSpell evt)
+            {
+            }
+
+            public void OnEventDidTrigger(RuleCastSpell evt)
+            {
+
+                if (!ConditionForExecution(evt.Context))
+                    return;
+
+                if (resource != null && Owner.Resources.GetResourceAmount(resource) < 1)
+                {
+                    Fact.Deactivate();
+                    return;
+                }
+                if (resource != null && Owner.Resources.GetResourceAmount(resource) > 0)
+                    Owner.Resources.Spend(resource, 1);
+                AbilityExecutionContext context = evt.Context;
+
+
+
+                context.RemoveSpellDescriptor(SpellDescriptor.Fire);
+                context.RemoveSpellDescriptor(SpellDescriptor.Cold);
+                context.RemoveSpellDescriptor(SpellDescriptor.Acid);
+                context.RemoveSpellDescriptor(SpellDescriptor.Electricity);
+                context.AddSpellDescriptor(ElementToSpellDescriptor(this.Element));
+            }
+
+            public void OnEventAboutToTrigger(RuleCalculateDamage evt)
+            {
+
+                var ability = evt.Reason.Context.SourceAbility;
+                if (ability == null || !ConditionForExecution(evt.Reason.Context, false))
+                    return;
+
+
+                foreach (BaseDamage baseDamage in evt.DamageBundle)
+                {
+                    EnergyDamage energyDamage = baseDamage as EnergyDamage;
+                    if (energyDamage != null)
+                    {
+                        if (CheckEnergy(energyDamage.EnergyType))
+                            energyDamage.ReplaceEnergy(this.Element);
+                    }
+                }
+            }
+
+            public void OnEventDidTrigger(RuleCalculateDamage evt)
+            {
+            }
+            private static SpellDescriptor ElementToSpellDescriptor(DamageEnergyType element)
+            {
+                switch (element)
+                {
+                    case DamageEnergyType.Fire:
+                        return SpellDescriptor.Fire;
+                    case DamageEnergyType.Cold:
+                        return SpellDescriptor.Cold;
+                    case DamageEnergyType.Electricity:
+                        return SpellDescriptor.Electricity;
+                    case DamageEnergyType.Acid:
+                        return SpellDescriptor.Acid;
+                }
+                return SpellDescriptor.Fire;
+            }
+
+            public DamageEnergyType Element;
+            public bool RestrictElement;
+            //[ShowIf("RestrictElement")]
+            public DamageEnergyType RestrictedElement;
+            public bool RestrictSchool;
+            //[ShowIf("RestrictSchool")]
+            public SpellSchool RestrictedSchool;
+            public BlueprintAbilityResource resource;
+
+        }
 
         static void CreateTeleportationSubSchool()
         {
             string name = "TeleportationSchool";
             string Name = "Focused School -- Teleportation";
             string basedesc = "Whenever you cast a conjuration (summoning) spell, increase the duration by a number of rounds equal to 1/2 your wizard level (minimum 1). This increase is not doubled by Extend Spell.";
-            
+
             string TPname = "ShiftAbility";
             string TPName = "Shift";
             string TPfeat = "ShiftFeature";
             string TPdesc = "At 1st level, you can teleport to a nearby space as a swift action as if using dimension door. This movement does not provoke an attack of opportunity. You must be able to see the space that you are moving into." +
                 " You cannot take other creatures with you when you use this ability (except for familiars). You can move 5 feet for every two wizard levels you possess (minimum 5 feet). " +
                 "You can use this ability a number of times per day equal to 3 + your Intelligence modifier.";
-            
+
             BlueprintFeature ConjurationBase = library.Get<BlueprintFeature>("cee0f7edbd874a042952ee150f878b84");
             BlueprintFeature ConjurationGreat = library.Get<BlueprintFeature>("71293f6177954334697ca44a9ddf7090");
             BlueprintAbility TravelAbility = library.Get<BlueprintAbility>("867e6fd88d089c442be7cdd49f05a88e");
-            string vardesc = "Summoner Smile: " + basedesc + "\nShift(Su): " + TPdesc + "\n"+ConjurationGreat.Name+": "+ConjurationGreat.Description;
+            string vardesc = "Summoner Smile: " + basedesc + "\nShift(Su): " + TPdesc + "\n" + ConjurationGreat.Name + ": " + ConjurationGreat.Description;
 
             var TPresource = SchoolUtility.GetWizardBaseResource(SpellSchool.Conjuration);
 
-            
+
             var ability = library.CopyAndAdd<BlueprintAbility>(TravelAbility, TPname, Helpers.getGuid(TPname));
             ability.SetNameDescription(TPName, TPdesc);
             ability.ActionType = CommandType.Swift;
@@ -183,28 +523,28 @@ namespace thelostgrimoire
             ability.CustomRange = 5.Feet();
             ability.Type = AbilityType.Supernatural;
             ability.ReplaceComponent<AbilityResourceLogic>(r => r.RequiredResource = TPresource.resource);
-            
+
             var Teleportfeat = Helpers.CreateFeature(TPfeat, TPName, TPdesc, Helpers.getGuid(TPfeat), ability.Icon, FeatureGroup.Domain, ability.CreateAddFact());
             Teleportfeat.ReapplyOnLevelUp = false;
 
             BlueprintComponent[] addcompos = new BlueprintComponent[10];
-            BlueprintFeature[] featurebylevel = new BlueprintFeature[10] ;
+            BlueprintFeature[] featurebylevel = new BlueprintFeature[10];
             BlueprintAbility[] copies = new BlueprintAbility[10];
-            for (int i = 0; i<9; i++)
+            for (int i = 0; i < 9; i++)
             {
                 //create a copy with the right range
                 copies[i] = library.CopyAndAdd<BlueprintAbility>(ability, TPname + i, Helpers.getGuid(TPname + i));
-                copies[i].CustomRange = (5 * (i+1)).Feet();
+                copies[i].CustomRange = (5 + (5 * (i + 1))).Feet();
 
                 //create feature to replace the ability
-                featurebylevel[i] = Helpers.CreateFeature("Update" + TPname + i, "Shift Range Increase", "At level 4 and every other level thereafter the range of the Shift ability increase by 5ft.\n Shift's Range is "+ (5+5 * (i + 1))+" feet.", Helpers.getGuid("Update" + TPname + i), ability.Icon, FeatureGroup.Domain, 
-                    
+                featurebylevel[i] = Helpers.CreateFeature("Update" + TPname + i, "Shift Range Increase", "At level 4 and every other level thereafter the range of the Shift ability increase by 5ft.\n Shift's Range is " + (5 + 5 * (i + 1)) + " feet.", Helpers.getGuid("Update" + TPname + i), ability.Icon, FeatureGroup.Domain,
+
                     copies[i].CreateAddFact()
                     );
                 featurebylevel[i].HideInUI = false;
                 featurebylevel[i].AddComponent(Helpers.Create<RemoveFeatureOnApply>(c => c.Feature = i == 0 ? (BlueprintUnitFact)Teleportfeat : (BlueprintUnitFact)featurebylevel[i - 1]));
                 //create the add feature component
-                
+
 
             }
             var TPbasefeature = SchoolUtility.CreateFeature("TeleportationBaseFeature", "Summoner's Charm", basedesc, ConjurationBase.Icon, 1, false, false,
@@ -243,7 +583,7 @@ namespace thelostgrimoire
             var oppositionconjur = library.Get<BlueprintFeature>("ca4a0d68c0408d74bb83ade784ebeb0d");
             oppositionconjur.AddComponent(Helpers.PrerequisiteNoFeature(TPSchoolVariant));
 
-            
+
 
 
 
@@ -257,8 +597,8 @@ namespace thelostgrimoire
             string gracedisplay = "Healing Grace";
             string gracedesc = "Whenever you cast a spell, you gain a \"healing pool\" for an amount equal to the level of the spell." +
                 "Then, for a short time, you may use a free action to heal creatures targeted by the spell for a total of 1 point of damage healed per point of your healing pool. " +
-                "If you assign any of the healing to an undead creature, it instead takes 1 point of damage for each point assigned. Any point remaining in your healing pool after this first target has been affected will be automatically assigned to another valid target."+
-                "If you cast another spell while you still have point in your healing pool, they will be automatically expended and creature will be healed or damaged accordingly."+
+                "If you assign any of the healing to an undead creature, it instead takes 1 point of damage for each point assigned. Any point remaining in your healing pool after this first target has been affected will be automatically assigned to another valid target." +
+                "If you cast another spell while you still have point in your healing pool, they will be automatically expended and creature will be healed or damaged accordingly." +
                 "At 11th level, the healing pool total gained when casting a spell is equal to 2 points per level of the spell. " +
                 "At 20th level, the total increase to 3 points  per level of the spell.";
             string gracetargetdesc = "This ability allows you to spend your healing pool on a valid target with a free action. The target will be healed immediatly (or damaged if it is undead) by an amount equal to the total of the healing pool." +
@@ -276,8 +616,8 @@ namespace thelostgrimoire
                 "You can use this ability a number of times per day equal to 3 + your Intelligence modifier. This ability has no effect if you are immune to nonlethal damage.";
 
             var necrogreater = library.Get<BlueprintFeature>("82371e899df830e4bb955429d89b755c");
-            string basedesc = gracedisplay+"(Su): "+gracedesc+"\n"+sharedisplay+"(Sp): "+sharedesc;
-            string vardesc = basedesc+"\n"+necrogreater.Name+"(Su): "+necrogreater.Description;
+            string basedesc = gracedisplay + "(Su): " + gracedesc + "\n" + sharedisplay + "(Sp): " + sharedesc;
+            string vardesc = basedesc + "\n" + necrogreater.Name + "(Su): " + necrogreater.Description;
             var schoolicon = NecromancyProgression.Icon;
             var baseicon = NecromancyBaseFeature.Icon;
             var shareicon = Helpers.GetIcon("6cbb040023868574b992677885390f92");
@@ -286,7 +626,7 @@ namespace thelostgrimoire
             var FxEssenceBuff = Helpers.GetFx("afc207ce60f237746a561a2877ec29e3");//Vampiric touch buff fx
             var FxEssenceCast = Helpers.GetFx("e93261ee4c3ea474e923f6a645a3384f");// False life fx on cast
             var FxEssenceCastOnCaster = Helpers.GetFx("7bcb8adb7d3292f458bd616af9e6b743");//Vampiric shield hit target
-            
+
 
             //CREATING HEALING GRACE
 
@@ -300,20 +640,21 @@ namespace thelostgrimoire
 
             var gracepoollogic = Helpers.CreateResourceLogic(gracepool, true);
 
-            
+
             //Status Buff to select who can recieve Healing grace
             var gracestatus = Helpers.CreateBuff(Gracename + "StatusBuff", "Healing Grace Target", "This creature is a valid target for the Healing Grace ability", Helpers.getGuid(Gracename + "StatusBuff"), schoolicon, FxGraceBuff, null);
             gracestatus.Stacking = StackingType.Stack;
-            
+
             // Buff to signal that Healing Grace should be used automatically
             var autograce = Helpers.CreateBuff(Gracename + "AutoGraceBuff", "Healing Grace(Auto)", gracetoggledesc, Helpers.getGuid(Gracename + "AutoGraceBuff"), schoolicon, null, null);
 
             //The usable ability of healing grace
-            var gracetarget = Helpers.CreateAbility(Gracename+"AbilityTargeted", gracedisplay, gracetargetdesc, Helpers.getGuid(Gracename + "AbilityTargeted"), baseicon, AbilityType.Supernatural, CommandType.Free, AbilityRange.Long, "Instantaneous","",
+            var gracetarget = Helpers.CreateAbility(Gracename + "AbilityTargeted", gracedisplay, gracetargetdesc, Helpers.getGuid(Gracename + "AbilityTargeted"), baseicon, AbilityType.Supernatural, CommandType.Free, AbilityRange.Long, "Instantaneous", "",
                 gracepoollogic,
                 Helpers.Create<AbilityTargetHasBuffByCaster>(f => {
                     f.CheckedFacts = new BlueprintUnitFact[] { gracestatus };
-                    f.Inverted = false;}),
+                    f.Inverted = false;
+                }),
                 Helpers.CreateRunActions(Helpers.Create<ContextActionHealinGrace>(a => { a.pool = gracepool; a.status = gracestatus; a.PrefabLink = FxGraceCast; })),
                 Helpers.Create<AbilitySpawnFx>(f => {
                     f.PrefabLink = FxGraceCast;
@@ -328,7 +669,7 @@ namespace thelostgrimoire
             gracetarget.CanTargetSelf = true;
             gracetarget.CanTargetPoint = false;
             gracetarget.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
-            gracetarget.ResourceAssetIds = new string[] {FxGraceBuff.AssetId, FxGraceCast.AssetId };
+            gracetarget.ResourceAssetIds = new string[] { FxGraceBuff.AssetId, FxGraceCast.AssetId };
             //Toggle for the autobuff
             var autogracetoggle = Helpers.CreateActivatableAbility(Gracename + "ToggleAuto", "Toggle Automatic Healing Grace", gracetoggledesc, Helpers.getGuid(Gracename + "ToggleAuto"), schoolicon, autograce, AbilityActivationType.Immediately, CommandType.Free, null);
             autogracetoggle.DeactivateImmediately = true;
@@ -336,12 +677,12 @@ namespace thelostgrimoire
             var gracetoken = Helpers.CreateBuff(Gracename + "TokenBuff", "", "", Helpers.getGuid(Gracename + "TokenBuff"), baseicon, null, null, Helpers.Create<RemovePoolOnTimer>(r => { r.pool = gracepool; r.autobuff = autograce; r.Grace = gracetarget; r.status = gracestatus; }));
             //gracetoken.SetBuffFlags(BuffFlags.HiddenInUi);
             gracetoken.Stacking = StackingType.Replace;
-            
+
             //The main Feature of Healing grace
-            var Grace = Helpers.CreateFeature(Gracename+"Feature", gracedisplay, gracedesc, Helpers.getGuid(Gracename + "Feature"), baseicon, FeatureGroup.None, 
+            var Grace = Helpers.CreateFeature(Gracename + "Feature", gracedisplay, gracedesc, Helpers.getGuid(Gracename + "Feature"), baseicon, FeatureGroup.None,
                 gracetarget.CreateAddFact(),
                 autogracetoggle.CreateAddFact(),
-                Helpers.Create<ManageHealingGrace>(p => { p.pool = gracepool; p.status = gracestatus; p.token = gracetoken;  }),
+                Helpers.Create<ManageHealingGrace>(p => { p.pool = gracepool; p.status = gracestatus; p.token = gracetoken; }),
                 gracepooladd
                 );
 
@@ -357,22 +698,22 @@ namespace thelostgrimoire
             EssenceCasterBuff.SetBuffFlags(BuffFlags.RemoveOnRest | BuffFlags.HiddenInUi);
             EssenceCasterBuff.Stacking = StackingType.Stack;
 
-            var EssenceTargetBuff = Helpers.CreateBuff(sharename + "TargetBuff", sharedisplay, sharedesc, Helpers.getGuid(sharename + "TargetBuff"), shareicon, FxEssenceBuff, null, 
+            var EssenceTargetBuff = Helpers.CreateBuff(sharename + "TargetBuff", sharedisplay, sharedesc, Helpers.getGuid(sharename + "TargetBuff"), shareicon, FxEssenceBuff, null,
                 Helpers.Create<AddContextStatBonus>(c => {
                     c.Stat = StatType.TemporaryHitPoints;
                     c.Multiplier = 1;
                     c.Descriptor = ModifierDescriptor.Profane;
                     c.Value = new ContextValue() { ValueType = ContextValueType.Shared, ValueShared = AbilitySharedValue.StatBonus };
                 }));
-            EssenceTargetBuff.SetBuffFlags(BuffFlags.RemoveOnRest| BuffFlags.HiddenInUi);
+            EssenceTargetBuff.SetBuffFlags(BuffFlags.RemoveOnRest | BuffFlags.HiddenInUi);
             EssenceTargetBuff.Stacking = StackingType.Stack;
             var resource = SchoolUtility.GetWizardBaseResource(SpellSchool.Necromancy);
 
-            var ShareEssence = Helpers.CreateAbility(sharename + "Ability", sharedisplay, sharedesc, Helpers.getGuid(sharename + "Ability"), shareicon, AbilityType.SpellLike, 
+            var ShareEssence = Helpers.CreateAbility(sharename + "Ability", sharedisplay, sharedesc, Helpers.getGuid(sharename + "Ability"), shareicon, AbilityType.SpellLike,
                 CommandType.Standard, AbilityRange.Touch, "Instantaneous", "",
                 resource.logic,
-                Helpers.CreateRunActions(Helpers.Create<ContextActionDeal>(a => { a.ResultSharedValue = AbilitySharedValue.StatBonus; a.WriteResultToSharedValue = true; }), 
-                Helpers.CreateApplyBuff(EssenceCasterBuff, Helpers.CreateContextDuration(), false, false, true, false,true),
+                Helpers.CreateRunActions(Helpers.Create<ContextActionDeal>(a => { a.ResultSharedValue = AbilitySharedValue.StatBonus; a.WriteResultToSharedValue = true; }),
+                Helpers.CreateApplyBuff(EssenceCasterBuff, Helpers.CreateContextDuration(), false, false, true, false, true),
                 Helpers.CreateApplyBuff(EssenceTargetBuff, Helpers.CreateContextDuration(1, DurationRate.Hours), false)),
                 Helpers.Create<AbilitySpawnFx>(f => {
                     f.PrefabLink = FxEssenceCast;
@@ -394,9 +735,9 @@ namespace thelostgrimoire
             ShareEssence.CanTargetSelf = false;
             ShareEssence.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
             ShareEssence.EffectOnAlly = AbilityEffectOnUnit.Helpful;
-            ShareEssence.ResourceAssetIds = new string[] { FxEssenceBuff.AssetId, FxEssenceCast.AssetId, FxEssenceCastOnCaster.AssetId};
+            ShareEssence.ResourceAssetIds = new string[] { FxEssenceBuff.AssetId, FxEssenceCast.AssetId, FxEssenceCastOnCaster.AssetId };
 
-            var LifeBaseFeature = SchoolUtility.CreateFeature(name + "BaseFeature", basedisplay, basedesc, baseicon, components:new BlueprintComponent[]{ShareEssence.CreateAddFact(),
+            var LifeBaseFeature = SchoolUtility.CreateFeature(name + "BaseFeature", basedisplay, basedesc, baseicon, components: new BlueprintComponent[]{ShareEssence.CreateAddFact(),
                 Grace.CreateAddFact(),
                 resource.add,
                 SchoolUtility.SpeciaListComponent(SpellSchool.Necromancy)}
@@ -446,20 +787,20 @@ namespace thelostgrimoire
                 int hpleft = Caster.MaxHP - (Caster.Damage + Caster.DamageNonLethal);
                 int value = Math.Min(hpleft - 1, prevalue);
 
-                
+
                 if (this.WriteResultToSharedValue)
                 {
                     base.Context[this.ResultSharedValue] = value;
                 }
-                
+
             }
 
-          
+
             public bool WriteResultToSharedValue;
 
             public AbilitySharedValue ResultSharedValue;
 
-           
+
         }
         public class RemovePoolOnTimer : OwnedGameLogicComponent<UnitDescriptor>
         {
@@ -479,23 +820,23 @@ namespace thelostgrimoire
                 if (autocast)
 
                 {
-                    if(IsInTB && Owner.Unit.IsInCombat)
-                    Timemod += 0.01f;
+                    if (IsInTB && Owner.Unit.IsInCombat)
+                        Timemod += 0.01f;
                     else
-                    Timemod = 0;
+                        Timemod = 0;
                 }
                 else
                 {
 
-                   if (IsInTB && Owner.Unit.IsInCombat)
+                    if (IsInTB && Owner.Unit.IsInCombat)
                         Timemod += 0.01f;
                     else
                         Timemod += 10f;
 
                 }
 
-                Buff buff = (Buff)base.Fact;                
-                buff.EndTime = Timemod > 0 ? Game.Instance.TimeController.GameTime + Timemod.Seconds() : buff.EndTime ;
+                Buff buff = (Buff)base.Fact;
+                buff.EndTime = Timemod > 0 ? Game.Instance.TimeController.GameTime + Timemod.Seconds() : buff.EndTime;
             }
 
             public override void OnFactDeactivate()
@@ -524,7 +865,7 @@ namespace thelostgrimoire
                             }
                         }
                     }
-                    bool notarget = (UnitToAffect == Owner.Unit && !Owner.HasFact(status)) || (UnitToAffect == Owner.Unit && Owner.Unit.Damage<1);
+                    bool notarget = (UnitToAffect == Owner.Unit && !Owner.HasFact(status)) || (UnitToAffect == Owner.Unit && Owner.Unit.Damage < 1);
                     if (!notarget)
                     {
                         TargetWrapper Target = new TargetWrapper(UnitToAffect);
@@ -560,7 +901,7 @@ namespace thelostgrimoire
                 foreach (BlueprintUnitFact blueprint in this.CheckedFacts)
                 {
                     flag = unit.Descriptor.HasFact(blueprint);
-                    
+
                     if (flag)
                     {
                         int count = 0;
@@ -568,10 +909,10 @@ namespace thelostgrimoire
                         {
                             if (buff.Context.MaybeCaster == caster && buff.Blueprint == blueprint)
                                 count++;
-                            
+
                         }
                         if (count > 0) flag2 = true;
-                            
+
                         break;
                     }
                 }
@@ -581,10 +922,10 @@ namespace thelostgrimoire
             public BlueprintUnitFact[] CheckedFacts;
             public bool Inverted;
         }
-        public class ManageHealingGrace: RuleInitiatorLogicComponent<RuleCastSpell>, IApplyAbilityEffectHandler
+        public class ManageHealingGrace : RuleInitiatorLogicComponent<RuleCastSpell>, IApplyAbilityEffectHandler
         {
-           
-            public void OnAbilityEffectApplied(AbilityExecutionContext context) {}
+
+            public void OnAbilityEffectApplied(AbilityExecutionContext context) { }
             public void OnTryToApplyAbilityEffect(AbilityExecutionContext context, TargetWrapper target)
             {
 
@@ -593,7 +934,7 @@ namespace thelostgrimoire
                 {
                     if (count == 0)
                     {
-                        
+
                         int amount = context.Caster.Descriptor.Resources.GetResourceAmount(pool);
                         context.Caster.Descriptor.Resources.Spend(pool, amount);
 
@@ -626,24 +967,24 @@ namespace thelostgrimoire
                     }
                     count++;
                     bool present = false;
-                        foreach (Buff buff in target.Unit.Buffs)
+                    foreach (Buff buff in target.Unit.Buffs)
+                    {
+                        if (buff.Blueprint == status && buff.Context.MaybeCaster == context.MaybeCaster)
                         {
-                            if (buff.Blueprint == status && buff.Context.MaybeCaster == context.MaybeCaster)
-                            {
-                                present = true;
-                                break;
-                            }
+                            present = true;
+                            break;
                         }
-                        if (!present)
-                            target.Unit.Descriptor.AddBuff(status, context, new TimeSpan?(2.Rounds().Seconds));
+                    }
+                    if (!present)
+                        target.Unit.Descriptor.AddBuff(status, context, new TimeSpan?(2.Rounds().Seconds));
 
-                   
+
 
                 }
-                
+
 
             }
-            public void OnAbilityEffectAppliedToTarget(AbilityExecutionContext context, TargetWrapper target) {}
+            public void OnAbilityEffectAppliedToTarget(AbilityExecutionContext context, TargetWrapper target) { }
 
             public override void OnEventAboutToTrigger(RuleCastSpell evt)
             {
@@ -672,7 +1013,7 @@ namespace thelostgrimoire
 
             public override void RunAction()
             {
-                
+
                 if (base.Target.Unit == null || !Target.Unit.Descriptor.HasFact(status))
                 {
                     UberDebug.LogError(this, "Invalid target for effect '{0}'", new object[]
@@ -686,7 +1027,7 @@ namespace thelostgrimoire
                     UberDebug.LogError(this, "Caster is missing", Array.Empty<object>());
                     return;
                 }
-                
+
                 int bonus = Context.MaybeCaster.Descriptor.Resources.GetResourceAmount(pool);
 
                 if (!Target.Unit.Descriptor.HasFact(Undead))
@@ -694,13 +1035,13 @@ namespace thelostgrimoire
                     int HealingTotal = bonus + 1;
                     int TargetMissingHP = Target.Unit.MaxHP - Target.Unit.HPLeft;
                     int HealingDone = TargetMissingHP < HealingTotal ? TargetMissingHP : HealingTotal;
-                    Context.TriggerRule<RuleHealDamage>(new RuleHealDamage(base.Context.MaybeCaster, base.Target.Unit, DiceFormula.Zero,HealingDone));
+                    Context.TriggerRule<RuleHealDamage>(new RuleHealDamage(base.Context.MaybeCaster, base.Target.Unit, DiceFormula.Zero, HealingDone));
                     HealingTotal -= HealingDone;
 
-                    if(HealingTotal>0)
+                    if (HealingTotal > 0)
                     {
                         int countguard = 1;
-                        while(HealingTotal>0)
+                        while (HealingTotal > 0)
                         {
                             UnitEntityData newtarget = FindAnotherTarget(Context.MaybeCaster, false);
                             if (newtarget == Context.MaybeCaster && !newtarget.Descriptor.HasFact(status))
@@ -709,7 +1050,7 @@ namespace thelostgrimoire
                             int newHealingDone = newTargetMissingHP < HealingTotal ? newTargetMissingHP : HealingTotal;
                             Context.TriggerRule<RuleHealDamage>(new RuleHealDamage(base.Context.MaybeCaster, newtarget, DiceFormula.Zero, newHealingDone));
                             var prefab = PrefabLink.Load(false);
-                            FxHelper.SpawnFxOnUnit(prefab, newtarget.View, null, default(Vector3)); 
+                            FxHelper.SpawnFxOnUnit(prefab, newtarget.View, null, default(Vector3));
                             HealingTotal -= newHealingDone;
 
                             if (countguard > Game.Instance.State.Units.Count)
@@ -725,7 +1066,7 @@ namespace thelostgrimoire
                 else
                 {
                     int DamageTotal = bonus + 1;
-                    int DamageDone = Target.Unit.HPLeft< DamageTotal ? Target.Unit.HPLeft : DamageTotal;
+                    int DamageDone = Target.Unit.HPLeft < DamageTotal ? Target.Unit.HPLeft : DamageTotal;
 
                     DirectDamage directDamage = new DirectDamage(new DiceFormula(0, DiceType.D10), DamageDone);
                     DamageBundle damage = new DamageBundle(new BaseDamage[]
@@ -744,7 +1085,7 @@ namespace thelostgrimoire
                             UnitEntityData newtarget = FindAnotherTarget(Context.MaybeCaster, true);
                             if (newtarget == Context.MaybeCaster && !newtarget.Descriptor.HasFact(status))
                                 break;
-                            
+
                             int newDamageDone = newtarget.HPLeft < DamageTotal ? newtarget.HPLeft : DamageTotal;
 
                             DirectDamage newdirectDamage = new DirectDamage(new DiceFormula(0, DiceType.D10), newDamageDone);
@@ -767,7 +1108,7 @@ namespace thelostgrimoire
 
                     Context.MaybeCaster.Descriptor.Resources.Spend(pool, bonus);
                 }
-                
+
                 foreach (UnitEntityData unitEntityData in Game.Instance.State.Units)
                 {
                     if (unitEntityData.Descriptor.Buffs.HasFact(status))
@@ -775,7 +1116,7 @@ namespace thelostgrimoire
 
                         Buff CasterBuff = FindCasterBuff(unitEntityData);
                         if (CasterBuff != null)
-                            unitEntityData.Buffs.RemoveFact(CasterBuff);     
+                            unitEntityData.Buffs.RemoveFact(CasterBuff);
                     }
                 }
             }
@@ -834,9 +1175,9 @@ namespace thelostgrimoire
             string flourishdesc = "You gain a +2 enhancement bonus on Bluff skill checks. This bonus increases by 1 for every 5 wizard levels you have, up to a maximum of +6 at 20th level. "/* +
                 "You're also able to weave illusion magic into your spells, making them harder to decipher for the purpose of counterspelling, " +
                 "the diffilculty to counter you spell is increased by 2, at lvl 10 the difficulty is increase by 4 and by 6 at level 20."*/;
-            string BaseDesc = "Deceptive Flourish: "+flourishdesc+"\nTerror(Su): "+terrordesc;
+            string BaseDesc = "Deceptive Flourish: " + flourishdesc + "\nTerror(Su): " + terrordesc;
             var illugreaterfeat = library.Get<BlueprintFeature>("f0585eb111ede2c4ebf00b057d069463");
-            string VarDesc = "Illusionists use magic to weave confounding images, figments, and phantoms to baffle and vex their foes.\n" + BaseDesc+"\n"+illugreaterfeat.Name+" : "+illugreaterfeat.Description;
+            string VarDesc = "Illusionists use magic to weave confounding images, figments, and phantoms to baffle and vex their foes.\n" + BaseDesc + "\n" + illugreaterfeat.Name + " : " + illugreaterfeat.Description;
             Sprite icon = Helpers.GetIcon("6717dbaef00c0eb4897a1c908a75dfe5");
             Sprite schoolicon = IllusionProgression.Icon;
             var terrorfx = Helpers.GetFx("bd9712a252d288e4991ea29a8569e23b");
@@ -874,7 +1215,7 @@ namespace thelostgrimoire
                     f.CheckedFacts = new BlueprintUnitFact[] { Undead };
                     f.UnlessFact = library.Get<BlueprintFeature>("1a5e7191279e7cd479b17a6ca438498c");//bloodline undead arcana
                 }),
-                Helpers.Create<AbilityTargetHasFact> (f => {
+                Helpers.Create<AbilityTargetHasFact>(f => {
                     f.CheckedFacts = new BlueprintUnitFact[] { Plant, Construct };
                     f.Inverted = true;
                 }),
@@ -902,7 +1243,7 @@ namespace thelostgrimoire
             //TerrorCast.CustomRange = ;
 
             // BEDEVILING AURA
-             
+
             var bedevileffectbuff = Helpers.CreateBuff(bedevilname + "EffectBuff", bedevildisplay, bedevildesc, Helpers.getGuid(bedevilname + "EffectBuff"), bedevilicon, BedevilFxBuff, null,
                 Helpers.Create<AddCondition>(c => c.Condition = UnitCondition.Slowed),
                 Helpers.Create<AddCondition>(c => c.Condition = UnitCondition.DisableAttacksOfOpportunity),
@@ -932,14 +1273,14 @@ namespace thelostgrimoire
                 a.Size = 30.Feet();
                 a.SpellResistance = false;
                 a.name = bedevilname + "Area";
-                
+
             });
             bedevilarea.SetComponents(
                 Helpers.Create<AbilityAreaEffectBuff>(c => {
                     c.Condition = Helpers.CreateConditionsCheckerAnd(Helpers.Create<ContextConditionIsEnemy>()
                         );
                     c.Buff = bedevileffectbuff;
-                    }),
+                }),
                 Helpers.Create<AbilityTargetHasNoFactUnless>(f => {
                     f.CheckedFacts = new BlueprintUnitFact[] { Undead };
                     f.UnlessFact = library.Get<BlueprintFeature>("1a5e7191279e7cd479b17a6ca438498c");//bloodline undead arcana
@@ -958,7 +1299,7 @@ namespace thelostgrimoire
             library.AddAsset(bedevilarea, Helpers.getGuid(bedevilarea.name));
 
             var bedevilresource = SchoolUtility.CopySchoolresource("ccd9239740802bd4eab4cb751467205d", true);
-            var bedevilbuff = Helpers.CreateBuff(bedevilname + "Buff", "", "",Helpers.getGuid(bedevilname+"Buff"), bedevilicon, BedevilFxCast, null,
+            var bedevilbuff = Helpers.CreateBuff(bedevilname + "Buff", "", "", Helpers.getGuid(bedevilname + "Buff"), bedevilicon, BedevilFxCast, null,
                 Helpers.Create<AddAreaEffect>(a => a.AreaEffect = bedevilarea)
                 );
             bedevilbuff.SetBuffFlags(BuffFlags.HiddenInUi);
@@ -970,22 +1311,22 @@ namespace thelostgrimoire
             bedevilability.DeactivateIfCombatEnded = true;
             bedevilability.IsOnByDefault = false;
             bedevilability.OnlyInCombat = true;
-            bedevilability.ResourceAssetIds = new string[] { BedevilFxCast.AssetId, BedevilFxBuff.AssetId, BedevilFxAura.AssetId};
+            bedevilability.ResourceAssetIds = new string[] { BedevilFxCast.AssetId, BedevilFxBuff.AssetId, BedevilFxAura.AssetId };
 
             var bedevilfeature = Helpers.CreateFeature(bedevilname + "GreaterFeature", bedevildisplay, bedevildesc, Helpers.getGuid(bedevilname + "GreaterFeature"), bedevilicon, FeatureGroup.WizardFeat,
                 bedevilresource.add,
                 bedevilability.CreateAddFact());
 
             var CounterSpellResist = SchoolUtility.CreateFeature("IllusionistCounterSpellResist", "", "", icon, 1, true, true);
-            var BaseFeature = SchoolUtility.CreateFeature(name + "BaseFeature", basename, BaseDesc, icon, 1, false, false, 
+            var BaseFeature = SchoolUtility.CreateFeature(name + "BaseFeature", basename, BaseDesc, icon, 1, false, false,
                 baseresource.add,
                 TerrorCast.CreateAddFact(),
                 CounterSpellResist.CreateAddFact(),
                 Helpers.Create<ReplaceAbilitiesStat>(rs => { rs.Ability = new BlueprintAbility[] { TerrorCast }; rs.Stat = StatType.Intelligence; }),
                 SchoolUtility.SpeciaListComponent(SpellSchool.Illusion),
                 Helpers.CreateAddContextStatBonus(StatType.CheckBluff, ModifierDescriptor.Enhancement),
-                Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.StartPlusDivStep, min: 1, max:5,
-                startLevel:-5, stepLevel:5, classes: new BlueprintCharacterClass[] {wizardclass})
+                Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.StartPlusDivStep, min: 1, max: 5,
+                startLevel: -5, stepLevel: 5, classes: new BlueprintCharacterClass[] { wizardclass })
                 );
             var OppositionIllusion = library.Get<BlueprintFeature>("6750ead44c0c034428c6509c68110375");
             var Progression = SchoolUtility.CreateSchoolVariantProgression(IllusionProgression, name, "Focused School - Phantasm", VarDesc, true,
@@ -995,7 +1336,7 @@ namespace thelostgrimoire
                     (1, OppositionSchool),
                     (8, bedevilfeature)
                     ));
-            
+
             OppositionIllusion.AddComponent(Helpers.PrerequisiteNoFeature(Progression));
             //Update to illusion base school (Adding Deceptive flourish)
             IllusionBaseFeature.AddComponents(Helpers.CreateAddContextStatBonus(StatType.CheckBluff, ModifierDescriptor.Enhancement), Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.StartPlusDivStep, min: 1, max: 5,
@@ -1032,7 +1373,7 @@ namespace thelostgrimoire
                     {
 
                         var Allystrength = Rulebook.Trigger<RuleCalculateAttackBonus>(new RuleCalculateAttackBonus(Ally, target, mainweapon.MaybeWeapon, 0));
-                        if(Allystrength.Result > strength)
+                        if (Allystrength.Result > strength)
                         {
 
                             strength = Allystrength.Result;
@@ -1040,7 +1381,7 @@ namespace thelostgrimoire
                         }
                     }
                 }
-                if(AllyToAttack != null)
+                if (AllyToAttack != null)
                     Game.Instance.CombatEngagementController.ForceAttackOfOpportunity(AllyToAttack, target);
             }
         }
@@ -1050,12 +1391,12 @@ namespace thelostgrimoire
             var diviner = library.Get<BlueprintFeature>("54d21b3221ea82a4d90d5a91b7872f3d");//diviner base feature
             diviner.AddComponent(Helpers.Create<TurnbasedInterface>());
         }
-       
-        public class TurnbasedInterface: RuleInitiatorLogicComponent<RuleInitiativeRoll>
+
+        public class TurnbasedInterface : RuleInitiatorLogicComponent<RuleInitiativeRoll>
         {
 
-            
-            
+
+
             public override void OnEventAboutToTrigger(RuleInitiativeRoll evt)
             {
                 var main = AccessTools.TypeByName("TurnBased.Main, TurnBased");
@@ -1070,15 +1411,16 @@ namespace thelostgrimoire
                         var combat = AccessTools.Property(core.GetType(), "Combat").GetValue(core);
                         HashSet<UnitEntityData> unitsToSurprise = (HashSet<UnitEntityData>)AccessTools.Field(combat.GetType(), "_unitsToSurprise").GetValue(combat);
                         unitsToSurprise.Add(Owner.Unit);
-                       
+
 
                     }
 
 
                 }
+
             }
 
-            
+
             public override void OnEventDidTrigger(RuleInitiativeRoll evt)
             {
             }
@@ -1104,7 +1446,7 @@ namespace thelostgrimoire
                 "    Great Traveler : At 8th level, a Poleiheira adherent become even more adept to traveling long distance. When traveling on the regional map she augments the travel speed of her group by 30%. ";
             string mount = "Mounts";
             string mountdesc = "When she travel Poleiheira adherent can summon a magical steed to her side that lasts for 2 hours, this allow her to resist fatigue for as much time.";
-            string mounupgradedesc = "The duration of the Poleiheira adherent mount ability increase by one Hour to a total of"; 
+            string mounupgradedesc = "The duration of the Poleiheira adherent mount ability increase by one Hour to a total of";
             string traveler = "Great Traveler";
             string travelerdesc = "At 8th level, a Poleiheira adherent become even more adept to traveling long distance. When traveling on the regional map she augments the travel speed of her group by 30%.";
 
@@ -1116,24 +1458,24 @@ namespace thelostgrimoire
 
 
             //School power for lvl 1+
-            var Mount1 = Helpers.CreateFeature(name + mount + "Feature1", mount, mountdesc, Helpers.getGuid(name + mount + "Feature1"), iconmount, FeatureGroup.WizardFeat, 
+            var Mount1 = Helpers.CreateFeature(name + mount + "Feature1", mount, mountdesc, Helpers.getGuid(name + mount + "Feature1"), iconmount, FeatureGroup.WizardFeat,
                 Helpers.Create<AddWearinessHours>(p => p.Hours = -2)
                 );
-            var Mount2 = Helpers.CreateFeature(name + mount + "Feature2", mount+" Upgrade",mounupgradedesc+" 3 hours.", Helpers.getGuid(name + mount + "Feature2"), iconmount, FeatureGroup.WizardFeat,
+            var Mount2 = Helpers.CreateFeature(name + mount + "Feature2", mount + " Upgrade", mounupgradedesc + " 3 hours.", Helpers.getGuid(name + mount + "Feature2"), iconmount, FeatureGroup.WizardFeat,
                 Helpers.Create<AddWearinessHours>(p => p.Hours = -3),
-                Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = Mount1 )
+                Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = Mount1)
                 );
-            var Mount3 = Helpers.CreateFeature(name + mount + "Feature3", mount+" Upgrade", mounupgradedesc + " 4 hours.", Helpers.getGuid(name + mount + "Feature3"), iconmount, FeatureGroup.WizardFeat,
+            var Mount3 = Helpers.CreateFeature(name + mount + "Feature3", mount + " Upgrade", mounupgradedesc + " 4 hours.", Helpers.getGuid(name + mount + "Feature3"), iconmount, FeatureGroup.WizardFeat,
                 Helpers.Create<AddWearinessHours>(p => p.Hours = -4),
                 Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = Mount2)
                 );
 
-            var Mount4 = Helpers.CreateFeature(name + mount + "Feature4", mount+" Upgrade", mounupgradedesc + " 5 hours.", Helpers.getGuid(name + mount + "Feature4"), iconmount, FeatureGroup.WizardFeat,
+            var Mount4 = Helpers.CreateFeature(name + mount + "Feature4", mount + " Upgrade", mounupgradedesc + " 5 hours.", Helpers.getGuid(name + mount + "Feature4"), iconmount, FeatureGroup.WizardFeat,
                 Helpers.Create<AddWearinessHours>(p => p.Hours = -5),
                 Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = Mount3)
                 );
 
-            var Mount5 = Helpers.CreateFeature(name + mount + "Feature5", mount+ " Upgrade", mounupgradedesc + " 6 hours.", Helpers.getGuid(name + mount + "Feature5"), iconmount, FeatureGroup.WizardFeat,
+            var Mount5 = Helpers.CreateFeature(name + mount + "Feature5", mount + " Upgrade", mounupgradedesc + " 6 hours.", Helpers.getGuid(name + mount + "Feature5"), iconmount, FeatureGroup.WizardFeat,
                 Helpers.Create<AddWearinessHours>(p => p.Hours = -6),
                 Helpers.Create<RemoveFeatureOnApply>(f => f.Feature = Mount4)
                 );
@@ -1157,7 +1499,7 @@ namespace thelostgrimoire
                 Helpers.CreateAddFact(BondedItem));
 
             // Creating the feature for new spell selection
-            var MoreSpell = Helpers.CreateParametrizedFeature(name+"MoreSpellParamFeature", Bond + ": supplemental spell", spellsupdesc, Helpers.getGuid(name + "MoreSpellParamFeature"), iconbook, FeatureGroup.WizardFeat, FeatureParameterType.LearnSpell, 
+            var MoreSpell = Helpers.CreateParametrizedFeature(name + "MoreSpellParamFeature", Bond + ": supplemental spell", spellsupdesc, Helpers.getGuid(name + "MoreSpellParamFeature"), iconbook, FeatureGroup.WizardFeat, FeatureParameterType.LearnSpell,
                 Helpers.Create<LearnSpellParametrized>(l => {
                     l.SpellcasterClass = wizardclass;
                     l.SpellList = wizardlist;
@@ -1181,7 +1523,7 @@ namespace thelostgrimoire
             MoreSpellSelection.AllFeatures = MoreSpellSelection.AllFeatures.AddToArray(MoreSpell);
 
             //Filling level entry for progression 
-            for (int i = 1; i<21; i++)
+            for (int i = 1; i < 21; i++)
             {
                 if (i == 1)
                     addFeatures.Add(Helpers.LevelEntry(1, Mount1));
@@ -1191,7 +1533,7 @@ namespace thelostgrimoire
                         addFeatures.Add(Helpers.LevelEntry(i, MoreSpellSelection, MoreSpellSelection, Mount2));
                     else if (i == 8)
                         addFeatures.Add(Helpers.LevelEntry(i, MoreSpellSelection, MoreSpellSelection, GreatTraveler));
-                    else if(i == 10)
+                    else if (i == 10)
                         addFeatures.Add(Helpers.LevelEntry(i, MoreSpellSelection, MoreSpellSelection, Mount3));
                     else if (i == 15)
                         addFeatures.Add(Helpers.LevelEntry(i, MoreSpellSelection, MoreSpellSelection, Mount4));
@@ -1209,7 +1551,7 @@ namespace thelostgrimoire
             //Make other bond inabailable
             string bookbondid = Helpers.getGuid(name + "bondedbook");
             var noadherent = Helpers.PrerequisiteNoFeature(archetypeselection);
-           
+
             foreach (BlueprintFeature bond in Arcanebondselection.AllFeatures)
             {
                 if (bond.AssetGuid != bookbondid)
@@ -1223,33 +1565,33 @@ namespace thelostgrimoire
             SpecialistSchoolSelection.Features = SpecialistSchoolSelection.Features.AddToArray(archetypeselection);
             SpecialistSchoolSelection.AllFeatures = SpecialistSchoolSelection.AllFeatures.AddToArray(archetypeselection);
 
-            
+
         }
 
 
- 
+
         public class GreatTravelerEffect : OwnedGameLogicComponent<UnitDescriptor>, IAreaActivationHandler, IGlobalSubscriber, IPartyHandler, IUnitLifeStateChanged
         {
 
             public bool OwnerIsActive()
             {
-                
-                   return Owner.State.IsConscious && Game.Instance.Player.Party.HasItem(Owner.Unit);
-                
+
+                return Owner.State.IsConscious && Game.Instance.Player.Party.HasItem(Owner.Unit);
+
             }
             public bool OtherAdherentInParty()
             {
-                
-                    var flag = false;
-                    foreach (UnitEntityData Member in Game.Instance.Player.Party)
-                    {
-                        if (Member == Owner.Unit)
-                            continue;
-                        if (Member.Descriptor.HasFact(Fact) && Member.Descriptor.State.IsConscious)
-                            flag = true;
-                    }
-                    return flag; 
-                
+
+                var flag = false;
+                foreach (UnitEntityData Member in Game.Instance.Player.Party)
+                {
+                    if (Member == Owner.Unit)
+                        continue;
+                    if (Member.Descriptor.HasFact(Fact) && Member.Descriptor.State.IsConscious)
+                        flag = true;
+                }
+                return flag;
+
             }
 
             public void Switch()
@@ -1281,13 +1623,13 @@ namespace thelostgrimoire
                         Changed = false;
                     }
                 }
-                    
-                    
-               
+
+
+
 
             }
 
-                      
+
 
             public void OnAreaActivated()
             {
@@ -1296,7 +1638,7 @@ namespace thelostgrimoire
                     Switch();
                     ManageSpeed();
                 }
-                
+
             }
             public void HandleUnitLifeStateChanged(UnitEntityData unit, UnitLifeState prevLifeState)
             {
@@ -1305,7 +1647,7 @@ namespace thelostgrimoire
                     Switch();
                     ManageSpeed();
                 }
-                
+
 
             }
 
@@ -1317,9 +1659,9 @@ namespace thelostgrimoire
                     Switch();
                     ManageSpeed();
                 }
-                
+
             }
-            
+
             public void HandleCompanionActivated(UnitEntityData unit)
             {
                 if (unit.Descriptor.HasFact(Fact) && Game.Instance.CurrentMode == GameModeType.GlobalMap)
@@ -1327,11 +1669,11 @@ namespace thelostgrimoire
                     Switch();
                     ManageSpeed();
                 }
-                
+
 
             }
 
-            
+
             public void HandleCompanionRemoved(UnitEntityData unit)
             {
                 if (unit.Descriptor.HasFact(Fact) && Game.Instance.CurrentMode == GameModeType.GlobalMap)
@@ -1339,7 +1681,7 @@ namespace thelostgrimoire
                     Switch();
                     ManageSpeed();
                 }
-                
+
             }
             static bool Changed;
             public float modifier = 2;
@@ -1468,7 +1810,7 @@ namespace thelostgrimoire
                 BondSelection.AllFeatures = BondSelection.AllFeatures.AddRangeToArray(allspellbond[i]);//BondSelection.AllFeatures.AddRangeToArray(spellbondwiz);
                 BondSelection.HideNotAvailibleInUI = true;
 
-                
+
 
 
 
@@ -1483,32 +1825,33 @@ namespace thelostgrimoire
             BondSelectionStep.Features = BondSelectionStep.Features.AddToArray(BondSelection);
             BondSelectionStep.AllFeatures = BondSelectionStep.AllFeatures.AddToArray(BondSelection);
 
-            
+
 
             //Adding stuff to arcane bond
             Arcanebondselection.Features = Arcanebondselection.Features.AddToArray(BondSelectionStep);
             Arcanebondselection.AllFeatures = Arcanebondselection.AllFeatures.AddToArray(BondSelectionStep);
-            
+
         }
-     
-      
+
+
 
         public class SpontaneousCastingParametrized : ParametrizedFeatureComponent
         {
-            
+
 
 
 
             public override void OnFactActivate()
             {
+
                 BlueprintAbility[] SpellSpontaneous = { null, null, null, null, null, null, null, null, null, null };
                 BlueprintAbility blueprintAbility = (!(base.Param != null)) ? null : (base.Param.Value.Blueprint as BlueprintAbility);
-                if(blueprintAbility.HasVariants)
+                if (blueprintAbility.HasVariants)
                 {
                     var Hasvariant = blueprintAbility.Variants;
-                    foreach(BlueprintAbility variant in Hasvariant)
+                    foreach (BlueprintAbility variant in Hasvariant)
                     {
-                        var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid(variant.name+ "BoundCopy"));
+                        var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid(variant.name + "BoundCopy"));
                         BlueprintAbility[] SpellSpontaneousmany = { null, null, null, null, null, null, null, null, null, null };
                         SpellSpontaneousmany[SpellLevel] = copy != null ? copy : variant;
                         Owner.DemandSpellbook(wizardclass).AddSpellConversionList(SpellSpontaneousmany);
@@ -1518,25 +1861,25 @@ namespace thelostgrimoire
                 else
                 {
                     var copy = library.TryGet<BlueprintAbility>(Helpers.getGuid(blueprintAbility.name + "BoundCopy"));
-                    SpellSpontaneous[SpellLevel] = copy != null? copy: blueprintAbility;
+                    SpellSpontaneous[SpellLevel] = copy != null ? copy : blueprintAbility;
                     Owner.DemandSpellbook(wizardclass).AddSpellConversionList(SpellSpontaneous);
                 }
 
-                
+
                 if (!Owner.DemandSpellbook(wizardclass).IsKnown(blueprintAbility))
                 {
-                    
+
                     Owner.DemandSpellbook(wizardclass).AddKnown(SpellLevel, blueprintAbility);
-                    
+
                 }
             }
             public override void OnFactDeactivate()
             {
-                
-            }
-           
 
-            
+            }
+
+
+
 
             public int SpellLevel;
 
@@ -1572,7 +1915,7 @@ namespace thelostgrimoire
                     NewSlection.AllFeatures = NewSlection.AllFeatures.AddToArray(originalschool);
                     Selection = NewSlection;
                     Selection.HideInCharacterSheetAndLevelUp = false;
-                    
+
                 }
 
                 Selection.Features = Selection.Features.AddToArray(newschool);
@@ -1629,23 +1972,28 @@ namespace thelostgrimoire
                 return feat;
             }
 
-            public BlueprintComponent[] CreateBaseAbility() {
+            public BlueprintComponent[] CreateBaseAbility()
+            {
                 BlueprintComponent[] Compo = new BlueprintComponent[1];
                 return Compo;
             }
 
-            public static wizardressource CreateWizardBaseResource(string name, Sprite icon)
+            public static wizardressource CreateWizardResource(string name, Sprite icon, bool SetAsBase= true)
             {
                 var resource = Helpers.CreateAbilityResource(name, "", "", Helpers.getGuid(name), icon);
+                if(SetAsBase)
                 resource.SetWizardBaseResource();
 
                 var addresource = Helpers.CreateAddAbilityResource(resource);
                 var resourcelogic = Helpers.CreateResourceLogic(resource, true);
+                var togglelogic = Helpers.CreateActivatableResourceLogic(resource, ActivatableAbilityResourceLogic.ResourceSpendType.NewRound);
+
                 var result = new wizardressource()
                 {
                     add = addresource,
                     logic = resourcelogic,
-                    resource = resource
+                    resource = resource,
+                    ToggleLogic = togglelogic
 
                 };
 
@@ -1656,7 +2004,7 @@ namespace thelostgrimoire
                 BlueprintAbilityResource resource = library.Get<BlueprintAbilityResource>(guid);
                 var addresource = Helpers.CreateAddAbilityResource(resource);
 
-                var resourcelogic =  Helpers.CreateResourceLogic(resource, true);
+                var resourcelogic = Helpers.CreateResourceLogic(resource, true);
                 var togglelogic = Helpers.CreateActivatableResourceLogic(resource, ActivatableAbilityResourceLogic.ResourceSpendType.NewRound);
                 var result = new wizardressource()
                 {
@@ -1676,19 +2024,21 @@ namespace thelostgrimoire
                 var resource = schoolbaseresources.Value[(int)school];
                 var addresource = Helpers.CreateAddAbilityResource(resource);
                 var resourcelogic = Helpers.CreateResourceLogic(resource, true);
+                var togglelogic = Helpers.CreateActivatableResourceLogic(resource, ActivatableAbilityResourceLogic.ResourceSpendType.NewRound);
                 var result = new wizardressource()
                 {
                     add = addresource,
                     logic = resourcelogic,
                     resource = resource,
-                    ToggleLogic = null
+                    ToggleLogic = togglelogic
 
                 };
 
                 return result;
             }
 
-            public  class wizardressource{
+            public class wizardressource
+            {
                 public BlueprintAbilityResource resource;
                 public AddAbilityResources add;
                 public AbilityResourceLogic logic;
@@ -1701,7 +2051,7 @@ namespace thelostgrimoire
                 return Helpers.Create<AddSpecialSpellList>(s => {
                     s.CharacterClass = @class == null ? wizardclass : @class;
                     s.SpellList = list;
-                    
+
                 });
 
             }
@@ -1744,39 +2094,39 @@ namespace thelostgrimoire
         {
             static void Postfix(TooltipData data, DescriptionBody body, bool isTooltip)
             {
-                
+
                 if (data.Buff != null)
                 {
-                    
+
                     string charname = data.Buff.Context.MaybeCaster.CharacterName != null ? data.Buff.Context.MaybeCaster.CharacterName : "unknow";
                     DescriptionBuilder.Templates.Separator1(body.ContentBox);
                     body.ContentBox.Add(DescriptionTemplatesBase.Bricks.TitleH4).SetText("This effect was created by " + charname + ".");
-                    
-                    
-                    
+
+
+
                 }
                 else
                 {
                     UberDebug.LogErrorChannel("UI", "No buff data inside tooltipdata", Array.Empty<object>());
                 }
-                
+
             }
-           
+
         }
 
         [HarmonyPatch(typeof(UnitCombatState))]
         [Harmony12.HarmonyPatch("IsFlanked", MethodType.Getter)]
         private static class MakeCreatureFlankedByBuff
         {
-            static void Postfix(UnitCombatState __instance, ref bool __result )
+            static void Postfix(UnitCombatState __instance, ref bool __result)
             {
                 try
-                { 
-                    if(AllwaysFlanked == null)
-                         AllwaysFlanked = library.Get<BlueprintBuff>(Helpers.getGuid("BedevilingAuraEffectBuff"));
+                {
+                    if (AllwaysFlanked == null)
+                        AllwaysFlanked = library.Get<BlueprintBuff>(Helpers.getGuid("BedevilingAuraEffectBuff"));
                     if (__instance.Unit.Descriptor.HasFact(AllwaysFlanked))
-                    __result = true;
-                
+                        __result = true;
+
                 }
                 catch (Exception ex)
                 {
@@ -1790,5 +2140,5 @@ namespace thelostgrimoire
 
 
     }
-   
+
 }
