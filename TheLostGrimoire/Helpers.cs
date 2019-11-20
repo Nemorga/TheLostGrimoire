@@ -138,7 +138,7 @@ namespace thelostgrimoire
 
         internal static readonly List<BlueprintScriptableObject> newAssets = new List<BlueprintScriptableObject>();
 #endif
-
+        ///<summary>Add a blueprint to the library</summary>
         public static void AddAsset(this LibraryScriptableObject library, BlueprintScriptableObject blueprint, String guid)
         {
             blueprintScriptableObject_set_AssetId(blueprint, guid);
@@ -245,17 +245,18 @@ namespace thelostgrimoire
         {
             SetComponents(obj, components.ToArray());
         }
-
         public static void AddAsset(this LibraryScriptableObject library, BlueprintScriptableObject blueprint, String guid1, String guid2)
         {
             library.AddAsset(blueprint, Helpers.MergeIds(guid1, guid2));
         }
 
+        ///<summary>Get a blueprint from the library, can and will throw error if type T is wrong or the Guid doesn't exist</summary>
         public static T Get<T>(this LibraryScriptableObject library, String assetId) where T : BlueprintScriptableObject
         {
             return (T)library.BlueprintsByAssetId[assetId];
         }
 
+        ///<summary>Like Get but return null if anything wrong happen when getting the blueprint</summary>
         public static T TryGet<T>(this LibraryScriptableObject library, String assetId) where T : BlueprintScriptableObject
         {
             BlueprintScriptableObject result;
@@ -1426,13 +1427,14 @@ namespace thelostgrimoire
             ability.Buff = buff;
             ability.ResourceAssetIds = Array.Empty<string>();
             ability.ActivationType = activationType;
-            set_ActivateWithUnitCommand(ability, commandType);
+            set_ActivateWithUnitCommand(ability,commandType);
             ability.SetComponents(components);
             ability.ActivateWithUnitAnimation = activateWithUnitAnimation;
             Main.library.AddAsset(ability, assetId);
             return ability;
         }
 
+       
         static readonly FastSetter set_ActivateWithUnitCommand = CreateFieldSetter<BlueprintActivatableAbility>("m_ActivateWithUnitCommand");
 
         public static ActivatableAbilityResourceLogic CreateActivatableResourceLogic(this BlueprintAbilityResource resource,

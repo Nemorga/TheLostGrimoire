@@ -1412,7 +1412,7 @@ namespace thelostgrimoire
                 Helpers.CreateResourceLogic(Resource)
                 );
             ability.ResourceAssetIds = new string[] { "8a80d991f3d68e84293e098a6faa7620", "725b02acb7286094688c0d5da974dcdc", "396af91a93f6e2b468f5fa1a944fae8a" };
-
+           
 
             //Feature
             var feature = Helpers.CreateFeature("ScarecrowCompanionFascinateGazeFeature", "Fascinating Gaze", "Three time a day, a scarecrow can make its eyes fascinating for two round. " +
