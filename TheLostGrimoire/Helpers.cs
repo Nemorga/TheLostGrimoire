@@ -188,6 +188,50 @@ namespace thelostgrimoire
             components.Insert(index, component);
             obj.SetComponents(components);
         }
+        /// <summary>
+        /// Fill the ResourceAssetid field so fx are prealoaded
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="assetid">The Guid of the fx used by the spell and its children (other ability, variant or buff)</param>
+        public static void SetAssetId(this BlueprintAbility spell, params String[] assetid)
+        {
+            spell.ResourceAssetIds = assetid;
+
+        }
+        /// <summary>
+        /// Set wich target are valid target for the spell
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="foes"></param>
+        /// <param name="allies"></param>
+        /// <param name="point"></param>
+        /// <param name="self"></param>
+        public static void SetCantarget(this BlueprintAbility spell, bool foes = false, bool allies = false, bool point = false, bool self =false)
+        {
+            spell.CanTargetEnemies = foes;
+            spell.CanTargetFriends = allies;
+            spell.CanTargetPoint = point;
+            spell.CanTargetSelf = self;
+        }
+        /// <summary>
+        /// Set the effect of the spell for tooltip
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="ally"></param>
+        /// <param name="foe"></param>
+        public static void SetEffectOn(this BlueprintAbility spell, AbilityEffectOnUnit ally = AbilityEffectOnUnit.None, AbilityEffectOnUnit foe = AbilityEffectOnUnit.None)
+        {
+            spell.EffectOnAlly = ally;
+            spell.EffectOnEnemy = foe;
+        }
+        /// <summary>
+        /// Make the cast time a full round action
+        /// </summary>
+        /// <param name="spell"></param>
+        public static void SetFullround(this BlueprintAbility spell)
+        {
+            Helpers.SetField(spell, "m_IsFullRoundAction", true);
+        }
 
         public static void AddComponent(this BlueprintScriptableObject obj, BlueprintComponent component)
         {
@@ -1565,6 +1609,7 @@ namespace thelostgrimoire
             BlueprintFeature feature = null, BlueprintFeature[] featureList = null,
             (int, int)[] customProgression = null)
         {
+
             var config = Create<ContextRankConfig>();
             setType(config, type);
             setBaseValueType(config, baseValueType);

@@ -56,6 +56,7 @@ using Kingmaker.Utility;
 using Kingmaker.Controllers.Projectiles;
 using Harmony12;
 using Newtonsoft.Json;
+using UnityEngine;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 
 namespace thelostgrimoire
@@ -68,7 +69,11 @@ namespace thelostgrimoire
         static BlueprintSpellList hunterlist = library.TryGet<BlueprintSpellList>("b161506e0b8f4116806a243f6838ae01");
         static BlueprintSpellList witchlist = library.TryGet<BlueprintSpellList>("422490cf62744e16a3e131efd94cf290");
         static BlueprintSpellList shamanlist = library.TryGet<BlueprintSpellList>("7113337f695742559ecdecc8905b132a");
-
+        static string Guid(string name) => Helpers.getGuid(name);
+        static BlueprintAbility Spell(String name, String displayName,
+            String description, Sprite icon, AbilityRange range, CommandType actionType = CommandType.Standard,
+            String duration= "", String savingThrow = "",
+            params BlueprintComponent[] components) => Helpers.CreateAbility(name, displayName, description, Guid(name), icon, AbilityType.Spell, actionType, range, duration, savingThrow, components);
 
         internal static void Load()
         {
@@ -78,7 +83,12 @@ namespace thelostgrimoire
             //needed patch
            
         }
+        public static void CreateImprovedTrueStrike()
+        {
 
+
+
+        }
         public static void CreateCounterSpells()
         {
          
@@ -159,7 +169,6 @@ namespace thelostgrimoire
             ability.EffectOnAlly = AbilityEffectOnUnit.Harmful;
             Helpers.SetField(ability, "m_IsFullRoundAction", true);
             ability.ResourceAssetIds = new string[] { fx.AssetId, fx2.AssetId };
-
 
 
             var abilitygreater = Helpers.CreateAbility(name + "GreaterAbility", "Greater Counterspell", "This spell is similar to Lesser Counterspell except that the caster level check receive a bonus of +5 to their caster level check.\n\n" +

@@ -151,10 +151,332 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateLifeSubSchool, "Live or die");
             Main.SafeLoad(CreateTeleportationSubSchool, "Not there");
             Main.SafeLoad(CreateAdmixtureSubSchool, "Many flavor of destruction");
+            Main.SafeLoad(CreateEnhancedmentSubSchool, "Be stronk");
+            Main.SafeLoad(CreateProphecySubschool, "It was written");
             //needed patch
             Main.ApplyPatch(typeof(ShowCasterNameOnBuffToolTip), "Anonymous buff killer");
             Main.ApplyPatch(typeof(MakeCreatureFlankedByBuff), "you're surounded");
         }
+
+
+        static void CreateProphecySubschool()
+        {
+            string name = "ProphecySchool";
+            string Name = "Focused School -- Prophecy";
+            string lvl1 = "InspiringPrediction";
+            string lvl1Name = "Inspiring Prediction(Su)";
+            string lvl1Desc = "A number of times per day equal to 3 + your Intelligence modifier, you can predict an ally’s success, bolstering others’ resolve. As a swift action, you can shout an inspiring prediction, granting each ally within 50 feet who can hear you a +4 luck bonus on her next attack roll, saving throw, or skill check.";
+
+            string lvl1b = "TheProphecy";
+            string Lvl1bName = "In Accordance with the Prophecy (Su)";
+            string Lvl1bDessc = "A number of times per day equal to your Intelligence modifier, you can publicly declare that your next spell is guided by prophecy as a Free Action. When you do, the next spell you cast has a 20% chance of fizzling (1–20 on a d%). If the spell does not fail, treat the spell as if it had been modified by the Empower Spell feat, even if you do not have that feat. At 12th level, the chance that the spell fizzles is reduced to 15% (1–15 on a d%). At 16th level, the chance is reduced to 10% (1–10 on a d%).";
+
+            BlueprintAbility DivinerFortune = library.Get<BlueprintAbility>("0997652c1d8eb164caae8a462401a25d");
+
+            string basedesc = DivinerFortune.Name + ": " + DivinerFortune.Description +
+                "\n" + lvl1Name + ": " + lvl1Desc;
+            string vardesc = basedesc + "\n" + Lvl1bName + ": " + Lvl1bDessc;
+
+            Sprite SchoolIcon = DivinationProgression.Icon;
+            Sprite CombatCasting = Helpers.GetIcon("06964d468fde1dc4aa71a92ea04d930d");
+            Sprite Shout = Helpers.GetIcon("f09453607e683784c8fca646eec49162");
+
+           
+            
+
+            PrefabLink CommonDivination = Helpers.GetFx("c388856d0e8855f429a83ccba67944ba");
+            //INSPIRING PREDICTION
+            var Predictionressource = SchoolUtility.CreateWizardResource(lvl1 + "Resource", SchoolIcon, true);
+
+            var PredictionBuff = Helpers.CreateBuff(lvl1+"Buff", lvl1Name, lvl1Desc, Guid(lvl1+"Buff"), Shout, CommonDivination, null,  
+                Helpers.Create<PredictionBuffBonus>()
+                );
+            var PredictionAbility = Helpers.CreateAbility(lvl1 + "Ability", lvl1Name, lvl1Desc, Guid(lvl1 + "Ability"), Shout, AbilityType.Supernatural, CommandType.Swift, AbilityRange.Personal, "1 round", "",
+                Helpers.CreateRunActions(Helpers.CreateApplyBuff(PredictionBuff, Helpers.CreateContextDuration(), false, false, false, false, true)),
+                Helpers.CreateAbilityTargetsAround(50.Feet(), TargetType.Ally),
+                Predictionressource.logic
+                );
+            PredictionAbility.EffectOnAlly = AbilityEffectOnUnit.Helpful;
+            PredictionAbility.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Omni;
+            PredictionAbility.HasFastAnimation = false;
+            PredictionAbility.EffectOnEnemy = AbilityEffectOnUnit.None;
+            PredictionAbility.ResourceAssetIds = new string[] { CommonDivination.AssetId};
+            //IN ACCORDANCE WITH THE PROPHECY
+            var prophecyresource = SchoolUtility.CreateWizardResource(lvl1b + "Resource", SchoolIcon, false);
+            prophecyresource.resource.SetIncreasedByStat(0, StatType.Intelligence);
+
+            var ProphecyBuff = Helpers.CreateBuff(lvl1b+"Buff", Lvl1bName, Lvl1bDessc, Guid(lvl1b + "Buff"), CombatCasting, CommonDivination, null, 
+                Helpers.Create<ProphecyBuff>()
+                );
+            var ProphecyAbility = Helpers.CreateAbility(lvl1b + "Ability", Lvl1bName, Lvl1bDessc, Guid(lvl1b + "Ability"), CombatCasting, AbilityType.Supernatural, CommandType.Free, AbilityRange.Personal, "", "",
+                Helpers.CreateRunActions(Helpers.CreateApplyBuff(ProphecyBuff, Helpers.CreateContextDuration(), false, false, true, true)),
+                prophecyresource.logic
+                );
+            ProphecyAbility.CanTargetSelf = true;
+            ProphecyAbility.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Self;
+            ProphecyAbility.ResourceAssetIds = new string[] { CommonDivination.AssetId };
+            var ProphecyFeature = SchoolUtility.CreateFeature(name + "BaseFeature", Name, vardesc, SchoolIcon, 1, false, false, 
+                prophecyresource.add, 
+                Predictionressource.add, 
+                SchoolUtility.GetWizardBaseResource(SpellSchool.Divination).add,
+                ProphecyAbility.CreateAddFact(),
+                PredictionAbility.CreateAddFact(),
+                DivinerFortune.CreateAddFact(), 
+                Helpers.Create<ReplaceAbilitiesStat>(c=> { c.Ability = new BlueprintAbility[]{ DivinerFortune}; c.Stat = StatType.Intelligence;}),
+                SchoolUtility.SpeciaListComponent(SpellSchool.Divination)
+                );
+            var TokenFeature = Helpers.CreateFeature(name+"TokenFeature", "In Accordance with the Prophecy : Spell Failure Chance decrease", "On 12th, 16th and 20th level, the spell failure chance induced by In Accordance with the Prophecy is decreased by 5% to minimum if 5% at level 20", Guid(name + "TokenFeature"), CombatCasting, FeatureGroup.None);
+            TokenFeature.HideInCharacterSheetAndLevelUp = true;
+
+            var progression = SchoolUtility.CreateSchoolVariantProgression(DivinationProgression, name, Name, vardesc, true,SchoolUtility.BuildLevelEntry(
+                (1, ProphecyFeature),
+                (1, OppositionSchool), 
+                (1, OppositionSchool), 
+                (12, TokenFeature), 
+                (16, TokenFeature), 
+                (20, TokenFeature)
+                ));
+
+            var OppositionDivination = library.Get<BlueprintFeature>("09595544116fe5349953f939aeba7611");
+            OppositionDivination.AddComponent(Helpers.PrerequisiteNoFeature(progression));
+
+        }
+        public class ProphecyBuff : BuffLogic, IInitiatorRulebookHandler<RuleCalculateAbilityParams>, IRulebookHandler<RuleCalculateAbilityParams>, IInitiatorRulebookHandler<RuleCastSpell>, IRulebookHandler<RuleCastSpell>, IInitiatorRulebookSubscriber
+        {
+           
+            public int Fail {
+                get
+                {
+                   int lvl = Owner.Progression.GetClassLevel(wizardclass);
+                    return lvl == 20 ? 5 : lvl > 15 ? 10 : lvl > 11 ? 15 : 20;
+                }
+            }
+
+            public  void OnEventAboutToTrigger(RuleCalculateAbilityParams evt)
+            {
+                if (evt.Spell != null && evt.Spellbook != null && evt.Spell.Type == AbilityType.Spell)
+                {
+                    evt.AddMetamagic(Metamagic.Empower);
+                    Applied = true;
+                    
+                }
+            }
+
+            public void OnEventAboutToTrigger(RuleCastSpell evt)
+            {
+                if (Applied)
+                {
+                    evt.SpellFailureChance += Fail;
+                    Applied = false;
+                    Buff.Remove();
+
+                }
+
+            }
+
+            public  void OnEventDidTrigger(RuleCalculateAbilityParams evt)
+            {
+            }
+
+
+            public void OnEventDidTrigger(RuleCastSpell evt)
+            {
+            }
+            
+            public bool Applied = false; 
+
+        }
+        public class PredictionBuffBonus : BuffLogic, IInitiatorRulebookHandler<RuleAttackRoll>, IInitiatorRulebookHandler<RuleSavingThrow>, IInitiatorRulebookHandler<RuleSkillCheck>,
+            IInitiatorRulebookSubscriber, IRulebookHandler<RuleAttackRoll>, IRulebookHandler<RuleSavingThrow>, IRulebookHandler<RuleSkillCheck>
+        {
+            public void OnEventAboutToTrigger(RuleAttackRoll evt)
+            {
+                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(4, this, ModifierDescriptor.Luck));
+            }
+
+            public void OnEventAboutToTrigger(RuleSavingThrow evt)
+            {
+                evt.AddTemporaryModifier(evt.Initiator.Stats.GetStat(evt.StatType).AddModifier(4, this, ModifierDescriptor.Luck));
+            }
+
+            public void OnEventAboutToTrigger(RuleSkillCheck evt)
+            {
+                evt.AddTemporaryModifier(evt.Initiator.Stats.GetStat(evt.StatType).AddModifier(4, this, ModifierDescriptor.Luck));
+            }
+
+            public void OnEventDidTrigger(RuleAttackRoll evt)
+            {
+                Buff.Remove();
+            }
+
+            public void OnEventDidTrigger(RuleSavingThrow evt)
+            {
+                Buff.Remove();
+
+            }
+
+            public void OnEventDidTrigger(RuleSkillCheck evt)
+            {
+                Buff.Remove();
+
+            }
+
+
+
+        }
+
+
+
+
+        static void CreateEnhancedmentSubSchool()
+        {
+            string name = "EnhancementSchool";
+            string Name = "Focused School -- Enhancement";
+            string lvl1 = "Augment";
+            string lvl1Name = "Augment (Sp)";
+            string lvl1Desc = "As a standard action, you can touch a creature and grant it either a +2 enhancement bonus to a single ability score of your choice or a +1 bonus to natural armor that " +
+                "stacks with any natural armor the creature might possess. At 10th level, the enhancement bonus to one ability score increases to +4. " +
+                "The natural armor bonus increases by +1 for every five wizard levels you possess, to a maximum of +5 at 20th level. " +
+                "This augmentation lasts a number of rounds equal to 1/2 your wizard level (minimum 1 round). " +
+                "ou can use this ability a number of times per day equal to 3 + your Intelligence modifier.";
+            string Lvl1abilitiesdesc = "As a standard action, you can touch a creature and grant it a {0} bonus to {1} for a number of rounds equal to 1/2 your wizard level (minimum 1 round).";
+
+            string lvl8 = "PerfectionofSelf";
+            string Lvl8Name = "Perfection of Self (Su)";
+            string Lvl8Dessc = "At 8th level, as a swift action you can grant yourself an enhancement bonus to a single ability score equal to 1/2 your wizard level (maximum +10) for one round." +
+                " You may use this ability for a number of times per day equal to your wizard level.";
+            string Lvl8abilitiesdesc = "As a swift action you can grant yourself an enhancement bonus to {0} equal to 1/2 your wizard level for one round.";
+
+            BlueprintFeature PhysicalEnhancement = library.Get<BlueprintFeature>("93919f8ce64dc5a4cbf058a486a44a1b");
+
+            string basedesc = PhysicalEnhancement.Name+": "+ PhysicalEnhancement.Description +
+                "\n" + lvl1Name + ": " + lvl1Desc;
+            string vardesc = basedesc + "\n" + Lvl8Name + ": " + Lvl8Dessc;
+
+            Sprite SchoolIcon = TransmutationProgression.Icon;
+
+            // Getting all the needed stuff to create the abilities in loop
+            Sprite Lvl1Icon = Helpers.GetIcon("c60969e7f264e6d4b84a1499fdcf9039"); //Enlarge Person 
+            Sprite Lvl8Icon = Helpers.GetIcon("4e0e9aba6447d514f88eff1464cc4763"); //Reduce person
+            Sprite[] Icons = new Sprite[] {
+                Helpers.GetIcon("4c3d08935262b6544ae97599b3a9556d"),
+                Helpers.GetIcon("de7a025d48ad5da4991e7d3c682cf69d"),
+                Helpers.GetIcon("a900628aea19aa74aad0ece0e65d091a"),
+                Helpers.GetIcon("ae4d3ad6a8fda1542acf2e9bbc13d113"),
+                Helpers.GetIcon("f0455c9295b53904f9e02fc571dd2ce1"),
+                Helpers.GetIcon("446f7bf201dc1934f96ac0a26e324803"),
+                Helpers.GetIcon("5b77d7cc65b8ab74688e74a37fc2f553")
+
+            };//BullStrength, Cat's Grace, Bear Endurance, Fox cunning, Owl wisdom, Eagle splendor, Barkskin 
+            PrefabLink TransmutationBuff = Helpers.GetFx("352469f228a3b1f4cb269c7ab0409b8e");
+            StatType[] Stats = new StatType[] { StatType.Strength, StatType.Dexterity, StatType.Constitution, StatType.Intelligence, StatType.Wisdom, StatType.Charisma, StatType.AC };
+
+
+
+            //CREATING AUGMENT 
+            BlueprintAbility[] AugmentVariants = new BlueprintAbility[7];
+            BlueprintBuff[] AugmentBuff = new BlueprintBuff[7];
+
+            var AugmentAbility = Helpers.CreateAbility(lvl1 + "BaseAbility", lvl1Name, lvl1Desc, Guid(lvl1+"BaseAbility"), Lvl1Icon, AbilityType.SpellLike, CommandType.Standard, AbilityRange.Touch, "1/2 Wizard level", "");
+            var Baseresource = SchoolUtility.GetWizardBaseResource(SpellSchool.Transmutation);
+            for (int i = 0; i< AugmentVariants.Length; i++)
+            {
+                string FormatedDesc = "";
+                if (i < 6)
+                {
+                    FormatedDesc = string.Format(Lvl1abilitiesdesc, "+2 (or +4 if you are lvl 10)", Stats[i].ToString());
+
+                    AugmentBuff[i] = Helpers.CreateBuff(lvl1 + Stats[i].ToString() + "buff", lvl1Name + ": " + Stats[i].ToString(), FormatedDesc, Guid(lvl1 + Stats[i].ToString() + "buff"), Icons[i], TransmutationBuff, null,
+                        Helpers.CreateAddContextStatBonus(Stats[i], ModifierDescriptor.Enhancement, ContextValueType.Rank),
+                        Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.Custom, min: 2, max: 4,
+                        classes: new BlueprintCharacterClass[] { wizardclass }, customProgression: new (int, int)[] { (9, 2), (20, 4) })
+                        );
+
+
+                }
+                else
+                {
+                    FormatedDesc = string.Format(Lvl1abilitiesdesc, "+ 1 per 5 wizard level", "Natural Armor");
+
+                    AugmentBuff[i] = Helpers.CreateBuff(lvl1 + "Natural" + Stats[i].ToString() + "buff", lvl1Name + ": Natural " + Stats[i].ToString(), FormatedDesc , Guid(lvl1 + "Natural" + Stats[i].ToString() + "buff"), Icons[i], TransmutationBuff, null,
+                        Helpers.CreateAddContextStatBonus(Stats[i], ModifierDescriptor.NaturalArmor, ContextValueType.Rank),
+                        Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.OnePlusDivStep, min: 1, max: 5, startLevel: 1, stepLevel: 5,
+                        classes: new BlueprintCharacterClass[] { wizardclass })
+                        );
+                }
+                AugmentVariants[i] = Helpers.CreateAbility(lvl1 + Stats[i].ToString() + "Variant", lvl1Name + ": " + Stats[i].ToString(), FormatedDesc, Guid(lvl1 + Stats[i].ToString() + "Variant"), Icons[i],
+                    AbilityType.SpellLike, CommandType.Standard, AbilityRange.Touch, "1/2 Wizard level", "", 
+                    Helpers.CreateRunActions(Helpers.CreateApplyBuff(AugmentBuff[i], Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.StatBonus)), true)),
+                    Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.Div2, AbilityRankType.StatBonus, 1, 10, classes: new BlueprintCharacterClass[] { wizardclass }),
+                    Baseresource.logic
+                    );
+                AugmentVariants[i].CanTargetFriends = true;
+                AugmentVariants[i].CanTargetSelf = true;
+                AugmentVariants[i].CanTargetEnemies = true;
+                AugmentVariants[i].EffectOnAlly = AbilityEffectOnUnit.Helpful;
+                AugmentVariants[i].EffectOnEnemy = AbilityEffectOnUnit.Helpful;
+                AugmentVariants[i].Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
+
+
+            }
+            AugmentAbility.AddComponent(AugmentAbility.CreateAbilityVariants(AugmentVariants));
+            AugmentAbility.AddComponents(Baseresource.logic);
+            AugmentAbility.ResourceAssetIds = new string[] { TransmutationBuff.AssetId};
+           
+            //PERFECTION OF SELF (PoF)
+            BlueprintAbility[] PoFVariants = new BlueprintAbility[6];
+            BlueprintBuff[] PoFBuff = new BlueprintBuff[6];
+            var GreaterResource = SchoolUtility.CopySchoolresource("bf214cd0561aebb43a789ff83f12928b");
+            for (int i = 0; i < PoFVariants.Length; i++)
+            {
+                string FormatDesc = string.Format(Lvl8abilitiesdesc, Stats[i].ToString());
+                PoFBuff[i] = Helpers.CreateBuff(lvl8 + Stats[i].ToString() + "Buff", Lvl8Name + ": " + Stats[i].ToString(), FormatDesc, Guid(lvl8 + Stats[i].ToString() + "Buff"), Icons[i], TransmutationBuff, null,
+                    Helpers.CreateAddContextStatBonus(Stats[i], ModifierDescriptor.Enhancement, ContextValueType.Rank),
+                    Helpers.CreateContextRankConfig(ContextRankBaseValueType.ClassLevel, ContextRankProgression.Div2, classes: new BlueprintCharacterClass[] { wizardclass })
+                    );
+                PoFVariants[i] = Helpers.CreateAbility(lvl8 + Stats[i].ToString() + "Variant", Lvl8Name + ": " + Stats[i].ToString(), FormatDesc, Guid(lvl8 + Stats[i].ToString() + "Variant"), Icons[i],
+                    AbilityType.Supernatural, CommandType.Swift, AbilityRange.Personal, "1 round", "",  
+                    Helpers.CreateRunActions(Helpers.CreateApplyBuff(PoFBuff[i], Helpers.CreateContextDuration(1, DurationRate.Rounds), false, false, true, false, false)),
+                    GreaterResource.logic
+                    );
+                PoFVariants[i].Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.SelfTouch;
+                PoFVariants[i].CanTargetSelf = true;
+            }
+            var PoFAbility = Helpers.CreateAbility(lvl8 + "BaseAbility", Lvl8Name, Lvl8Dessc, Guid(lvl8 + "BaseAbility"), Lvl8Icon, AbilityType.SpellLike, CommandType.Swift, AbilityRange.Personal, "1 round", "");
+            PoFAbility.AddComponent(PoFAbility.CreateAbilityVariants(PoFVariants));
+            PoFAbility.AddComponent(GreaterResource.logic);
+            PoFAbility.ResourceAssetIds = new string[] { TransmutationBuff.AssetId};
+
+            //FEATURE AND PROGRESSION
+
+            var BaseFeature = SchoolUtility.CreateFeature(name + "BaseFeature", Name, basedesc, TransmutationProgression.Icon, 1, false, false,
+                Baseresource.add,
+                PhysicalEnhancement.CreateAddFact(),
+                AugmentAbility.CreateAddFact(),
+                SchoolUtility.SpeciaListComponent(SpellSchool.Transmutation)
+                );
+
+            var GreatFeature = SchoolUtility.CreateFeature(name + "GreaterFeature", Lvl8Name, Lvl8Dessc, Lvl8Icon, 1, false, false, 
+                GreaterResource.add, 
+                PoFAbility.CreateAddFact()
+                );
+            var capstone = library.Get<BlueprintFeature>("6aa7d3496cd68e643adcd439a7306caa");
+
+            var schoolprogression = SchoolUtility.CreateSchoolVariantProgression(TransmutationProgression, name + "Progression", Name, vardesc, true,
+                SchoolUtility.BuildLevelEntry(
+                    (1, BaseFeature),
+                    (1, OppositionSchool), 
+                    (1, OppositionSchool), 
+                    (8, GreatFeature), 
+                    (20, capstone)
+                    ));
+
+            var TransOpposition = library.Get<BlueprintFeature>("fc519612a3c604446888bb345bca5234");
+            TransOpposition.AddComponent(Helpers.PrerequisiteNoFeature(schoolprogression));
+
+
+        }
+
 
         static void CreateAdmixtureSubSchool()
         {
@@ -176,7 +498,6 @@ namespace thelostgrimoire
                 "better result." +
                 "\n" + lvl1Name + ": " + lvl1Desc;
             string vardesc = basedesc + "\n" + Lvl8Name + ": " + Lvl8Dessc;
-
             BlueprintActivatableAbility ColdAbility = library.CopyAndAdd<BlueprintActivatableAbility>("dd484f0706325de40aee5dba15fbce45", lvl1 + "ColdAbility", Guid(lvl1 + "ColdAbility"));
             BlueprintActivatableAbility FireAbility = library.CopyAndAdd<BlueprintActivatableAbility>("924dfcd481c0be54c959c2846b3fb7da", lvl1 + "FireAbility", Guid(lvl1 + "FireAbility"));
             BlueprintActivatableAbility AcidAbility = library.CopyAndAdd<BlueprintActivatableAbility>("94ce51ed666fc8d42830aa9fe48897f9", lvl1 + "AcidAbility", Guid(lvl1 + "AcidAbility"));
@@ -324,6 +645,8 @@ namespace thelostgrimoire
                     (1, OppositionSchool), 
                     (8, GreaterFeature)
                     ));
+            var EvocOpposition = library.Get<BlueprintFeature>("c3724cfbe98875f4a9f6d1aabd4011a6");
+            EvocOpposition.AddComponent(Helpers.PrerequisiteNoFeature(AdmixtureProgression));
         }
         public static BlueprintActivatableAbility CreateElementalManipulation(string basename, string ElementName, string Description, Sprite Icon, DamageEnergyType Element, PrefabLink Aurafx, PrefabLink EffectBuffFx, PrefabLink AuraBuffFx, SchoolUtility.wizardressource ResourceWrapper)
 
