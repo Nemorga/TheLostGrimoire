@@ -1801,6 +1801,7 @@ namespace thelostgrimoire
         public static AbilityAreaEffectRunAction CreateAreaEffectRunAction(GameAction unitEnter = null, GameAction unitExit = null, GameAction unitMove = null, GameAction round = null)
         {
             var a = Create<AbilityAreaEffectRunAction>();
+            
             a.UnitEnter = CreateActionList(unitEnter);
             a.UnitExit = CreateActionList(unitExit);
             a.UnitMove = CreateActionList(unitMove);
