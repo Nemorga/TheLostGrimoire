@@ -124,7 +124,7 @@ namespace thelostgrimoire
 
             //needed patch
             Main.ApplyPatch(typeof(IgnoreAppoachPatch), "please work");
-            //Main.ApplyPatch(typeof(AugmentDetectionRadiusPacth), "please work");
+            Main.ApplyPatch(typeof(AugmentDetectionRadiusPacth), "please work");
         }
         public static void CreateInsectSpies()
         {
@@ -693,22 +693,20 @@ namespace thelostgrimoire
         [HarmonyPatch(typeof(PartyPerceptionController), nameof(PartyPerceptionController.Tick))]
         private static class AugmentDetectionRadiusPacth
         {
-            static BlueprintBuff Extended = GetBuff(Guid("InsectSpiesTokenBuff"));
-            static BlueprintBuff ExtendedG = GetBuff(Guid("InsectSpiesGreaterTokenBuff"));
+            static BlueprintBuff Extended = GetBuff(Guid("UnboundSightTokenBuff"));
+            static BlueprintBuff ExtendedG = GetBuff(Guid("UnboundSightGreaterTokenBuff"));
 
             private static bool Prefix(PartyPerceptionController __instance)
             {
-                var RollPerception = AccessTools.Method("Kingmaker.Controllers.MapObjects.PartyPerceptionController:RollPerception", new Type[] { typeof(UnitEntityData), typeof(StaticEntityData) });
                 
-                
-                float RadiusExtenion = 0;
-                List <StaticEntityData> list = ListPool<StaticEntityData>.Claim();
+
+
+                List<StaticEntityData> list = ListPool<StaticEntityData>.Claim();
                 AreaPersistentState loadedAreaState = Game.Instance.State.LoadedAreaState;
                 loadedAreaState.CollectAllEntities<StaticEntityData>(list);
                 foreach (UnitEntityData unit in Game.Instance.Player.ControllableCharacters)
                 {
-                    if (unit.Descriptor.HasFact(ExtendedG) || unit.Descriptor.HasFact(Extended))
-                        RadiusExtenion = 5f;
+                    
                     if (unit.HasMotionThisTick)
                     {
                         foreach (StaticEntityData Entity in list)
@@ -724,16 +722,23 @@ namespace thelostgrimoire
                                 {
                                     MapObjectEntityData mapObjectEntityData = Entity as MapObjectEntityData;
                                     if (mapObjectEntityData != null && mapObjectEntityData.View.Interactions.HasItem((i) => i is LootComponent && i.Enabled) &&
-                                        !mapObjectEntityData.WasHighlightedOnReveal && 
+                                        !mapObjectEntityData.WasHighlightedOnReveal &&
                                         num < (float)BlueprintRoot.Instance.StandartPerceptionRadius && !Game.Instance.Player.IsInCombat)
                                     {
                                         mapObjectEntityData.View.ForceHighlightOnReveal();
                                     }
                                 }
-                                else if (Entity.IsPerceptionRollAllowed(unit) && num < Entity.View.PerceptionCheckComponent.Radius + RadiusExtenion && unit.HasLOS(Entity.View.transform))
+                                else if (Entity.IsPerceptionRollAllowed(unit)  && unit.HasLOS(Entity.View.transform))
                                 {
-                                    Log.Write("Perception Roll| Distance :"+num+"| Perception Radius :"+ Entity.View.PerceptionCheckComponent.Radius+"| Extension : "+RadiusExtenion);
-                                    RollPerception.Invoke(null, new object[] { unit, Entity });
+                                    float RadiusExtenion = 0;
+
+                                    if (unit.Descriptor.HasFact(ExtendedG) || unit.Descriptor.HasFact(Extended))
+                                        RadiusExtenion = 5f;
+                                    if( num < Entity.View.PerceptionCheckComponent.Radius + RadiusExtenion)
+                                    { 
+                                    Log.Write("Perception Roll| Distance :" + num + "| Perception Radius :" + Entity.View.PerceptionCheckComponent.Radius + "| Extension : " + RadiusExtenion);
+                                    AccessTools.Method(typeof(PartyPerceptionController), "RollPerception", new Type[] { typeof(UnitEntityData), typeof(StaticEntityData) }).Invoke(null, new object[] { unit, Entity });
+                                    }
                                 }
                             }
                         }
@@ -742,8 +747,10 @@ namespace thelostgrimoire
 
                 return false;
             }
-            
+
         }
+
+
 
         [HarmonyPatch(typeof(UnitUseAbility))]
         [Harmony12.HarmonyPatch("ctor", Harmony12.MethodType.Constructor)]
