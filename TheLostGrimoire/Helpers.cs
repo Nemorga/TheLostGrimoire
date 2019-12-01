@@ -740,7 +740,7 @@ namespace thelostgrimoire
 
         public static LocalizedString reflexHalfDamage, savingThrowNone;
 
-        public static BlueprintSpellList wizardSpellList, magusSpellList, druidSpellList, clericSpellList, paladinSpellList, inquisitorSpellList, alchemistSpellList, bardSpellList;
+        public static BlueprintSpellList wizardSpellList, magusSpellList, druidSpellList, clericSpellList, paladinSpellList, inquisitorSpellList, alchemistSpellList, bardSpellList, rangerSpellList;
 
         public static BlueprintItemWeapon touchWeapon;
         public static BlueprintItemWeapon rayWeapon;
@@ -799,6 +799,7 @@ namespace thelostgrimoire
             inquisitorSpellList = library.Get<BlueprintSpellList>("57c894665b7895c499b3dce058c284b3");
             alchemistSpellList = library.Get<BlueprintSpellList>("f60d0cd93edc65c42ad31e34a905fb2f");
             bardSpellList = library.Get<BlueprintSpellList>("25a5013493bdcf74bb2424532214d0c8");
+            rangerSpellList = library.Get<BlueprintSpellList>("29f3c338532390546bc5347826a655c4");
 
             touchWeapon = library.Get<BlueprintItemWeapon>("bb337517547de1a4189518d404ec49d4"); // TouchItem
             rayWeapon = library.Get<BlueprintItemWeapon>("f6ef95b1f7bb52b408a5b345a330ffe8"); //ray weapon

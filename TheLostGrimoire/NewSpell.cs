@@ -1,6 +1,7 @@
 ﻿
 
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using Kingmaker.Blueprints;
@@ -11,14 +12,19 @@ using Kingmaker.Blueprints.Items.Armors;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Blueprints.Classes.Spells;
 using Kingmaker.Blueprints.Facts;
+using Kingmaker.Blueprints.Items;
+using Kingmaker.Controllers.MapObjects;
+using Kingmaker.View.MapObjects;
 using Kingmaker.Blueprints.Items.Equipment;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Root.Strings;
+using Kingmaker.Controllers;
 using Kingmaker.Designers;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Designers.Mechanics.Buffs;
 using Kingmaker.Designers.Mechanics.Recommendations;
+using Kingmaker.EntitySystem;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.ElementsSystem;
@@ -54,7 +60,9 @@ using Kingmaker.UnitLogic.Mechanics.Components;
 using Kingmaker.UnitLogic.Mechanics.Conditions;
 using Kingmaker.UnitLogic.Parts;
 using Kingmaker.Utility;
+using Kingmaker.View;
 using Kingmaker.Controllers.Projectiles;
+using Pathfinding.Util;
 using Harmony12;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -69,6 +77,7 @@ namespace thelostgrimoire
         static LibraryScriptableObject library => Main.library;
         static Sprite GetIcon(string id) => Helpers.GetIcon(id);
         static BlueprintAbility GetAbility(string id) => library.Get<BlueprintAbility>(id);
+        static BlueprintFeature GetFeat(string id) => library.Get<BlueprintFeature>(id);
         static BlueprintBuff GetBuff(string id) => library.Get<BlueprintBuff>(id);
         static BlueprintCharacterClass wizardclass = Main.library.Get<BlueprintCharacterClass>("ba34257984f4c41408ce1dc2004e342e");
         static BlueprintSpellList hunterlist = library.TryGet<BlueprintSpellList>("b161506e0b8f4116806a243f6838ae01");
@@ -98,7 +107,8 @@ namespace thelostgrimoire
             return buff;
         }
         static BlueprintBuff tokenbuff(string name) => spellbuff(name + "Token", "", "", wizardclass.Icon, null, null, StackingType.Replace, BuffFlags.HiddenInUi);
-
+        static AbilityEffectRunAction RunAction(params GameAction[] actions) => Helpers.CreateRunActions(actions);
+        static SpellComponent Divination = Helpers.CreateSpellComponent(SpellSchool.Divination);
         static PrefabLink CommonDivination = Helpers.GetFx("c388856d0e8855f429a83ccba67944ba");
 
 
@@ -108,13 +118,232 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateCounterSpells, "zapy zap");
             Main.SafeLoad(CreateImprovedTrueStrike, "never miss");
             Main.SafeLoad(CreateClairevoyance, "see far");
+            Main.SafeLoad(CreateDetectEnemy, "see you");
+            Main.SafeLoad(CreateHeigthenedAwerness, "feel my senses");
+            Main.SafeLoad(CreateInsectSpies, "fly fly my minions!");
+
             //needed patch
             Main.ApplyPatch(typeof(IgnoreAppoachPatch), "please work");
+            //Main.ApplyPatch(typeof(AugmentDetectionRadiusPacth), "please work");
+        }
+        public static void CreateInsectSpies()
+        {
+            Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");
+            string name = "UnboundSight";
+            string display = "Unbound Sight";
+            string desc = "";
+
+
+            var buff = tokenbuff(name);
+            var Gbuff = tokenbuff(name+"Greater");
+
+            var spell = Spell(name, display, desc, icon, AbilityRange.Personal, duration: "1 minute/ level", components: new BlueprintComponent[] {
+                Divination,
+                RunAction(Helpers.CreateApplyBuff(buff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default), DurationRate.Minutes), true, true,true))
+            });
+            spell.SetCantarget(self: true);
+            spell.AvailableMetamagic = Metamagic.Quicken | Metamagic.Heighten;
+            spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Self;
+
+            Helpers.AddSpell(spell);
+            spell.AddToSpellList(Helpers.wizardSpellList, 2);
+            spell.AddToSpellList(Helpers.rangerSpellList, 1);
+            spell.AddToSpellList(Helpers.druidSpellList, 2);
+            if (witchlist != null)
+                spell.AddToSpellList(witchlist, 2);
+
+            var Gpell = Spell(name + "Greater", display + ", Greater", "This function like "+display+" except that you can target another creature."+desc, icon, AbilityRange.Touch, duration: "1 minute/ level", components: new BlueprintComponent[] {
+                Divination, 
+                RunAction(Helpers.CreateApplyBuff(Gbuff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default), DurationRate.Minutes), true, true,true))
+            });
+            Gpell.SetCantarget(self: true, allies: true);
+            Gpell.AvailableMetamagic = Metamagic.Quicken | Metamagic.Heighten | Metamagic.Reach;
+            Gpell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
+
+            Helpers.AddSpell(Gpell);
+            Gpell.AddToSpellList(Helpers.wizardSpellList, 5);
+            spell.AddToSpellList(Helpers.rangerSpellList, 4);
+            spell.AddToSpellList(Helpers.druidSpellList, 4);
+            if (witchlist != null)
+                spell.AddToSpellList(witchlist, 5);
 
         }
-        public static void CreateClairevoyance()
+        public class AugmentLineOfSight : AbilityAreaEffectLogic
+        {
+            protected override void OnTick(MechanicsContext context, AreaEffectEntityData areaEffect)
+            {
+                var caster = context.MainTarget.Unit;
+                if (!context.MainTarget.IsUnit)
+                {
+                    Log.Write("NOPE!!");
+                    return;
+                }
+                List<StaticEntityData> list = ListPool<StaticEntityData>.Claim();
+                AreaPersistentState loadedAreaState = Game.Instance.State.LoadedAreaState;
+                loadedAreaState.CollectAllEntities<StaticEntityData>(list);
+                if (context.MainTarget.Unit.HasMotionThisTick)
+                {
+                    foreach (StaticEntityData Entity in list)
+                    {
+                        if (Entity.IsInGame && !Entity.IsInFogOfWar)
+                        {
+                            float num = caster.DistanceTo(Entity.View.transform.position);
+                            if (!Entity.IsPerceptionCheckPassed && Entity.View.PerceptionCheckComponent == null)
+                            {
+                                Entity.IsPerceptionCheckPassed = true;
+                            }
+                            else if (Entity.IsPerceptionRollAllowed(caster) && num < Entity.View.PerceptionCheckComponent.Radius && caster.HasLOS(Entity.View.transform))
+                            {
+                                RollPerception(caster, Entity);
+                            }
+                        }
+                    }
+                }
+            }
+            private static void RollPerception(UnitEntityData character, StaticEntityData data)
+            {
+                int dc = data.View.PerceptionCheckComponent.DC;
+                RuleSkillCheck ruleSkillCheck = Rulebook.Trigger<RuleSkillCheck>(new RuleSkillCheck(character, StatType.SkillPerception, dc)
+                {
+                    Reason = data
+                });
+                data.LastPerceptionRollRank[character] = character.Stats.SkillPerception.BaseValue;
+                data.IsPerceptionCheckPassed = ruleSkillCheck.IsPassed;
+                if (ruleSkillCheck.IsPassed)
+                {
+                    EventBus.RaiseEvent<IPerceptionHandler>(delegate (IPerceptionHandler h)
+                    {
+                        h.OnEntityNoticed(data, character);
+                    });
+                }
+               
+            }
+
+        }
+
+        public static void CreateHeigthenedAwerness()
+        {
+            Sprite icon = GetIcon("4093d5a0eb5cae94e909eb1e0e1a6b36");
+            string name = "HeightenedAwareness";
+            string display = "Heightened Awareness";
+            string desc = "You enter a heightened state of awareness that allows you to notice more about your surroundings and recall information effortlessly. You gain a +2 competence bonus on Perception checks, Initiative checks and on all Knowledge checks.";
+
+            BlueprintBuff buff = spellbuff(name, display, desc, icon, CommonDivination, components: new BlueprintComponent[] {
+                Helpers.CreateAddStatBonus(StatType.SkillPerception, 2, ModifierDescriptor.Competence),
+                Helpers.CreateAddStatBonus(StatType.Initiative, 2, ModifierDescriptor.Competence),
+                Helpers.CreateAddStatBonus(StatType.SkillKnowledgeArcana, 2, ModifierDescriptor.Competence),
+                Helpers.CreateAddStatBonus(StatType.SkillKnowledgeWorld, 2, ModifierDescriptor.Competence),
+                Helpers.CreateAddStatBonus(StatType.SkillLoreNature, 2, ModifierDescriptor.Competence),
+                Helpers.CreateAddStatBonus(StatType.SkillLoreReligion, 2, ModifierDescriptor.Competence)
+            });
+
+            BlueprintAbility spell = Spell(name, display, desc, icon, AbilityRange.Personal, CommandType.Standard, duration:"10 minutes/level", 
+                components: new BlueprintComponent[] {
+                    Helpers.CreateRunActions(Helpers.CreateApplyBuff(buff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default), DurationRate.TenMinutes), true, true, true)),
+                    Helpers.CreateSpellComponent(SpellSchool.Divination)
+                });
+            spell.SetCantarget(self: true);
+            spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Self;
+            spell.SetEffectOn();
+            spell.AvailableMetamagic = Metamagic.Quicken | Metamagic.Extend | Metamagic.Heighten;
+
+            Helpers.AddSpell(spell);
+            spell.AddToSpellList(Helpers.wizardSpellList, 1);
+            spell.AddToSpellList(Helpers.alchemistSpellList, 1);
+            spell.AddToSpellList(Helpers.bardSpellList, 1);
+            spell.AddToSpellList(Helpers.druidSpellList, 1);
+            spell.AddToSpellList(Helpers.inquisitorSpellList, 1);
+            spell.AddToSpellList(Helpers.rangerSpellList, 1);
+            if(shamanlist != null)
+                spell.AddToSpellList(shamanlist, 1);
+
+        }
+
+        public static void CreateDetectEnemy()
         {
             Sprite icon = GetIcon("82962a820ebc0e7408b8582fdc3f4c0c");
+            string name = "DetectEnemy";
+            string display = "Discern Enemies' Location";
+            string desc = "A discern location spell is among the most powerful means of locating creatures or objects. Nothing short of a mind blank spell keep you from learning the exact location of all the hostile creature in the area you are in. The spell reveals the name of each creature and its location.\nNote: this spell adds map marker on the local map.";
+            BlueprintUnitFact POI = library.Get<BlueprintUnitFact>("d74ba40ce400c854f9487b720550cc82");
+            BlueprintUnitFact marker_POI = library.Get<BlueprintUnitFact>("a1fac90afc6b3814f9e89bcdcd9fda24");
+            BlueprintUnitFact marker_unit = library.Get<BlueprintUnitFact>("86c643ff85c5d1843bb8ec3d15f6ff24");
+            BlueprintUnitFact marker_POI_always = library.Get<BlueprintUnitFact>("8d665cf41716dc24581137ee84ecec27");
+            BlueprintUnitFact marker_VIT = library.Get<BlueprintUnitFact>("c4cbe77f822100f4d85e907fa9a50e9a");
+            BlueprintBuff MindBlank = GetBuff("35f3724d4e8877845af488d167cb8a89");
+
+            var marker = Helpers.CreateFeature(name + "marker", "", "", Guid(name + "marker"), icon, FeatureGroup.None,
+                Helpers.Create<AddLocalMapMarker>(m => { m.Type = Kingmaker.UI.ServiceWindow.LocalMap.LocalMap.MarkType.Poi; m.ShowIfNotRevealed = true; })
+                );
+
+            var buff = spellbuff(name, display, desc, icon, components: new BlueprintComponent[] {
+                Helpers.Create<AddTemporaryFeat>(t => t.Feat = marker),
+                Helpers.CreateSpellComponent(SpellSchool.Divination)
+            });
+            buff.SetBuffFlags(BuffFlags.HiddenInUi | BuffFlags.IsFromSpell);
+
+            var spell = Spell(name, display, desc, icon, AbilityRange.Unlimited, CommandType.Standard,"", "10 minutes", "Will", 
+                Helpers.CreateRunActions(Helpers.Create<ApplySuperBuff>(a => { a.buff = buff; a.avoid = new BlueprintUnitFact[] {POI, marker_POI, marker_POI_always, marker_unit, marker_VIT, MindBlank }; })),
+                Helpers.CreateSpellComponent(SpellSchool.Divination)
+                );
+            spell.SpellResistance = true;
+            spell.AvailableMetamagic = Metamagic.Heighten;
+            spell.SetCantarget(self: true);
+            spell.SetEffectOn(foe: AbilityEffectOnUnit.Harmful);
+            spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Self;
+            spell.SetFullround();
+            spell.MaterialComponent.Item = library.Get<BlueprintItem>("92752bbbf04dfa1439af186f48aee0e9");
+            spell.MaterialComponent.Count = 1;
+            Helpers.AddSpell(spell);
+
+            spell.AddToSpellList(Helpers.wizardSpellList, 8);
+            spell.AddToSpellList(Helpers.clericSpellList, 8);
+            if (witchlist != null)
+                spell.AddToSpellList(witchlist, 8);
+            if (shamanlist != null)
+                spell.AddToSpellList(shamanlist, 8); 
+
+
+        }
+        public class ApplySuperBuff : ContextAction
+        {
+            public override string GetCaption()
+            {
+                return string.Format("Detecting Enemies");
+            }
+
+            public override void RunAction()
+            {
+                foreach (UnitEntityData unit in Game.Instance.State.Units)
+                {
+                    if(unit.IsPlayersEnemy && !unit.Descriptor.State.IsDead && unit.Faction != trap)
+                    {
+                        bool dont = false;
+                        foreach(BlueprintUnitFact avoidit in avoid)
+                        {
+                            if (unit.Descriptor.HasFact(avoidit))
+                                dont = true;
+                        }
+                        if (!dont)
+                        {
+                            RuleSavingThrow Save = Context.TriggerRule(new RuleSavingThrow(unit, SavingThrowType.Will, Context.Params.DC));
+                            if(!Save.IsPassed)
+                                unit.Descriptor.AddBuff(buff, Context, new TimeSpan?(10.Minutes()));
+
+                        }
+
+                    }
+                }
+            }
+            public BlueprintBuff buff;
+            public BlueprintUnitFact[] avoid;
+            static BlueprintFaction trap = library.Get<BlueprintFaction>("d75c5993785785d468211d9a1a3c87a6");
+                
+        }
+
+        public static void CreateClairevoyance()
+        {
+            Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");
             string name = "Clairevoyance";
             string display = "Clairaudience-Clairvoyance";
             string desc = "Clairaudience/clairvoyance creates an invisible magical sensor at a specific location that enables you to hear or see (your choice) almost as if you were there." +
@@ -150,21 +379,32 @@ namespace thelostgrimoire
             spell.SetEffectOn();
             spell.AvailableMetamagic = Metamagic.Extend;
             spell.AddToSpellList(Helpers.wizardSpellList, 3);
+            spell.AddToSpellList(Helpers.bardSpellList, 3);
+            if(witchlist!= null)
+                spell.AddToSpellList(witchlist, 3);
+            if(shamanlist != null)
+                spell.AddToSpellList(shamanlist, 3);
 
             Helpers.AddSpell(spell);
 
 
         }
-        public class AOERevealZone : BlueprintComponent, IAreaEffectHandler
+        public class AOERevealZone : AbilityAreaEffectLogic
         {
-           public  void HandleAreaEffectSpawned(AreaEffectEntityData area)
+           protected override void OnRound(MechanicsContext context, AreaEffectEntityData area)
             {
-               area.View.
+                FogOfWarController.AddRevealer(area.View.transform);
+                foreach (AreaEffectEntityData AreaEntity in Game.Instance.State.AreaEffects)
+                {
+                    if (AreaEntity != area && AreaEntity.Blueprint== AreaBlueprint)
+                    {
+                        if (AreaEntity.Context.MaybeCaster == area.Context.MaybeCaster)
+                            AreaEntity.FadeOutViewAndDestroy();
+                    }
+                }
+
             }
 
-            
-            public void HandleAreaEffectDestroyed(AreaEffectEntityData area)
-            { }
 
             public BlueprintAbilityAreaEffect AreaBlueprint;
 
@@ -450,7 +690,61 @@ namespace thelostgrimoire
 
         }
 
-        
+        [HarmonyPatch(typeof(PartyPerceptionController), nameof(PartyPerceptionController.Tick))]
+        private static class AugmentDetectionRadiusPacth
+        {
+            static BlueprintBuff Extended = GetBuff(Guid("InsectSpiesTokenBuff"));
+            static BlueprintBuff ExtendedG = GetBuff(Guid("InsectSpiesGreaterTokenBuff"));
+
+            private static bool Prefix(PartyPerceptionController __instance)
+            {
+                var RollPerception = AccessTools.Method("Kingmaker.Controllers.MapObjects.PartyPerceptionController:RollPerception", new Type[] { typeof(UnitEntityData), typeof(StaticEntityData) });
+                
+                
+                float RadiusExtenion = 0;
+                List <StaticEntityData> list = ListPool<StaticEntityData>.Claim();
+                AreaPersistentState loadedAreaState = Game.Instance.State.LoadedAreaState;
+                loadedAreaState.CollectAllEntities<StaticEntityData>(list);
+                foreach (UnitEntityData unit in Game.Instance.Player.ControllableCharacters)
+                {
+                    if (unit.Descriptor.HasFact(ExtendedG) || unit.Descriptor.HasFact(Extended))
+                        RadiusExtenion = 5f;
+                    if (unit.HasMotionThisTick)
+                    {
+                        foreach (StaticEntityData Entity in list)
+                        {
+                            if (Entity.IsInGame && !Entity.IsInFogOfWar)
+                            {
+                                float num = unit.DistanceTo(Entity.View.transform.position);
+                                if (!Entity.IsPerceptionCheckPassed && Entity.View.PerceptionCheckComponent == null)
+                                {
+                                    Entity.IsPerceptionCheckPassed = true;
+                                }
+                                else if (Entity.IsPerceptionCheckPassed)
+                                {
+                                    MapObjectEntityData mapObjectEntityData = Entity as MapObjectEntityData;
+                                    if (mapObjectEntityData != null && mapObjectEntityData.View.Interactions.HasItem((i) => i is LootComponent && i.Enabled) &&
+                                        !mapObjectEntityData.WasHighlightedOnReveal && 
+                                        num < (float)BlueprintRoot.Instance.StandartPerceptionRadius && !Game.Instance.Player.IsInCombat)
+                                    {
+                                        mapObjectEntityData.View.ForceHighlightOnReveal();
+                                    }
+                                }
+                                else if (Entity.IsPerceptionRollAllowed(unit) && num < Entity.View.PerceptionCheckComponent.Radius + RadiusExtenion && unit.HasLOS(Entity.View.transform))
+                                {
+                                    Log.Write("Perception Roll| Distance :"+num+"| Perception Radius :"+ Entity.View.PerceptionCheckComponent.Radius+"| Extension : "+RadiusExtenion);
+                                    RollPerception.Invoke(null, new object[] { unit, Entity });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+            
+        }
+
         [HarmonyPatch(typeof(UnitUseAbility))]
         [Harmony12.HarmonyPatch("ctor", Harmony12.MethodType.Constructor)]
         [HarmonyPatch(new Type[] { typeof(CommandType), typeof(AbilityData), typeof(TargetWrapper) })]
