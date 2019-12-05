@@ -96,7 +96,21 @@ namespace thelostgrimoire
             //needed patch
             
         }
-
+        public static BlueprintCheck CreateCheck(string name, int num, StatType type, int dc, BlueprintCueBase success, BlueprintCueBase fail, bool hidden = false,  DCModifier[] dCModifier = null, ConditionsChecker condition = null, params BlueprintComponent[] components )
+        {
+            BlueprintCheck o = Helpers.Create<BlueprintCheck>();
+            o.Success = success;
+            o.Fail = fail;
+            o.Hidden = hidden;
+            o.DC = dc;
+            o.DCModifiers = dCModifier == null ? Array.Empty<DCModifier>() : dCModifier;
+            o.Type = type;
+            o.Conditions = condition == null ? new ConditionsChecker() : condition;
+            o.name = "Check_" + name + num;
+            o.SetComponents(components);
+            library.AddAsset(o, Guid(o.name));
+            return o;
+        }
         public static BlueprintDialog CreateBookEvent(string name, CueSelection FirstCue, Condition[] conditions = null, GameAction[] startaction = null, GameAction[] finishaction = null, 
             GameAction[] replaceaction = null, params BlueprintComponent[] components )
         {
@@ -149,7 +163,7 @@ namespace thelostgrimoire
             p.Answers = answers;
             p.Cues = cues;
 
-
+            p.Title = Helpers.CreateString(p.name + ".Title", title);
             p.OnShow = new ActionList();
             p.OnShow.Actions = onshowaction == null? Array.Empty<GameAction>() : onshowaction;
 
@@ -196,24 +210,31 @@ namespace thelostgrimoire
 
             return o;
         }
-        public static void CreateTree( (BlueprintAnswer answer, CueSelection cueSelection)[] Answernextcue, (BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent)[] AnswerParenting, 
-            (BlueprintCueBase Cuechild, BlueprintScriptableObject parent)[] CueBookParenting)
+        public static void AnswerNextCue(params (BlueprintAnswer answer, CueSelection cueSelection)[] Answernextcue)
         {
-            foreach((BlueprintAnswer answer, CueSelection selection)item in Answernextcue)
+            foreach ((BlueprintAnswer answer, CueSelection selection) item in Answernextcue)
             {
                 item.answer.NextCue = item.selection;
             }
-            foreach((BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent) item in AnswerParenting)
+        }
+        public static void ParentingAnswer(params (BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent)[] AnswerParenting)
+        {
+            foreach ((BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent) item in AnswerParenting)
             {
                 item.Answerchild.ParentAsset = item.parent;
             }
-            foreach((BlueprintCueBase Cuechild, BlueprintScriptableObject parent) item in CueBookParenting)
+        }
+        public static void ParentingCue(params (BlueprintCueBase Cuechild, BlueprintScriptableObject parent)[] CueBookParenting)
+        {
+            foreach ((BlueprintCueBase Cuechild, BlueprintScriptableObject parent) item in CueBookParenting)
             {
                 item.Cuechild.ParentAsset = item.parent;
             }
 
-
         }
+            
+       
+        
         public static CueSelection CreateCueSelection(Strategy strategy = Strategy.First, params BlueprintCueBase[] cues)
         {
             CueSelection s = new CueSelection();

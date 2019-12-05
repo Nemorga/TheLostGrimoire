@@ -169,7 +169,7 @@ namespace thelostgrimoire
             // Code taken from GameStarter.Awake(). PF:K logging can be enabled with command line flags,
             // but when developing the mod it's easier to force it on.
             var dataPath = ApplicationPaths.persistentDataPath;
-            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.Full);
             UberLogger.Logger.Enabled = true;
             var text = Path.Combine(dataPath, "GameLog.txt");
             if (File.Exists(text))

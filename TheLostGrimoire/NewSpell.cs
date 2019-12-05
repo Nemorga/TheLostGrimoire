@@ -71,6 +71,7 @@ using Kingmaker.Designers.EventConditionActionSystem.Actions;
 using Kingmaker.Designers.EventConditionActionSystem.Conditions;
 using Kingmaker.DialogSystem.Blueprints;
 using Kingmaker.DialogSystem;
+using Kingmaker.Designers.EventConditionActionSystem.Evaluators;
 
 namespace thelostgrimoire
 {
@@ -133,50 +134,159 @@ namespace thelostgrimoire
 
         public static void CreateContacPLane()
         {
-
-            var AnswerYes = BookEvents.CreateAnswer("Test", 0, "Yes");
-            var AnswerNo = BookEvents.CreateAnswer("Test", 1, "No");
-            var AnswerBye = BookEvents.CreateAnswer("Test", 2, "Close");
-
-            var CueFirst = BookEvents.CreateCue("Test", 0, "Do you want unlimited power?");
-            var CuetoYes = BookEvents.CreateCue("Test", 1, "Too Bad! You're Ugly", Helpers.CreateConditionsCheckerAnd(Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerYes; s.CurrentDialog = true; })));
-            var CuetoNo = BookEvents.CreateCue("Test", 2, "Meh You're no fun", Helpers.CreateConditionsCheckerAnd(Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerNo; s.CurrentDialog = true; }) ));
-
-
-            var BookPage = BookEvents.CreateBookPage("Test", 0, new List<BlueprintCueBase> { CueFirst, CuetoNo, CuetoYes }, new List<BlueprintAnswerBase> { AnswerYes, AnswerNo, AnswerBye }, "1dabb49b2d57f1b4da20d50b1e503069");
-            BookPage.ShowOnce = false;
-            BookPage.ShowOnceCurrentDialog = false;
-
-            var Dialog = BookEvents.CreateBookEvent("test", BookEvents.CreateCueSelection(Strategy.First,BookPage));
-            
-
-            BookEvents.CreateTree(
-                new (BlueprintAnswer, CueSelection)[]{ 
-                (AnswerYes, BookEvents.CreateCueSelection(Strategy.First, CuetoYes)),
-                (AnswerNo, BookEvents.CreateCueSelection(Strategy.First, CuetoNo)),
-                (AnswerBye, new CueSelection())},
-                new (BlueprintAnswerBase, BlueprintScriptableObject)[]
-            {
-                (AnswerBye, BookPage), (AnswerYes, BookPage),(AnswerNo, BookPage)
-            },
-                new (BlueprintCueBase, BlueprintScriptableObject)[] 
-                {
-                    (BookPage, Dialog),
-                    (CueFirst, BookPage), 
-                    (CuetoNo, BookPage),
-                    (CuetoYes, BookPage)
-                });
-
-
-
-
             Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");
             string name = "Contact";
             string display = "Contact";
             string desc = "bcuiau";
+            
+
+            BlueprintBuff buffarcane = spellbuff(name+"Arcane", "Knowledge from another dimension", desc, icon, null, null, StackingType.Replace, BuffFlags.RemoveOnRest | BuffFlags.StayOnDeath,
+                Helpers.CreateAddStatBonus(StatType.SkillKnowledgeArcana, 5, ModifierDescriptor.UntypedStackable)
+                );
+            BlueprintBuff buffworld = spellbuff(name + "World", "Knowledge from another dimension", desc, icon, null, null, StackingType.Replace, BuffFlags.RemoveOnRest | BuffFlags.StayOnDeath,
+                Helpers.CreateAddStatBonus(StatType.SkillKnowledgeWorld, 5, ModifierDescriptor.UntypedStackable)
+                );
+            BlueprintBuff buffreligion = spellbuff(name + "Religion", "Knowledge from another dimension", desc, icon, null, null, StackingType.Replace, BuffFlags.RemoveOnRest | BuffFlags.StayOnDeath,
+                Helpers.CreateAddStatBonus(StatType.SkillLoreReligion, 5, ModifierDescriptor.UntypedStackable)
+                );
+            BlueprintBuff buffnature = spellbuff(name + "Nature", "Knowledge from another dimension", desc, icon, null, null, StackingType.Replace, BuffFlags.RemoveOnRest | BuffFlags.StayOnDeath,
+                Helpers.CreateAddStatBonus(StatType.SkillLoreNature, 5, ModifierDescriptor.UntypedStackable)
+                );
+            //BlueprintAbility TokenIscasrer
+
+            var AnswerContinue = BookEvents.CreateAnswer("ContactPlane", 0, "Continue...");
+            //var AnswerNo = BookEvents.CreateAnswer("ContactPlane", 1, "No");
+            var AnswerBye = BookEvents.CreateAnswer("ContactPlane", 2, "But… No, you made a mistake : the power, the danger. You must leave at once, before anything happens to you.");
+            var AnswerBye2 = BookEvents.CreateAnswer("ContactPlane", 3, "But… No, you made a mistake : the power, the danger. You must leave at once, before anything happens to you.");
+            
+            var AnswerEasy = BookEvents.CreateAnswer("ContactPlane", 5, "I will go to the strange forest, where I feel some spirit of lesser power may have answer.");
+            //var AnswerAverage = BookEvents.CreateAnswer("ContactPlane", 6, "I will go to the city, where some higher spirits may know more.");
+            //var AnswerHard = BookEvents.CreateAnswer("ContactPlane", 7, "I will go to the heart of this plane, where I feel the greatest and wisest spirit reside.");
+            CharacterSelection charselect = new CharacterSelection();
+            charselect.SelectionType = CharacterSelection.Type.Keep;
+
+            List<BlueprintAnswerBase> easyanswer = new List<BlueprintAnswerBase>();
+            var AnswerEasyArcane = BookEvents.CreateAnswer("ContactPlane", 6, "Give me knowledge of the planes, magic and spells! [Bonus to Knowledge: Arcane until next rest]", onselect: Helpers.CreateActionList(Helpers.Create<AttachBuff>(b => { b.Buff = buffarcane; b.Target = Helpers.Create<DialogInitiator>(); })), charselection: charselect);
+            easyanswer.Add(AnswerEasyArcane);
+            var AnswerEasyWorld = BookEvents.CreateAnswer("ContactPlane", 7, "Give me knowledge of History, of the folks and their tradition! [Bonus to Knowledge: World until next rest]", onselect: Helpers.CreateActionList(Helpers.Create<AttachBuff>(b => { b.Buff = buffworld; b.Target = Helpers.Create<DialogInitiator>(); })), charselection: charselect);
+            easyanswer.Add(AnswerEasyWorld);
+            var AnswerEasyNature = BookEvents.CreateAnswer("ContactPlane", 8, "I want to know about the natural world, about animals and plants! [Bonus to Lore: Nature until next rest]", onselect: Helpers.CreateActionList(Helpers.Create<AttachBuff>(b => { b.Buff = buffnature; b.Target = Helpers.Create<DialogInitiator>(); })), charselection: charselect);
+            easyanswer.Add(AnswerEasyNature);
+            var AnswerEasyReligion = BookEvents.CreateAnswer("ContactPlane", 9, "I want to know the gods, their teaching and the things they despise! [Bonus to Lore: Religion until next rest]", onselect: Helpers.CreateActionList(Helpers.Create<AttachBuff>(b => { b.Buff = buffreligion; b.Target = Helpers.Create<DialogInitiator>(); })), charselection: charselect);
+            easyanswer.Add(AnswerEasyReligion);
+            var AnswerEasyEnemy = BookEvents.CreateAnswer("ContactPlane", 10, "I will go to ");
+            easyanswer.Add(AnswerEasyEnemy);
+            var AnswerEasyTrap = BookEvents.CreateAnswer("ContactPlane", 11, "I will go to the ");
+            easyanswer.Add(AnswerEasyTrap);
+            var AnswerEasyHidden = BookEvents.CreateAnswer("ContactPlane", 12, "I will go to the strange");
+            easyanswer.Add(AnswerEasyHidden);
+
+            Condition[] Donotshow = new Condition[] { };
+            Condition[] Doshow = new Condition[] { };
+            foreach(BlueprintAnswer answer in easyanswer )
+            {
+                Donotshow = Donotshow.AddToArray(Helpers.Create<AnswerSelected>(c => { c.Answer = answer; c.CurrentDialog = true; c.Not = true; }));
+                Doshow = Doshow.AddToArray(Helpers.Create<AnswerSelected>(c => { c.Answer = answer; c.CurrentDialog = true; }));
+            }
+            foreach (BlueprintAnswer answer in easyanswer)
+            {
+                answer.ShowConditions.Conditions = Donotshow;
+                answer.ShowConditions.Operation = Operation.And;
+            }
+
+            //var Buffanswerlist = Helpers.Create<BlueprintAnswersList>(l => { l.Answers = easyanswer;l.ShowOnce = true; });
+            //List<BlueprintAnswerBase> easyanswer2 = new List<BlueprintAnswerBase>();
+            //easyanswer2.AddRange(easyanswer);
+            var AnswerBye3 = BookEvents.CreateAnswer("ContactPlane", 13, "Leave", Doshow);
+            AnswerBye3.ShowConditions.Operation = Operation.Or;
+            easyanswer.Add(AnswerBye3);
+
+            
+
+
+            var CueFirst = BookEvents.CreateCue("ContactPlane", 0, "As you speak the words of power, you feel your body going numb, your sense of your surroundings fades, your vision blurs. Finally, as your companions disappear from your sight, and as your mind leave your body,  there is only darkness.\nBut, far, far away, in what is otherwise an eerie void : a light, a star, tinkling in the distance. Another plane, your destination. Your mind set course for it, sailing the void as if all the abysses were chasing you and then, you feel it. The power, the knowledge of being greater than yours, greater than anything you encountered.\nAs you come closer and closer, a strange world start to reveal itself inside the light... ");
+            var CueArrival = BookEvents.CreateCue("ContactPlane", 1, "Strange lands, strange cities, strange beings walking their trails and streets... like nothing you ever saw.\nAnd again, this feeling that drew you here: the knowledge and power. You’ve yet to ask your question but the weight of possible answer is already overwhelming, straining your mind as if you had spent days at a library without sleeping.\nYou must make a choice, you know it. Where will you seek answer? Who (or what) will you ask for wisdom? And you must be careful, the inhabitants of this plane do not care for your mind or its capability. The more knowledge you seek, the more danger to your mind. ");
+
+            var CueEasy = BookEvents.CreateCue("ContactPlane", 2, "You are surrounded by trees of multiple and strange essence, some familiar, others unknown. Is it a jungle? A forest of pine tree? Something else? \nWhatever the answer, you find out that while you were musing about the tree, many being drew close to you. Animal, spirit and otherwise of nature unknown: they wait beside you as if you were the one in charge. \nSomehow you are. They are waiting for a question to answer. What will you ask?");
+            CueEasy.OnShow.Actions = new GameAction[] {Helpers.Create<SetActingUnit>(c => c.unit = Helpers.Create<DialogInitiator>()) };
+            //var CueEasyResult = BookEvents.CreateCue("ContactPlane", 2, "You are surrounded by trees of multiple and strange essence, some familiar, others unknown. Is it a jungle? A forest of pine tree? Something else? \nWhatever the answer, you find out that while you were musing about the tree, many being drew close to you. Animal, spirit and otherwise of nature unknown: they wait beside you as if you were the one in charge. \nSomehow you are. They are waiting for a question to answer. What will you ask?");
+            //var CueAverage = BookEvents.CreateCue("ContactPlane", 3, "");
+            //var CueHard = BookEvents.CreateCue("ContactPlane", 4, "");
+            string End = "There is no answer. No sound, nothing but a flash of light and then...\nOnly silence.\nSilence and pain.\nPain, as your mind is instantly filled with new knowledge, and seems to be about to explode. But the wisdom is here, you can feel it… know it. New ideas, new notions, visions of distant land, patterns of forgotten runes, songs never heard by a living man, payers to ancient god…\nIf only you could harness them, control the influx, keep it from being a spiraling mess, a wave of pure thought and pain.\nAssembling all the powers of your mind, you gather a powerful wall of will, a channel made of ideas. You mastered spells and arcane might : nothing will shatter your mind!\nThe wave of knowledge crash against the dam of your will…";
+
+
+
+            var CueSuccess = BookEvents.CreateCue("ContactPlane", 5, End + "\nAnd stop there, broken, dispersed and slowly funneled into your memory. The pain subsides gently and you start to really understand what answers you were given. But as you want to thanks whoever answered you, you realize that you are back into your body. ");
+            var CueFail = BookEvents.CreateCue("ContactPlane", 6, End + "\nBut its force is so mighty that you can not handle it. As the pain keep on rising you feel all your mental barriers being broken one by one, all your well organized thought being disrupted and finally, even your conscience cannot withstand the full power of the answer that was gifted to you. Under this total assault, you lose consciousness, having only the time to hear a mocking laughter.\nYou regain consciousness a few minutes later and, to your relief, all of your mind seems in one piece and the knowledge you sought is here. But you have lost precious time and are exhausted.");
+
+            
+
+
+            var BookPage = BookEvents.CreateBookPage("ContactPlane", 0, new List<BlueprintCueBase> { CueFirst }, new List<BlueprintAnswerBase> { AnswerContinue, AnswerBye }, "90e75a92e9fbcc340b2869a5347c946b", title:"Contact Other Plane");
+            var BookPage1 = BookEvents.CreateBookPage("ContactPlane", 1, new List<BlueprintCueBase> { CueArrival }, new List<BlueprintAnswerBase> {AnswerEasy, AnswerBye2 }, "acff890219eb26140b40a312b3e7c047");
+
+            var BookPageEasy = BookEvents.CreateBookPage("ContactPlane", 2, new List<BlueprintCueBase> { CueEasy, CueSuccess, CueFail }, easyanswer, "d32a596156bd4db41b1ec6e19a09356f");
+            //var BookPageAverage = BookEvents.CreateBookPage("ContactPlane", 3, new List<BlueprintCueBase> { CueAverage }, new List<BlueprintAnswerBase> { AnswerBye2 }, "7e01dd21e02de5d408c86b16e689a817");
+            //var BookPageHard = BookEvents.CreateBookPage("ContactPlane", 4, new List<BlueprintCueBase> { CueHard }, new List<BlueprintAnswerBase> { AnswerBye2 }, "7372713ea8ec8a243813a3278a1ba57c");
+
+
+            var CheckEasy = BookEvents.CreateCheck("ContactPlane", 0, StatType.Intelligence, 8, null, null);
+            CueSuccess.Conditions.Conditions = new Condition[] { Helpers.Create<CheckPassed>(c => c.Check = CheckEasy) };
+            CueFail.Conditions.Conditions = new Condition[] { Helpers.Create<CheckFailed>(c => c.Check = CheckEasy) };
+            CheckEasy.Success = BookPageEasy;
+            CheckEasy.Fail = BookPageEasy;
+
+            var Dialog = BookEvents.CreateBookEvent("ContactPlane", BookEvents.CreateCueSelection(Strategy.First,BookPage));
+
+
+            BookEvents.AnswerNextCue((AnswerContinue, BookEvents.CreateCueSelection(Strategy.First, BookPage1)),
+                (AnswerBye, new CueSelection()),
+                (AnswerBye2, new CueSelection()),
+                (AnswerBye3, new CueSelection()),
+                (AnswerEasy, BookEvents.CreateCueSelection(Strategy.First, BookPageEasy)),
+                (AnswerEasyArcane, BookEvents.CreateCueSelection(Strategy.First, CheckEasy)),
+                (AnswerEasyWorld, BookEvents.CreateCueSelection(Strategy.First, CheckEasy)),
+                (AnswerEasyNature, BookEvents.CreateCueSelection(Strategy.First, CheckEasy)),
+                (AnswerEasyReligion, BookEvents.CreateCueSelection(Strategy.First, CheckEasy)),
+                (AnswerEasyEnemy, BookEvents.CreateCueSelection(Strategy.First, BookPageEasy)),
+                (AnswerEasyTrap, BookEvents.CreateCueSelection(Strategy.First, BookPageEasy)),
+                (AnswerEasyHidden, BookEvents.CreateCueSelection(Strategy.First, BookPageEasy)));
+
+
+            BookEvents.ParentingAnswer(
+                (AnswerBye, BookPage), 
+                (AnswerContinue, BookPage), 
+                (AnswerBye2, BookPage1), 
+                (AnswerBye3, BookPageEasy), (AnswerEasy, BookPage1), (AnswerEasyArcane, BookPageEasy),
+                (AnswerEasyWorld, BookPageEasy), (AnswerEasyReligion, BookPageEasy), (AnswerEasyNature, BookPageEasy), (AnswerEasyTrap, BookPageEasy), (AnswerEasyHidden, BookPageEasy),
+                (AnswerEasyEnemy, BookPageEasy));
+
+            BookEvents.ParentingCue(
+                (BookPage, Dialog),    
+                (CueFirst, BookPage),
+                (BookPage1, AnswerContinue),
+                (CueArrival, BookPage1),
+                (BookPageEasy, AnswerEasy),
+                (CueEasy, BookPageEasy), 
+                (CheckEasy, BookPageEasy),
+                (CueFail, CheckEasy), 
+                (CueSuccess, CheckEasy)
+                
+                );
+                
+          
+                    
+                    
+              
+
+
+
+
+            
             var spell = Spell(name, display, desc, icon, AbilityRange.Personal, components: new BlueprintComponent[] {
-                RunAction(Helpers.Create<StartDialog>(d =>{
+                RunAction(Helpers.Create<SpellStartDialogue>(d =>{
                     d.Dialogue = Dialog;
+                    
                     
                     })),
                 Divination
@@ -185,6 +295,41 @@ namespace thelostgrimoire
             Helpers.AddSpell(spell);
             spell.AddToSpellList(Helpers.wizardSpellList, 1);
 
+
+        }
+        public class SetActingUnit : GameAction
+        {
+            public override string GetCaption()
+            {
+                return "Make Unit the Acting Unit";
+            }
+
+            public override void RunAction()
+            {
+                Traverse traverse = Traverse.Create(Game.Instance.DialogController);
+                traverse.Property("ActingUnit").SetValue(unit.GetValue());
+                Log.Write(Game.Instance.DialogController.ActingUnit.CharacterName);
+                
+            }
+
+            public UnitEvaluator unit;
+        }
+        public class SpellStartDialogue : ContextAction
+        {
+            public override void RunAction()
+            {
+                
+                Game.Instance.DialogController.StartDialogWithoutTarget(Dialogue, speakerName: null, initiator: Context.MaybeCaster);
+
+
+            }
+
+            public override string GetCaption()
+            {
+                return string.Format("Start Dialog ({0})", Dialogue.NameSafe());
+            }
+            public BlueprintDialog Dialogue;
+            
 
         }
         public static void CreateInsectSpies()
