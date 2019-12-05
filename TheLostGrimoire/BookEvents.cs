@@ -149,6 +149,7 @@ namespace thelostgrimoire
             p.Answers = answers;
             p.Cues = cues;
 
+
             p.OnShow = new ActionList();
             p.OnShow.Actions = onshowaction == null? Array.Empty<GameAction>() : onshowaction;
 
@@ -195,12 +196,12 @@ namespace thelostgrimoire
 
             return o;
         }
-        public static void CreateTree( (BlueprintAnswer answer, List<BlueprintCueBase> cues, Strategy strategy)[] Answernextcue, (BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent)[] AnswerParenting, 
+        public static void CreateTree( (BlueprintAnswer answer, CueSelection cueSelection)[] Answernextcue, (BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent)[] AnswerParenting, 
             (BlueprintCueBase Cuechild, BlueprintScriptableObject parent)[] CueBookParenting)
         {
-            foreach((BlueprintAnswer answer, List<BlueprintCueBase> cues, Strategy strategy)item in Answernextcue)
+            foreach((BlueprintAnswer answer, CueSelection selection)item in Answernextcue)
             {
-                item.answer.NextCue = CreateCueSelection(item.cues, item.strategy);
+                item.answer.NextCue = item.selection;
             }
             foreach((BlueprintAnswerBase Answerchild, BlueprintScriptableObject parent) item in AnswerParenting)
             {
@@ -213,14 +214,14 @@ namespace thelostgrimoire
 
 
         }
-        public static CueSelection CreateCueSelection(List<BlueprintCueBase> cues, Strategy strategy = Strategy.First)
+        public static CueSelection CreateCueSelection(Strategy strategy = Strategy.First, params BlueprintCueBase[] cues)
         {
             CueSelection s = new CueSelection();
-            s.Cues = cues;
+            s.Cues.AddRange(cues);
             s.Strategy = strategy;
             return s; 
         }
-        public static BlueprintCue CreateCue(string name, int num, string text, Condition[] conditions = null, AlignmentShift shift = null, bool showonce = true, bool showoncecurrentdialog = true, bool movecamera = true, bool checkdistance = true, 
+        public static BlueprintCue CreateCue(string name, int num, string text, ConditionsChecker conditions = null, AlignmentShift shift = null, bool showonce = true, bool showoncecurrentdialog = true, bool movecamera = true, bool checkdistance = true, 
             bool turnspeaker = true,  params BlueprintComponent[] components )
         {
             BlueprintCue o = Helpers.Create<BlueprintCue>();
@@ -240,8 +241,7 @@ namespace thelostgrimoire
 
             o.TurnSpeaker = turnspeaker;
 
-            o.Conditions = new ConditionsChecker();
-            o.Conditions.Conditions = conditions == null ? Array.Empty<Condition>() : conditions ;
+            o.Conditions = conditions == null ? new ConditionsChecker() : conditions;
 
             o.SetComponents(components);
 

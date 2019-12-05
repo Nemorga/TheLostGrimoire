@@ -139,19 +139,22 @@ namespace thelostgrimoire
             var AnswerBye = BookEvents.CreateAnswer("Test", 2, "Close");
 
             var CueFirst = BookEvents.CreateCue("Test", 0, "Do you want unlimited power?");
-            var CuetoYes = BookEvents.CreateCue("Test", 1, "Too Bad! You're Ugly", conditions:new Condition[] { Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerYes; s.CurrentDialog = true; }) });
-            var CuetoNo = BookEvents.CreateCue("Test", 2, "Meh You're no fun", conditions: new Condition[] { Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerNo; s.CurrentDialog = true; }) });
+            var CuetoYes = BookEvents.CreateCue("Test", 1, "Too Bad! You're Ugly", Helpers.CreateConditionsCheckerAnd(Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerYes; s.CurrentDialog = true; })));
+            var CuetoNo = BookEvents.CreateCue("Test", 2, "Meh You're no fun", Helpers.CreateConditionsCheckerAnd(Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerNo; s.CurrentDialog = true; }) ));
 
 
             var BookPage = BookEvents.CreateBookPage("Test", 0, new List<BlueprintCueBase> { CueFirst, CuetoNo, CuetoYes }, new List<BlueprintAnswerBase> { AnswerYes, AnswerNo, AnswerBye }, "1dabb49b2d57f1b4da20d50b1e503069");
-            var Dialog = BookEvents.CreateBookEvent("test", BookEvents.CreateCueSelection(new List<BlueprintCueBase> {BookPage }));
+            BookPage.ShowOnce = false;
+            BookPage.ShowOnceCurrentDialog = false;
+
+            var Dialog = BookEvents.CreateBookEvent("test", BookEvents.CreateCueSelection(Strategy.First,BookPage));
+            
 
             BookEvents.CreateTree(
-                new (BlueprintAnswer, List<BlueprintCueBase>, Strategy)[] {
-                (AnswerYes, new List<BlueprintCueBase> { CuetoYes}, Strategy.First),
-                (AnswerNo, new List<BlueprintCueBase> { CuetoNo}, Strategy.First),
-                (AnswerBye, new List<BlueprintCueBase> {}, Strategy.First)
-            },
+                new (BlueprintAnswer, CueSelection)[]{ 
+                (AnswerYes, BookEvents.CreateCueSelection(Strategy.First, CuetoYes)),
+                (AnswerNo, BookEvents.CreateCueSelection(Strategy.First, CuetoNo)),
+                (AnswerBye, new CueSelection())},
                 new (BlueprintAnswerBase, BlueprintScriptableObject)[]
             {
                 (AnswerBye, BookPage), (AnswerYes, BookPage),(AnswerNo, BookPage)
