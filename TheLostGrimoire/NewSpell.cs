@@ -68,6 +68,9 @@ using Newtonsoft.Json;
 using UnityEngine;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 using Kingmaker.Designers.EventConditionActionSystem.Actions;
+using Kingmaker.Designers.EventConditionActionSystem.Conditions;
+using Kingmaker.DialogSystem.Blueprints;
+using Kingmaker.DialogSystem;
 
 namespace thelostgrimoire
 {
@@ -121,17 +124,73 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateDetectEnemy, "see you");
             Main.SafeLoad(CreateHeigthenedAwerness, "feel my senses");
             Main.SafeLoad(CreateInsectSpies, "fly fly my minions!");
-
+            Main.SafeLoad(CreateContacPLane, ":p");
             //needed patch
             Main.ApplyPatch(typeof(IgnoreAppoachPatch), "please work");
             Main.ApplyPatch(typeof(AugmentDetectionRadiusPacth), "please work");
         }
+
+
+        public static void CreateContacPLane()
+        {
+
+            var AnswerYes = BookEvents.CreateAnswer("Test", 0, "Yes");
+            var AnswerNo = BookEvents.CreateAnswer("Test", 1, "No");
+            var AnswerBye = BookEvents.CreateAnswer("Test", 2, "Close");
+
+            var CueFirst = BookEvents.CreateCue("Test", 0, "Do you want unlimited power?");
+            var CuetoYes = BookEvents.CreateCue("Test", 1, "Too Bad! You're Ugly", conditions:new Condition[] { Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerYes; s.CurrentDialog = true; }) });
+            var CuetoNo = BookEvents.CreateCue("Test", 2, "Meh You're no fun", conditions: new Condition[] { Helpers.Create<AnswerSelected>(s => { s.Answer = AnswerNo; s.CurrentDialog = true; }) });
+
+
+            var BookPage = BookEvents.CreateBookPage("Test", 0, new List<BlueprintCueBase> { CueFirst, CuetoNo, CuetoYes }, new List<BlueprintAnswerBase> { AnswerYes, AnswerNo, AnswerBye }, "1dabb49b2d57f1b4da20d50b1e503069");
+            var Dialog = BookEvents.CreateBookEvent("test", BookEvents.CreateCueSelection(new List<BlueprintCueBase> {BookPage }));
+
+            BookEvents.CreateTree(
+                new (BlueprintAnswer, List<BlueprintCueBase>, Strategy)[] {
+                (AnswerYes, new List<BlueprintCueBase> { CuetoYes}, Strategy.First),
+                (AnswerNo, new List<BlueprintCueBase> { CuetoNo}, Strategy.First),
+                (AnswerBye, new List<BlueprintCueBase> {}, Strategy.First)
+            },
+                new (BlueprintAnswerBase, BlueprintScriptableObject)[]
+            {
+                (AnswerBye, BookPage), (AnswerYes, BookPage),(AnswerNo, BookPage)
+            },
+                new (BlueprintCueBase, BlueprintScriptableObject)[] 
+                {
+                    (BookPage, Dialog),
+                    (CueFirst, BookPage), 
+                    (CuetoNo, BookPage),
+                    (CuetoYes, BookPage)
+                });
+
+
+
+
+            Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");
+            string name = "Contact";
+            string display = "Contact";
+            string desc = "bcuiau";
+            var spell = Spell(name, display, desc, icon, AbilityRange.Personal, components: new BlueprintComponent[] {
+                RunAction(Helpers.Create<StartDialog>(d =>{
+                    d.Dialogue = Dialog;
+                    
+                    })),
+                Divination
+            }) ;
+            spell.AvailableMetamagic = Metamagic.Heighten;
+            Helpers.AddSpell(spell);
+            spell.AddToSpellList(Helpers.wizardSpellList, 1);
+
+
+        }
         public static void CreateInsectSpies()
         {
-            Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");
+            Sprite icon = GetIcon("4cf3d0fae3239ec478f51e86f49161cb");//to set
             string name = "UnboundSight";
             string display = "Unbound Sight";
-            string desc = "";
+            string desc = "This spell allows you to project your sight and other senses to another nearby place. This grants you the ability to search for trap and hidden object while being farther than would normaly be needed for the task.\nNote: Most trap and hidden objet can only be detected if a character is within 5-8 meters  (~=17-27 feet) of it. This spell increase this distance by 5 meters (~= 17 feet)";
+            string descG = "This spell function like " + display + " except that it can be casted on an ally.\n" + display + " :" + desc;
 
 
             var buff = tokenbuff(name);
@@ -152,7 +211,7 @@ namespace thelostgrimoire
             if (witchlist != null)
                 spell.AddToSpellList(witchlist, 2);
 
-            var Gpell = Spell(name + "Greater", display + ", Greater", "This function like "+display+" except that you can target another creature."+desc, icon, AbilityRange.Touch, duration: "1 minute/ level", components: new BlueprintComponent[] {
+            var Gpell = Spell(name + "Greater", display + ", Greater", descG, icon, AbilityRange.Touch, duration: "1 minute/ level", components: new BlueprintComponent[] {
                 Divination, 
                 RunAction(Helpers.CreateApplyBuff(Gbuff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default), DurationRate.Minutes), true, true,true))
             });

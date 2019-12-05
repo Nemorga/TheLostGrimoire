@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Archetype.cs" />
+    <Compile Include="BookEvents.cs" />
     <Compile Include="NewSpell.cs" />
     <Compile Include="Fixandchange.cs" />
     <Compile Include="Relatedfeat.cs" />
