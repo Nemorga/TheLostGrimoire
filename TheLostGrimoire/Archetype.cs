@@ -157,7 +157,18 @@ namespace thelostgrimoire
             Main.ApplyPatch(typeof(ShowCasterNameOnBuffToolTip), "Anonymous buff killer");
             Main.ApplyPatch(typeof(MakeCreatureFlankedByBuff), "you're surounded");
         }
+        static void CreateCounterSpellSubSchool()
+        {
+            string name = "CounterSpellSchool";
+            string Name = "Focused School -- CounterSpell";
+            string lvl1 = "InspiringPrediction";
+            string lvl1Name = "Inspiring Prediction(Su)";
+            string lvl1Desc = "A number of times per day equal to 3 + your Intelligence modifier, you can predict an ally’s success, bolstering others’ resolve. As a swift action, you can shout an inspiring prediction, granting each ally within 50 feet who can hear you a +4 luck bonus on her next attack roll, saving throw, or skill check.";
 
+            string lvl1b = "TheProphecy";
+            string Lvl1bName = "In Accordance with the Prophecy (Su)";
+            string Lvl1bDessc = "A number of times per day equal to your Intelligence modifier, you can publicly declare that your next spell is guided by prophecy as a Free Action. When you do, the next spell you cast has a 20% chance of fizzling (1–20 on a d%). If the spell does not fail, treat the spell as if it had been modified by the Empower Spell feat, even if you do not have that feat. At 12th level, the chance that the spell fizzles is reduced to 15% (1–15 on a d%). At 16th level, the chance is reduced to 10% (1–10 on a d%).";
+        }
 
         static void CreateProphecySubschool()
         {
@@ -248,7 +259,7 @@ namespace thelostgrimoire
                 get
                 {
                    int lvl = Owner.Progression.GetClassLevel(wizardclass);
-                    return lvl == 20 ? 5 : lvl > 15 ? 10 : lvl > 11 ? 15 : 20;
+                    return lvl >= 20 ? 5 : lvl > 15 ? 10 : lvl > 11 ? 15 : 20;
                 }
             }
 
