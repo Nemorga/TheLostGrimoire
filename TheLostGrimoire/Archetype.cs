@@ -53,6 +53,7 @@ using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Abilities.Components.AreaEffects;
 using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Abilities.Components.TargetCheckers;
+using Kingmaker.UnitLogic.Abilities.Components.CasterCheckers;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.Buffs.Components;
 using Kingmaker.UnitLogic.Class.LevelUp;
@@ -186,6 +187,8 @@ namespace thelostgrimoire
         }
         static void CreateCounterSpellSubSchool()
         {
+            BlueprintFeature ResistanceAbjuration = GetFeat("1abe070e7a00ddd48b8a141d71f79e70");
+
             string name = "CounterSpellSchool";
             string Name = "Focused School -- CounterSpell";
             string lvl1 = "Disruption";
@@ -194,13 +197,18 @@ namespace thelostgrimoire
 
             string lvl6 = "CounterspellMastery";
             string Lvl6bName = "Counterspell Mastery (Su)";
-            string Lvl6Dessc = "At 6th level, you gain Improved Counterspell as a bonus feat. You may cast a counterspell spell once per day as a Free Action (instead of a FullRound action), you still need to keep a swift action for the actual counterspelling on your target's round.You can use this ability once per day at 6th level, plus one additional time per day for every 4 levels beyond 6th.";
+            string Lvl6Dessc = "At 6th level, you gain Improved Counterspell as a bonus feat. You may cast a counterspell spell once per round as a Free Action (instead of a FullRound action), you still need to keep a swift action for the actual counterspelling on your target's round.You can use this ability once per day at 6th level, plus one additional time per day for every 4 levels beyond 6th.";
+            string basedesc = ResistanceAbjuration.Name + ": " + ResistanceAbjuration.Description + "\n" + lvl1Name + ": " + lvl1Desc;
+            string vardesc = basedesc + "\n" + Lvl6bName + ": " + Lvl6Dessc;
             Sprite SchoolIcon = AbjurationProgression.Icon;
+            Sprite DispelIcon = GetIcon("92681f181b507b34ea87018e8f7a528a");
+            PrefabLink DisruptionField = Helpers.GetFx("602fa850c4a94d84eb8aa1bcc0d008c7"); //Anarchic cycle 
+
             SchoolUtility.wizardressource BaseResource = SchoolUtility.GetWizardBaseResource(SpellSchool.Abjuration);
 
-            BlueprintBuff DisrutpionBuff = buff(lvl1, lvl1Name, lvl1Desc, SchoolIcon, BuffFlags.StayOnDeath);
+            BlueprintBuff DisrutpionBuff = buff(lvl1, lvl1Name, lvl1Desc, DispelIcon, BuffFlags.StayOnDeath, DisruptionField);
 
-            BlueprintAbility Disruption = Ability(lvl1, lvl1Name, lvl1Desc, SchoolIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
+            BlueprintAbility Disruption = Ability(lvl1, lvl1Name, lvl1Desc, DispelIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
                 Helpers.CreateDeliverTouch(),
                 Helpers.CreateRunActions(Helpers.CreateApplyBuff(DisrutpionBuff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default)), false, false)),
                 Helpers.CreateContextRankConfig(progression: ContextRankProgression.Div2)
@@ -209,51 +217,60 @@ namespace thelostgrimoire
             Disruption.CanTargetEnemies = true;
             Disruption.CanTargetFriends = true;
 
-            BlueprintAbility DisruptionCast = Ability(lvl1+"Cast", lvl1Name, lvl1Desc, SchoolIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
+            BlueprintAbility DisruptionCast = Ability(lvl1+"Cast", lvl1Name, lvl1Desc, DispelIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
                 Helpers.CreateStickyTouch(Disruption),
                 BaseResource.logic
                 );
             DisruptionCast.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
+            DisruptionCast.EffectOnAlly = AbilityEffectOnUnit.Harmful;
+            DisruptionCast.EffectOnEnemy = AbilityEffectOnUnit.Harmful;
+            DisruptionCast.ResourceAssetIds = new string[] { DisruptionField.AssetId };
             DisruptionCast.CanTargetEnemies = true;
             DisruptionCast.CanTargetFriends = true;
+
+            BlueprintBuff MasteryToken = tokenbuff(lvl6);
+            SchoolUtility.wizardressource GreaterRes = SchoolUtility.CreateWizardResource(lvl6+"Resource", SchoolIcon, false);
+
+            GreaterRes.resource.SetIncreasedByLevelStartPlusDivStep(0, 6, 1, 4, 1, 0, 0, new BlueprintCharacterClass[] { wizardclass });
             BlueprintAbility Mastery = Ability(lvl6, Lvl6bName, Lvl6Dessc, SchoolIcon, AbilityRange.Medium, CommandType.Free, AbilityType.Supernatural, "", "Instantaneous", "",
-                Helpers.Create<CounterSpellMastery>()
+                Helpers.Create<CounterSpellMastery>(),
+                Helpers.CreateRunActions(Helpers.CreateApplyBuff(MasteryToken, Helpers.CreateContextDuration(1),false, false, true,false, false)),
+                Helpers.Create<AbilityCasterHasNoFacts>(f => f.Facts = new BlueprintUnitFact[] { MasteryToken }),
+                GreaterRes.logic
                 );
+
             Mastery.CanTargetEnemies = true;
             Mastery.CanTargetFriends = true;
             Mastery.Hidden = true;
             Mastery.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
 
-            AbjurationBaseFeature.AddComponent(Mastery.CreateAddFact());
+            BlueprintFeature Base = Helpers.CreateFeature(name + "Basefeature", "Resistance & Disruption", basedesc, Guid(name + "Basefeature"), SchoolIcon, FeatureGroup.None, 
+                SchoolUtility.SpeciaListComponent(SpellSchool.Abjuration),
+                BaseResource.add,
+                DisruptionCast.CreateAddFact(),
+                ResistanceAbjuration.CreateAddFact()
+                );
+            BlueprintFeature Greater = Helpers.CreateFeature(name + "GreaterFeature", Lvl6bName, Lvl6Dessc, Guid(name + "GreaterFeature"), GreaterCounterSpell.Icon, FeatureGroup.None, 
+                Mastery.CreateAddFact(),
+                RelatedFeat.ImprovCounter.CreateAddFact(),
+                GreaterRes.add
+                );
+            var progression = SchoolUtility.CreateSchoolVariantProgression(AbjurationProgression, name, Name, vardesc, true, SchoolUtility.BuildLevelEntry(
+                (1, OppositionSchool),
+                (1, OppositionSchool),
+                (1, Base),
+                (6, Greater)
+                
+                ));
+            var AbjurOppo = GetFeat("7f8c1b838ff2d2e4f971b42ccdfa0bfd");
+            AbjurOppo.AddComponent(Helpers.PrerequisiteNoFeature(progression));
+            
         }
         public class CounterSpellMastery : AbilityApplyEffect, IAbilityAvailabilityProvider, IAbilityParameterRequirement, IAbilityVisibilityProvider
         {
-            public bool RequireSpellSlot
-            {
-                get
-                {
-                    return true;
-                }
-            }
-
-            public bool RequireSpellbook
-            {
-
-                get
-                {
-                    return false;
-                }
-            }
-
-            public bool RequireSpellLevel
-            {
-                get
-                {
-                    return false;
-                }
-            }
-
-
+            public bool RequireSpellSlot { get {return true;} }
+            public bool RequireSpellbook { get {return false;} }
+            public bool RequireSpellLevel{ get {return false;} }
 
             public override void Apply(AbilityExecutionContext context, TargetWrapper target)
             {
@@ -319,9 +336,6 @@ namespace thelostgrimoire
             Sprite SchoolIcon = DivinationProgression.Icon;
             Sprite CombatCasting = Helpers.GetIcon("06964d468fde1dc4aa71a92ea04d930d");
             Sprite Shout = Helpers.GetIcon("f09453607e683784c8fca646eec49162");
-
-           
-            
 
             PrefabLink CommonDivination = Helpers.GetFx("c388856d0e8855f429a83ccba67944ba");
             //INSPIRING PREDICTION

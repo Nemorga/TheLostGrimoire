@@ -123,13 +123,13 @@ namespace thelostgrimoire
         internal static void Load()
         {
             // Load  spell
-            Main.SafeLoad(CreateCounterSpells, "zapy zap");
-            Main.SafeLoad(CreateImprovedTrueStrike, "never miss");
-            Main.SafeLoad(CreateClairevoyance, "see far");
-            Main.SafeLoad(CreateDetectEnemy, "see you");
-            Main.SafeLoad(CreateHeigthenedAwerness, "feel my senses");
-            Main.SafeLoad(CreateInsectSpies, "fly fly my minions!");
-            Main.SafeLoad(CreateContacPLane, ":p");
+            Main.SafeLoad(CreateCounterSpells, "zapy zap");//1 4 7
+            Main.SafeLoad(CreateImprovedTrueStrike, "never miss"); //5
+            Main.SafeLoad(CreateClairevoyance, "see far");//3
+            Main.SafeLoad(CreateDetectEnemy, "see you");//8
+            Main.SafeLoad(CreateHeigthenedAwerness, "feel my senses");//1
+            Main.SafeLoad(CreateInsectSpies, "fly fly my minions!");// 2 5
+            Main.SafeLoad(CreateContacPLane, ":p");//5
             //needed patch
             Main.ApplyPatch(typeof(IgnoreAppoachPatch), "please work");
             Main.ApplyPatch(typeof(AugmentDetectionRadiusPacth), "please work");
@@ -511,7 +511,9 @@ namespace thelostgrimoire
             spell.AvailableMetamagic = Metamagic.Heighten;
             Helpers.AddSpell(spell);
             spell.AddToSpellList(Helpers.wizardSpellList, 5);
-
+            spell.AddToSpellList(Helpers.alchemistSpellList, 5);
+            if(witchlist != null)
+                spell.AddToSpellList(witchlist, 5);
 
         }
         public class NoXp : BlueprintComponent
@@ -797,10 +799,10 @@ namespace thelostgrimoire
 
             Helpers.AddSpell(Gpell);
             Gpell.AddToSpellList(Helpers.wizardSpellList, 5);
-            spell.AddToSpellList(Helpers.rangerSpellList, 4);
-            spell.AddToSpellList(Helpers.druidSpellList, 4);
+            Gpell.AddToSpellList(Helpers.rangerSpellList, 3);
+            Gpell.AddToSpellList(Helpers.druidSpellList, 4);
             if (witchlist != null)
-                spell.AddToSpellList(witchlist, 5);
+                Gpell.AddToSpellList(witchlist, 5);
 
         }
         public class AugmentLineOfSight : AbilityAreaEffectLogic
@@ -1109,8 +1111,8 @@ namespace thelostgrimoire
             spell.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
             //Level alchemist 6, magus 6, sorcerer/wizard 5;
             spell.AddToSpellList(Helpers.wizardSpellList, 5);
-            spell.AddToSpellList(Helpers.alchemistSpellList, 6);
-            spell.AddToSpellList(Helpers.magusSpellList, 6);
+            spell.AddToSpellList(Helpers.alchemistSpellList, 5);
+            spell.AddToSpellList(Helpers.magusSpellList, 5);
 
             Helpers.AddSpell(spell);
 
