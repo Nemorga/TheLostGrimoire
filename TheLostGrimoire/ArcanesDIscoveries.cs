@@ -726,7 +726,7 @@ namespace thelostgrimoire
            
             public override void PostLoad()
             {
-                Bonus = Fact.MaybeContext.MaybeOwner.Descriptor.GetSpellbook(wizardclass).CasterLevel == 20 ? 4 : 2;
+                Bonus = Fact.MaybeContext.MaybeOwner.Descriptor.GetSpellbook(wizardclass).CasterLevel >= 20 ? 4 : 2;
                 var party = Kingmaker.Game.Instance.Player.ControllableCharacters;
                 foreach (UnitEntityData Char in party)
                 {
@@ -821,7 +821,7 @@ namespace thelostgrimoire
                 {
 
                     Check = true;
-                    Bonus = evt.Context.Params.CasterLevel == 20 ? 4 : 2;
+                    Bonus = evt.Context.Params.CasterLevel >= 20 ? 4 : 2;
 
                     var buffcompos = evt.Blueprint.ComponentsArray;
                     foreach (BlueprintComponent component in buffcompos)

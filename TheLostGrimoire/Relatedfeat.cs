@@ -58,7 +58,7 @@ namespace thelostgrimoire
     {
         static LibraryScriptableObject library => Main.library;
 
-
+        public static BlueprintFeature ImprovCounter;
 
         internal static void Load()
         {
@@ -72,8 +72,12 @@ namespace thelostgrimoire
         static void CreateImprovedCounterspell()
         {
             var icon = Helpers.GetIcon("cad1b9175e8c0e64583432a22134d33c");
-            var feat = Helpers.CreateFeature("ImprovedCounterspellfeature", "Improved Counterspell", "When counterspelling, you automatically succeed if the targeted spell level is inferior to your counterspell level.", Helpers.getGuid("ImprovedCounterspellfeature"), icon, FeatureGroup.Feat);
+            var feat = Helpers.CreateFeature("ImprovedCounterspellfeature", "Improved Counterspell", "When counterspelling, you automatically succeed if the targeted spell level is inferior to your counterspell level.", Helpers.getGuid("ImprovedCounterspellfeature"), icon, FeatureGroup.Feat,
+                Helpers.Create<RecommendationRequiresSpellbook>()
+                );
+            feat.Groups = feat.Groups.AddToArray(FeatureGroup.WizardFeat);
             library.AddFeats(feat);
+            ImprovCounter = feat;
         }
 
             static void CreateOlderFeat()

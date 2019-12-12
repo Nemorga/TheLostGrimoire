@@ -188,6 +188,50 @@ namespace thelostgrimoire
             components.Insert(index, component);
             obj.SetComponents(components);
         }
+        /// <summary>
+        /// Fill the ResourceAssetid field so fx are prealoaded
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="assetid">The Guid of the fx used by the spell and its children (other ability, variant or buff)</param>
+        public static void SetAssetId(this BlueprintAbility spell, params String[] assetid)
+        {
+            spell.ResourceAssetIds = assetid;
+
+        }
+        /// <summary>
+        /// Set wich target are valid target for the spell
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="foes"></param>
+        /// <param name="allies"></param>
+        /// <param name="point"></param>
+        /// <param name="self"></param>
+        public static void SetCantarget(this BlueprintAbility spell, bool foes = false, bool allies = false, bool point = false, bool self =false)
+        {
+            spell.CanTargetEnemies = foes;
+            spell.CanTargetFriends = allies;
+            spell.CanTargetPoint = point;
+            spell.CanTargetSelf = self;
+        }
+        /// <summary>
+        /// Set the effect of the spell for tooltip
+        /// </summary>
+        /// <param name="spell"></param>
+        /// <param name="ally"></param>
+        /// <param name="foe"></param>
+        public static void SetEffectOn(this BlueprintAbility spell, AbilityEffectOnUnit ally = AbilityEffectOnUnit.None, AbilityEffectOnUnit foe = AbilityEffectOnUnit.None)
+        {
+            spell.EffectOnAlly = ally;
+            spell.EffectOnEnemy = foe;
+        }
+        /// <summary>
+        /// Make the cast time a full round action
+        /// </summary>
+        /// <param name="spell"></param>
+        public static void SetFullround(this BlueprintAbility spell)
+        {
+            Helpers.SetField(spell, "m_IsFullRoundAction", true);
+        }
 
         public static void AddComponent(this BlueprintScriptableObject obj, BlueprintComponent component)
         {
@@ -696,7 +740,7 @@ namespace thelostgrimoire
 
         public static LocalizedString reflexHalfDamage, savingThrowNone;
 
-        public static BlueprintSpellList wizardSpellList, magusSpellList, druidSpellList, clericSpellList, paladinSpellList, inquisitorSpellList, alchemistSpellList, bardSpellList;
+        public static BlueprintSpellList wizardSpellList, magusSpellList, druidSpellList, clericSpellList, paladinSpellList, inquisitorSpellList, alchemistSpellList, bardSpellList, rangerSpellList;
 
         public static BlueprintItemWeapon touchWeapon;
         public static BlueprintItemWeapon rayWeapon;
@@ -755,6 +799,7 @@ namespace thelostgrimoire
             inquisitorSpellList = library.Get<BlueprintSpellList>("57c894665b7895c499b3dce058c284b3");
             alchemistSpellList = library.Get<BlueprintSpellList>("f60d0cd93edc65c42ad31e34a905fb2f");
             bardSpellList = library.Get<BlueprintSpellList>("25a5013493bdcf74bb2424532214d0c8");
+            rangerSpellList = library.Get<BlueprintSpellList>("29f3c338532390546bc5347826a655c4");
 
             touchWeapon = library.Get<BlueprintItemWeapon>("bb337517547de1a4189518d404ec49d4"); // TouchItem
             rayWeapon = library.Get<BlueprintItemWeapon>("f6ef95b1f7bb52b408a5b345a330ffe8"); //ray weapon
@@ -1565,6 +1610,7 @@ namespace thelostgrimoire
             BlueprintFeature feature = null, BlueprintFeature[] featureList = null,
             (int, int)[] customProgression = null)
         {
+
             var config = Create<ContextRankConfig>();
             setType(config, type);
             setBaseValueType(config, baseValueType);
@@ -1756,6 +1802,7 @@ namespace thelostgrimoire
         public static AbilityAreaEffectRunAction CreateAreaEffectRunAction(GameAction unitEnter = null, GameAction unitExit = null, GameAction unitMove = null, GameAction round = null)
         {
             var a = Create<AbilityAreaEffectRunAction>();
+            
             a.UnitEnter = CreateActionList(unitEnter);
             a.UnitExit = CreateActionList(unitExit);
             a.UnitMove = CreateActionList(unitMove);
