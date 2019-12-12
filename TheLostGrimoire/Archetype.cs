@@ -72,6 +72,10 @@ using Newtonsoft.Json;
 using UnityEngine;
 using static Kingmaker.UnitLogic.Commands.Base.UnitCommand;
 using Kingmaker.UnitLogic.Commands;
+using Kingmaker.UI.ActionBar;
+using Kingmaker.UI.UnitSettings;
+using Kingmaker.UI.Constructor;
+
 namespace thelostgrimoire
 {
     class Archetype
@@ -86,6 +90,24 @@ namespace thelostgrimoire
         static BlueprintFeatureSelection wizardfeats = library.Get<BlueprintFeatureSelection>("8c3102c2ff3b69444b139a98521a4899");
         static BlueprintFeature OppositionSchool = library.Get<BlueprintFeatureSelection>("6c29030e9fea36949877c43a6f94ff31");
         static string Guid(string name) => Helpers.getGuid(name);
+        static Sprite GetIcon(string id) => Helpers.GetIcon(id);
+        static BlueprintAbility GetAbility(string id) => library.Get<BlueprintAbility>(id);
+        static BlueprintFeature GetFeat(string id) => library.Get<BlueprintFeature>(id);
+        static BlueprintBuff GetBuff(string id) => library.Get<BlueprintBuff>(id);
+        static BlueprintAbility Ability(String name, String displayName,
+            String description, Sprite icon, AbilityRange range, CommandType actionType, AbilityType type= AbilityType.SpellLike, string var = "",
+            String duration = "", String savingThrow = "",
+            params BlueprintComponent[] components) => Helpers.CreateAbility(name + var + "Ability", displayName, description, Guid(name + var + "Spell"), icon, type , actionType, range, duration, savingThrow, components);
+        static BlueprintBuff buff(String name, String displayName, String description, Sprite icon, BuffFlags flags, PrefabLink fxOnStart = null, PrefabLink FxOnRemove = null, StackingType stack = StackingType.Replace,
+            params BlueprintComponent[] components)
+        {
+            BlueprintBuff buff = Helpers.CreateBuff(name + "Buff", displayName, description, Guid(name + "Buff"), icon, fxOnStart, FxOnRemove, components);
+            buff.Stacking = stack;
+            buff.SetBuffFlags(flags);
+
+            return buff;
+        }
+        static BlueprintBuff tokenbuff(string name) => buff(name + "Token", "", "", wizardclass.Icon, BuffFlags.HiddenInUi, null, null, StackingType.Replace);
 
         //Specialist progression 
         static BlueprintProgression AbjurationProgression = library.Get<BlueprintProgression>("c451fde0aec46454091b70384ea91989");
@@ -140,7 +162,9 @@ namespace thelostgrimoire
         static BlueprintFeature Dragon = library.Get<BlueprintFeature>("455ac88e22f55804ab87c2467deff1d6");
         static BlueprintFeature Plant = library.Get<BlueprintFeature>("706e61781d692a042b35941f14bc41c5");
         static BlueprintFeature Vermine = library.Get<BlueprintFeature>("09478937695300944a179530664e42ec");
-
+        public static BlueprintAbility LesserCounterSpell;
+        public static BlueprintAbility CounterSpell;
+        public static BlueprintAbility GreaterCounterSpell;
         internal static void Load()
         {
             // Load  feats
@@ -153,7 +177,10 @@ namespace thelostgrimoire
             Main.SafeLoad(CreateAdmixtureSubSchool, "Many flavor of destruction");
             Main.SafeLoad(CreateEnhancedmentSubSchool, "Be stronk");
             Main.SafeLoad(CreateProphecySubschool, "It was written");
+            Main.SafeLoad(CreateCounterSpellSubSchool, "No you don't!");
             //needed patch
+            Main.ApplyPatch(typeof(AddCounterSpellConversion), "Counter all the day");
+            Main.ApplyPatch(typeof(HandleDisruptionCheck), "No you don't, for real!!!");
             Main.ApplyPatch(typeof(ShowCasterNameOnBuffToolTip), "Anonymous buff killer");
             Main.ApplyPatch(typeof(MakeCreatureFlankedByBuff), "you're surounded");
         }
@@ -161,15 +188,116 @@ namespace thelostgrimoire
         {
             string name = "CounterSpellSchool";
             string Name = "Focused School -- CounterSpell";
-            string lvl1 = "InspiringPrediction";
-            string lvl1Name = "Inspiring Prediction(Su)";
-            string lvl1Desc = "A number of times per day equal to 3 + your Intelligence modifier, you can predict an ally’s success, bolstering others’ resolve. As a swift action, you can shout an inspiring prediction, granting each ally within 50 feet who can hear you a +4 luck bonus on her next attack roll, saving throw, or skill check.";
+            string lvl1 = "Disruption";
+            string lvl1Name = "Disruption (Su)";
+            string lvl1Desc = " At 1st level, you gain the ability to disrupt spellcasting with a touch. As a melee touch attack, you can place a disruptive field around the target. While the field is in place, the target must make a concentration check to cast any spell or to use a spell-like ability in addition to any other required concentration checks. The DC of this check is equal to 15 + twice the spell’s level. If the check is failed, the target’s spell is wasted. This field lasts for a number of rounds equal to 1/2 your wizard level (minimum 1). You can use this ability a number of times per day equal to 3 + your Intelligence modifier.";
 
-            string lvl1b = "TheProphecy";
-            string Lvl1bName = "In Accordance with the Prophecy (Su)";
-            string Lvl1bDessc = "A number of times per day equal to your Intelligence modifier, you can publicly declare that your next spell is guided by prophecy as a Free Action. When you do, the next spell you cast has a 20% chance of fizzling (1–20 on a d%). If the spell does not fail, treat the spell as if it had been modified by the Empower Spell feat, even if you do not have that feat. At 12th level, the chance that the spell fizzles is reduced to 15% (1–15 on a d%). At 16th level, the chance is reduced to 10% (1–10 on a d%).";
+            string lvl6 = "CounterspellMastery";
+            string Lvl6bName = "Counterspell Mastery (Su)";
+            string Lvl6Dessc = "At 6th level, you gain Improved Counterspell as a bonus feat. You may cast a counterspell spell once per day as a Free Action (instead of a FullRound action), you still need to keep a swift action for the actual counterspelling on your target's round.You can use this ability once per day at 6th level, plus one additional time per day for every 4 levels beyond 6th.";
+            Sprite SchoolIcon = AbjurationProgression.Icon;
+            SchoolUtility.wizardressource BaseResource = SchoolUtility.GetWizardBaseResource(SpellSchool.Abjuration);
+
+            BlueprintBuff DisrutpionBuff = buff(lvl1, lvl1Name, lvl1Desc, SchoolIcon, BuffFlags.StayOnDeath);
+
+            BlueprintAbility Disruption = Ability(lvl1, lvl1Name, lvl1Desc, SchoolIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
+                Helpers.CreateDeliverTouch(),
+                Helpers.CreateRunActions(Helpers.CreateApplyBuff(DisrutpionBuff, Helpers.CreateContextDuration(Helpers.CreateContextValue(AbilityRankType.Default)), false, false)),
+                Helpers.CreateContextRankConfig(progression: ContextRankProgression.Div2)
+                );
+            Disruption.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
+            Disruption.CanTargetEnemies = true;
+            Disruption.CanTargetFriends = true;
+
+            BlueprintAbility DisruptionCast = Ability(lvl1+"Cast", lvl1Name, lvl1Desc, SchoolIcon, AbilityRange.Touch, CommandType.Standard, AbilityType.Supernatural, "", "A number of rounds equal to 1/2 your wizard level", "",
+                Helpers.CreateStickyTouch(Disruption),
+                BaseResource.logic
+                );
+            DisruptionCast.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Touch;
+            DisruptionCast.CanTargetEnemies = true;
+            DisruptionCast.CanTargetFriends = true;
+            BlueprintAbility Mastery = Ability(lvl6, Lvl6bName, Lvl6Dessc, SchoolIcon, AbilityRange.Medium, CommandType.Free, AbilityType.Supernatural, "", "Instantaneous", "",
+                Helpers.Create<CounterSpellMastery>()
+                );
+            Mastery.CanTargetEnemies = true;
+            Mastery.CanTargetFriends = true;
+            Mastery.Hidden = true;
+            Mastery.Animation = Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Directional;
+
+            AbjurationBaseFeature.AddComponent(Mastery.CreateAddFact());
         }
+        public class CounterSpellMastery : AbilityApplyEffect, IAbilityAvailabilityProvider, IAbilityParameterRequirement, IAbilityVisibilityProvider
+        {
+            public bool RequireSpellSlot
+            {
+                get
+                {
+                    return true;
+                }
+            }
 
+            public bool RequireSpellbook
+            {
+
+                get
+                {
+                    return false;
+                }
+            }
+
+            public bool RequireSpellLevel
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+
+
+            public override void Apply(AbilityExecutionContext context, TargetWrapper target)
+            {
+                if (context.Ability.ParamSpellSlot == null || context.Ability.ParamSpellSlot.Spell == null)
+                {
+                    UberDebug.LogError(context.AbilityBlueprint, string.Format("Target spell is missing: {0}", context.AbilityBlueprint), Array.Empty<object>());
+                    return;
+                }
+                if (context.Ability.ParamSpellSlot.Spell.Spellbook == null)
+                {
+                    UberDebug.LogError(context.AbilityBlueprint, string.Format("Spellbook is missing: {0}", context.AbilityBlueprint), Array.Empty<object>());
+                    return;
+                }
+                
+                if (target == null || target.Unit == null)
+                {
+                    UberDebug.LogError(context.AbilityBlueprint, "Can't use spell: target is missing", Array.Empty<object>());
+                    return;
+                }
+                
+                Rulebook.Trigger(new RuleCastSpell(context.Ability.ParamSpellSlot.Spell, target));
+                context.Ability.ParamSpellSlot.Spell.Spend();
+
+            }
+            public string GetReason()
+            {
+                return string.Empty;
+            }
+            public bool IsAvailableFor(AbilityData ability)
+            {
+                SpellSlot slot = ability.ParamSpellSlot;
+                AbilityData abilitydata = (slot != null) ? slot.Spell : null;
+                BlueprintAbility spellblueprint = (abilitydata != null) ? abilitydata.Blueprint : null;
+                
+                return spellblueprint != null && abilities.Contains(spellblueprint) && slot != null && slot.Available;
+            }
+            public bool IsAbilityVisible(AbilityData spell)
+            {
+                return IsAvailableFor(spell);
+            }
+            
+            public static BlueprintAbility[] abilities = new BlueprintAbility[] { LesserCounterSpell, CounterSpell, GreaterCounterSpell };
+
+        }
         static void CreateProphecySubschool()
         {
             string name = "ProphecySchool";
@@ -1098,7 +1226,6 @@ namespace thelostgrimoire
                 return string.Format("doing some shit");
             }
 
-            // Token: 0x06005BBB RID: 23483 RVA: 0x001B6F54 File Offset: 0x001B5354
             public override void RunAction()
             {
                 UnitEntityData Caster = Context.MaybeCaster;
@@ -2419,6 +2546,66 @@ namespace thelostgrimoire
                 return result;
             });
 
+
+        }
+        [HarmonyPatch(typeof(UnitUseAbility), "MakeConcentrationCheckIfCastingIsDifficult")]
+        private static class HandleDisruptionCheck
+        {
+            static BlueprintBuff disruption = library.Get<BlueprintBuff>(Guid("DisruptionBuff"));
+            static void Postfix(UnitUseAbility __instance)
+            {
+                if (__instance.Cutscene || __instance.ConcentrationCheckFailed || !__instance.Spell.Blueprint.IsSpell || __instance.Spell.StickyTouch != null)
+                {
+                    return;
+                }
+                if (__instance.Executor.Descriptor.HasFact(disruption))
+                {
+                    int DC = 2 * (__instance.Spell.SpellLevel + 5);
+                    var falseDamage = new RuleDealDamage(__instance.Executor, __instance.Executor, new DamageBundle());
+                    AccessTools.Property(typeof(RuleDealDamage), "Damage").SetValue(falseDamage, DC);
+                    RuleCheckConcentration concentration = new RuleCheckConcentration(__instance.Executor, __instance.Spell, falseDamage);
+                    AccessTools.Property(typeof(UnitUseAbility), "ConcentrationCheckFailed").SetValue(__instance, !Rulebook.Trigger(concentration).Success);
+                }
+            }
+
+        }
+        [HarmonyPatch(typeof(ActionBarGroupSlot), "SetToggleAdditionalSpells")]
+        private static class AddCounterSpellConversion
+        {
+            static void Postfix(ActionBarGroupSlot __instance, AbilityData spell, ref List<AbilityData> ___Conversion, ref ButtonPF ___ToggleAdditionalSpells)
+            {
+                if (spell.Spellbook != null)
+                {
+                    MechanicActionBarSlotMemorizedSpell mechanicActionBarSlotMemorizedSpell = __instance.MechanicSlot as MechanicActionBarSlotMemorizedSpell;
+                    SpellSlot spellSlot = (mechanicActionBarSlotMemorizedSpell != null) ? mechanicActionBarSlotMemorizedSpell.SpellSlot : null;
+
+                    if (spellSlot != null)
+                    {
+                        foreach (Ability ability in spell.Caster.Abilities)
+                        {
+                            if (ability.Blueprint.GetComponent<CounterSpellMastery>())
+                            {
+                                AbilityData item = new AbilityData(ability)
+                                {
+                                    ParamSpellSlot = spellSlot
+                                };
+                                
+                                ___Conversion.Add(item);
+
+                            }
+                        }
+                        BlueprintAbility spellBlueprint = spell.Blueprint;
+                        if (___Conversion.Any((AbilityData s) => s.Blueprint != spellBlueprint && s.Blueprint.GetComponent<CounterSpellMastery>() && s.Blueprint.GetComponent<CounterSpellMastery>().IsAbilityVisible(s)) || (spellBlueprint.Variants != null && spellBlueprint.Variants.Any<BlueprintAbility>()))
+                        {
+                            if (___ToggleAdditionalSpells != null)
+                            {
+                                ___ToggleAdditionalSpells.gameObject.SetActive(true);
+                            }
+                        }
+                    }
+
+                }
+        }
 
         }
 

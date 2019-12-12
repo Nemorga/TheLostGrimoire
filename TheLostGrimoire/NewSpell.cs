@@ -1287,6 +1287,9 @@ namespace thelostgrimoire
             Helpers.AddSpell(ability);
             Helpers.AddSpell(abilitygreater);
 
+            Archetype.LesserCounterSpell = abilitylesser;
+            Archetype.CounterSpell = ability;
+            Archetype.GreaterCounterSpell = abilitygreater;
 
         }
 
