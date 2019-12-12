@@ -44,7 +44,7 @@ namespace thelostgrimoire
             if (MatchesBaseline(Path.Combine(dir, "baseline_assets.txt"))) return;
 
             WriteAssetInfo(Path.Combine(dir, "current_assets.txt"), GetCurrentAssetInfo());
-
+            WriteBlueprint(Path.Combine(dir, "blueprint.txt"), GetCurrentAssetInfo());
             Log.Write(statefulComponentMessage.ToString());
 #endif
         }
@@ -134,6 +134,17 @@ namespace thelostgrimoire
             {
                 lines.Add(pair.Key);
                 foreach (var item in pair.Value) lines.Add($"  {item}");
+            }
+            File.WriteAllLines(assetPath, lines);
+        }
+        static void WriteBlueprint(string assetPath, SortedDictionary<String, SortedSet<String>> info)
+        {
+            var lines = new List<String>();
+            foreach (var pair in info)
+            {
+                if(!pair.Key.Contains("BoundCopy"))
+                    lines.Add(pair.Key);
+                
             }
             File.WriteAllLines(assetPath, lines);
         }
