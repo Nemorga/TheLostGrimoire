@@ -101,6 +101,7 @@
     <Compile Include="BookEvents.cs" />
     <Compile Include="NewSpell.cs" />
     <Compile Include="Fixandchange.cs" />
+    <Compile Include="Pet.cs" />
     <Compile Include="Relatedfeat.cs" />
     <Compile Include="ConstructCompanion.cs" />
     <Compile Include="Helpers.cs" />
